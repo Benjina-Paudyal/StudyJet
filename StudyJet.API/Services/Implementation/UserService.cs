@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using StudyJet.API.Data.Entities;
 using StudyJet.API.DTOs.User;
-using StudyJet.API.Repositories.Implementation;
+using StudyJet.API.Repositories.Interface;
 using StudyJet.API.Services.Interface;
 
 namespace StudyJet.API.Services.Implementation

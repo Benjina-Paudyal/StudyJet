@@ -5,7 +5,6 @@ using StudyJet.API.Configuration;
 using StudyJet.API.Data;
 using StudyJet.API.Data.Entities;
 using StudyJet.API.Extensions;
-using StudyJet.API.Repositories.Implementation;
 using StudyJet.API.Repositories.Interface;
 using StudyJet.API.Services.Implementation;
 using StudyJet.API.Services.Interface;
@@ -146,7 +145,7 @@ builder.Services.AddJwtAuthentication(builder.Configuration);
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 
 // Registering Repositories
-builder.Services.AddScoped<IUserRepo, UserRepo>();
+builder.Services.AddScoped<IUserRepo, IUserRepo>();
 
 
 

@@ -1,7 +1,7 @@
 ﻿using StudyJet.API.Data.Entities;
 using StudyJet.API.DTOs.User;
 
-namespace StudyJet.API.Repositories.Implementation
+namespace StudyJet.API.Repositories.Interface
 {
     public interface IUserRepo
     {

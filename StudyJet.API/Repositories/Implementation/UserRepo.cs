@@ -3,9 +3,9 @@ using StudyJet.API.Data;
 using StudyJet.API.Data.Entities;
 using StudyJet.API.DTOs.Course;
 using StudyJet.API.DTOs.User;
-using StudyJet.API.Repositories.Implementation;
+using StudyJet.API.Repositories.Interface;
 
-namespace StudyJet.API.Repositories.Interface
+namespace StudyJet.API.Repositories.Implementation
 {
     public class UserRepo : IUserRepo
     {
