@@ -1,0 +1,67 @@
+##########################################
+# General
+##########################################
+*.log
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+##########################################
+# Node / Angular (StudyJet.UI)
+##########################################
+StudyJet.UI/node_modules/
+StudyJet.UI/dist/
+StudyJet.UI/.angular/
+StudyJet.UI/.sass-cache/
+StudyJet.UI/.vscode/
+StudyJet.UI/tmp/
+StudyJet.UI/out-tsc/
+StudyJet.UI/bazel-out/
+StudyJet.UI/coverage/
+StudyJet.UI/testem.log
+StudyJet.UI/typings
+StudyJet.UI/libpeerconnection.log
+
+##########################################
+# ASP.NET / .NET (StudyJet.API & Tests)
+##########################################
+StudyJet.API/bin/
+StudyJet.API/obj/
+StudyJet.API.Tests/bin/
+StudyJet.API.Tests/obj/
+
+##########################################
+# Visual Studio
+##########################################
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+##########################################
+# IDE-specific
+##########################################
+.idea/
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+##########################################
+# Code Coverage
+##########################################
+.nyc_output/
+*.lcov
+coverage/
+
+##########################################
+# Sensitive files
+##########################################
+# Ignore environment variable files
+.env
+secrets.json
+

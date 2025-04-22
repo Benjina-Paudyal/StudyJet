@@ -1,0 +1,6 @@
+@StudyJet.API_HostAddress = http://localhost:5081
+
+GET {{StudyJet.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
