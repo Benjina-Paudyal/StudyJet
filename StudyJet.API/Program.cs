@@ -1,8 +1,14 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using StudyJet.API.Configuration;
 using StudyJet.API.Data;
 using StudyJet.API.Data.Entities;
+using StudyJet.API.Extensions;
+using StudyJet.API.Repositories.Implementation;
+using StudyJet.API.Repositories.Interface;
+using StudyJet.API.Services.Implementation;
+using StudyJet.API.Services.Interface;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,15 +18,33 @@ var config = builder.Configuration;
 // Get environment variables first
 var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD");
 var defaultPassword = Environment.GetEnvironmentVariable("DEFAULT_PASSWORD");
+var jwtKey = Environment.GetEnvironmentVariable("JWT_KEY");
+var smtpPassword = Environment.GetEnvironmentVariable("SMTP_PASSWORD");
+var stripeSecretKey = Environment.GetEnvironmentVariable("STRIPE_SECRET_KEY");
+var stripePublishableKey = Environment.GetEnvironmentVariable("STRIPE_PUBLISHABLE_KEY");
+
 
 // Ensure critical environment variables are set
 if (string.IsNullOrEmpty(dbPassword))
     throw new InvalidOperationException("DB_PASSWORD environment variable is not set.");
 if (string.IsNullOrEmpty(defaultPassword))
     throw new InvalidOperationException("DEFAULT_PASSWORD environment variable is not set.");
+if (string.IsNullOrEmpty(smtpPassword))
+    throw new Exception("SMTP_PASSWORD environment variable not found.");
+if (string.IsNullOrEmpty(stripeSecretKey))
+if (string.IsNullOrEmpty(stripePublishableKey))
+    throw new Exception("STRIPE_PUBLISHABLE_KEY environment variable not found.");
+
+
 
 // Replace the placeholder manually in connection string
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection").Replace("${DB_PASSWORD}", dbPassword);
+
+// Set up other configuration settings
+builder.Configuration["Jwt:Key"] = jwtKey;
+builder.Configuration["Smtp:Password"] = smtpPassword;
+builder.Configuration["Stripe:SecretKey"] = stripeSecretKey;
+builder.Configuration["Stripe:PublishableKey"] = stripePublishableKey;
 
 // Adding DbContext with connection string
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connectionString));
@@ -114,6 +138,23 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 });
+
+// Configuring JWT authentication
+builder.Services.AddJwtAuthentication(builder.Configuration);
+
+// configure email settings
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+
+// Registering Repositories
+builder.Services.AddScoped<IUserRepo, UserRepo>();
+
+
+
+// Registering Services
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IFileStorageService, FileStorageService>();
 
 
 var app = builder.Build();
