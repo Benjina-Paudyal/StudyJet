@@ -1,6 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Stripe;
-using StudyJet.API.Data.Entities;
+﻿using StudyJet.API.Data.Entities;
 using StudyJet.API.Data.Enums;
 using StudyJet.API.DTOs.Course;
 using StudyJet.API.DTOs.User;

@@ -6,6 +6,7 @@ using StudyJet.API.Data.Entities;
 using StudyJet.API.DTOs.User;
 using StudyJet.API.Services.Interface;
 using StudyJet.API.DTOs;
+using StudyJet.API.DTOs.Auth;
 
 namespace StudyJet.API.Controllers
 {
@@ -19,9 +20,8 @@ namespace StudyJet.API.Controllers
         private readonly IEmailService _emailService;
         private readonly UserManager<User> _userManager;
         private readonly IConfiguration _configuration;
-        private readonly ILogger<AuthController> _logger;
 
-        public AuthController(IAuthService authService, IFileStorageService fileService, IUserService userService, IEmailService emailService, UserManager<User> userManager, ILogger<AuthController> logger, IConfiguration configuration)
+        public AuthController(IAuthService authService, IFileStorageService fileService, IUserService userService, IEmailService emailService, UserManager<User> userManager,IConfiguration configuration)
         {
             _authService = authService;
             _fileService = fileService;
@@ -29,7 +29,6 @@ namespace StudyJet.API.Controllers
             _emailService = emailService;
             _userManager = userManager;
             _configuration = configuration;
-            _logger = logger;
 
         }
 
@@ -137,14 +136,14 @@ namespace StudyJet.API.Controllers
                 {
                     var resetToken = await _authService.GeneratePasswordResetTokenAsync(user.Email);
 
-                    return Ok(new
+                    return Ok(new PasswordChangeResponseDTO
                     {
                         RequiresPasswordChange = true,
                         Message = "You need to change your password before proceeding.",
                         Username = user.UserName,
                         Email = user.Email,
                         FullName = user.FullName,
-                        Roles = await _userService.GetUserRolesAsync(user),
+                        Roles = (await _userService.GetUserRolesAsync(user)).ToList(),
                         ResetToken = resetToken
                     });
                 }
@@ -153,14 +152,14 @@ namespace StudyJet.API.Controllers
                 {
                     var tempToken = _authService.GenerateTempTokenAsync(user);
 
-                    return Ok(new
+                    return Ok(new TwoFactorResponseDTO
                     {
                         Requires2FA = true,
                         TempToken = tempToken,
                         Username = user.UserName,
                         Email = user.Email,
                         FullName = user.FullName,
-                        Roles = await _userService.GetUserRolesAsync(user)
+                        Roles = (await _userService.GetUserRolesAsync(user)).ToList()
                     });
                 }
 
@@ -343,14 +342,13 @@ namespace StudyJet.API.Controllers
                 var roles = await _userService.GetUserRolesAsync(user);
                 var defaultProfilePicUrl = _configuration["DefaultProfilePicPaths:ProfilePicture"];
 
-                return Ok(new
+                return Ok(new Verify2faLoginResponse
                 {
                     Token = token,
                     Roles = roles,
                     Username = user.UserName,
                     ProfilePictureUrl = user.ProfilePictureUrl ?? defaultProfilePicUrl,
                 });
-
             }
             catch (Exception ex)
             {
@@ -485,24 +483,32 @@ namespace StudyJet.API.Controllers
                 return BadRequest(new { Message = "User not found." });
             }
 
-            var roles = await _userManager.GetRolesAsync(user);
+            var roles = await _userManager.GetRolesAsync(user) ?? new List<string>();
             bool isInstructor = roles.Contains("Instructor");
 
             var result = await _authService.ResetPasswordAsync(resetPasswordDto.Email, resetPasswordDto.Token, resetPasswordDto.NewPassword);
 
             if (!result.Succeeded)
             {
-                return BadRequest(new { Message = result.Errors.FirstOrDefault()?.Description ?? "Password reset failed. Invalid token or other issue." });
+                var errorMessage = result.Errors?.FirstOrDefault()?.Description ?? "Password reset failed. Invalid token or other issue.";
+                return BadRequest(new { Message = errorMessage });
             }
 
             if (isInstructor && user.NeedToChangePassword)
             {
                 user.NeedToChangePassword = false;
-                await _userManager.UpdateAsync(user);
+                var updateResult = await _userManager.UpdateAsync(user);
+                if (!updateResult.Succeeded)
+                {
+                    return BadRequest(new { Message = "Failed to update user after password reset." });
+                }
             }
 
             return Ok(new { Message = "Password has been successfully reset." });
         }
+
+
+
 
 
 
