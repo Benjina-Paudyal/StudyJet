@@ -96,8 +96,8 @@ namespace StudyJet.API.Repositories.Implementation
             if (course == null)
                 throw new KeyNotFoundException("Course not found.");
 
-            return (course.CourseID, course.Title);
-        } // Tuple for notification service
+            return (course.CourseID, course.Title);// Tuple for notification service
+        } 
 
 
         public async Task<Course> InsertAsync(Course course)
