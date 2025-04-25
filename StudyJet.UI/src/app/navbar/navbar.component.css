@@ -1,0 +1,140 @@
+.custom-bg {
+    background-color: rgb(212, 245, 185);
+  }
+  
+  .collapsed-bg {
+    background-image: linear-gradient(to bottom, rgb(228, 244, 214), white);
+  }
+  
+  /* Brand Styles */
+  .navbar-brand {
+    font-family: 'Kavoon', cursive;
+    font-size: 32px;
+    color: #198754;
+  }
+  
+  /* Navbar Link Default Styles */
+  .navbar-nav .nav-link {
+    padding: 0.5rem;
+    color: #198754; 
+    transition: color 0.3s ease, background-color 0.3s ease; 
+  }
+  
+  /* Navbar Link Hover Effect */
+  .navbar-nav .nav-link:hover {
+    color: #333;  
+    background-color: transparent; 
+  }
+  
+  /* Apply color filter on hover */
+  .nav-link img {
+    transition: filter 0.3s ease; 
+  }
+  
+  .nav-link:hover img {
+    filter: brightness(0) saturate(100%) invert(20%) sepia(50%) hue-rotate(90deg) saturate(500%) brightness(80%);
+  }
+  
+  /* Navbar Toggler */
+  .navbar-toggler {
+    margin-top: -10px;
+    width: 20px;
+    height: 20px;
+    position: relative;
+    transition: 0.5s ease-in-out;
+    outline: none;
+    box-shadow: none;
+    border: 0;
+  }
+  
+  .navbar-toggler span {
+    margin: 0;
+    padding: 0;
+  }
+  
+  .toggler-icon {
+    display: block;
+    position: absolute;
+    height: 3px;
+    width: 100%;
+    background: #198754;
+    border-radius: 1px;
+    opacity: 1;
+    left: 0;
+    transform: rotate(0deg);
+    transition: 0.25s ease-in-out;
+  }
+  
+  /* Navbar Toggler - Collapsed State */
+  .navbar-toggler.collapsed .top-bar {
+    position:absolute;
+    top: 0;
+    transform: rotate(0deg);
+  }
+  
+  .navbar-toggler.collapsed .middle-bar {
+    position:absolute;
+    top: 10px;
+    opacity: 1;
+  }
+  
+  .navbar-toggler.collapsed .bottom-bar {
+    position:absolute;
+    top: 20px;
+    transform: rotate(0deg);
+  }
+  
+  /* Navbar Toggler - Expanded State */
+  .navbar-toggler:not(.collapsed) .top-bar {
+    transform: rotate(135deg);
+  }
+  
+  .navbar-toggler:not(.collapsed) .middle-bar {
+    opacity: 0;
+  }
+  
+  .navbar-toggler:not(.collapsed) .bottom-bar {
+    transform: rotate(-135deg);
+  }
+  
+  /* Search Container */
+  .search-container {
+    position: relative;
+    width: 100%;
+  }
+  
+  /* Search Bar */
+  .search-bar-input {
+    width: calc(100% - 40px);
+    padding: 10px 20px;
+    border: 1px solid #14A44D;
+    border-radius: 20px;
+    padding-left: 50px;
+    background: url('/assets/images/search.svg') ;
+    background-repeat: no-repeat;
+    background-position-x: 20px;
+    background-position-y: 50%;
+  }
+  
+  .navbar .search-container .search-bar-input{
+    background-color:#ffffff;
+  }
+  
+  /* Container Fluid */
+  .container-fluid {
+    padding: 0 15px;
+  }
+  
+  /* Button Block */
+  .btn-block {
+    width: 100%;
+  }
+  
+  @media (max-width: 300px) {
+    .navbar-brand {
+      font-size: 20px;
+    }
+  }
+  
+  
+  
