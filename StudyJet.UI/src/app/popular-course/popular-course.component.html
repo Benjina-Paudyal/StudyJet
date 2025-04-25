@@ -1,0 +1,53 @@
+<section id="courses" class="py-3">
+    <div class="container-fluid">
+      <h2 class="text-center mb-4 text-success">Popular Courses</h2>
+      <div class="row justify-content-center">
+        <div
+          class="col-md-2 mb-4 course-wrapper"
+          *ngFor="let course of popularCourses; let last = last"
+          (mouseover)="showModal(course)"
+          (mouseleave)="hideModal()"
+          [ngClass]="{'last-in-row': last}"
+        >
+          <!-- Course Card -->
+          <a
+            [routerLink]="['/courses', course.courseID]"
+            class="card h-100 text-center"
+            style="cursor:pointer; text-decoration: none;"
+          >
+            <img [src]="getCourseImageUrl(course.imageUrl)" class="card-img-top img-fluid" alt="{{ course.title }}" />
+            <div class="card-body text-center">
+              <h5 class="card-title">{{ course.title }}</h5>
+              <p class="card-text text-black-50">{{ course.instructorName }}</p>
+              <p class="card-text">{{ course.price }} DKK</p>
+            </div>
+          </a>
+  
+          <!-- Modal for hover effect -->
+          <div
+            *ngIf="selectedCourse === course"
+            class="course-modal bg-white p-3 shadow"
+            [routerLink]="['/courses', course.courseID]"
+          >
+            <h2>{{ selectedCourse.title }}</h2>
+            <p class="text-success">Updated: {{ selectedCourse.lastUpdatedDate | date }}</p>
+            <p class="course-modal-description">{{ selectedCourse.description }}</p>
+            <p><strong>{{ selectedCourse.price }} DKK</strong></p>
+          </div>
+        </div>
+      </div>
+  
+      <div class="row justify-content-center">
+        <div class="col-md-2 text-center">
+          <a
+            [routerLink]="['/courses']"
+            id="showAllCoursesButton"
+            class="btn btn-success mt-3 text-nowrap btn-lg"
+          >
+            <i class="bi bi-chevron-right"></i> Show All Courses
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+  
