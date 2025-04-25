@@ -65,3 +65,10 @@ coverage/
 .env
 secrets.json
 
+
+appsettings.json
+appsettings.Development.json
+angular.json
+StudyJet.API/Data/Migrations/
+
+
