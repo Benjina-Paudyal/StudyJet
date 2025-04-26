@@ -1,14 +1,16 @@
 import { Component } from '@angular/core';
 import { ShowcaseComponent } from '../showcase/showcase.component';
 import { PopularCourseComponent } from "../popular-course/popular-course.component";
+import { TestimonialComponent } from '../testimonial/testimonial.component';
 
 @Component({
   selector: 'app-homepage',
   standalone: true,
-  imports: [ShowcaseComponent, PopularCourseComponent],
+  imports: [ShowcaseComponent, PopularCourseComponent, TestimonialComponent],
   templateUrl: './homepage.component.html',
   styleUrl: './homepage.component.css'
 })
 export class HomepageComponent {
 
 }
+
