@@ -4,6 +4,7 @@ import { PopularCourseComponent } from "../popular-course/popular-course.compone
 import { TestimonialComponent } from '../testimonial/testimonial.component';
 import { ReactPromoComponent } from '../react-promo/react-promo.component';
 import { MissionComponent } from '../mission/mission.component';
+import { BecomeInstructorComponent } from '../become-instructor/become-instructor.component';
 
 @Component({
   selector: 'app-homepage',
@@ -13,7 +14,9 @@ import { MissionComponent } from '../mission/mission.component';
     PopularCourseComponent, 
     TestimonialComponent, 
     ReactPromoComponent,
-    MissionComponent],
+    MissionComponent,
+    BecomeInstructorComponent
+  ],
   templateUrl: './homepage.component.html',
   styleUrl: './homepage.component.css'
 })
