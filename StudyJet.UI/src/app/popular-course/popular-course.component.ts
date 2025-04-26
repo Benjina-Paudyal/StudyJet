@@ -30,15 +30,19 @@ export class PopularCourseComponent implements OnInit {
     this.fetchPopularCourses();
   }
 
+  // Fetch popular courses
   fetchPopularCourses(): void {
-    this.courseService.getPopularCourses().subscribe(
-      (courses: Course[]) => {
+    this.courseService.getPopularCourses().subscribe({
+      next: (courses: Course[]) => {
         this.popularCourses = courses;
       },
-      (error) => {
+      error: (error) => {
         console.error('Error fetching popular courses', error);
-      }
-    );
+      },
+      complete: () => {
+        console.log('Completed fetching popular courses!');
+      },
+    });
   }
 
   getCourseImageUrl(imageFilename: string): string {
