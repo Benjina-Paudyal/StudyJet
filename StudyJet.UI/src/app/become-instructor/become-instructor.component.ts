@@ -4,16 +4,17 @@ import { FormsModule } from '@angular/forms';
 import { EmailService } from '../services/email.service';
 import { catchError, of } from 'rxjs';
 import { UploadResponse } from '../models/uploadResponse';
-
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-become-instructor',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, CommonModule],
   templateUrl: './become-instructor.component.html',
   styleUrl: './become-instructor.component.css'
 })
 export class BecomeInstructorComponent {
+  isLoading = false; 
 
   @ViewChild('formElement') formElement: ElementRef<HTMLFormElement> | undefined;
   email = '';
@@ -35,7 +36,6 @@ export class BecomeInstructorComponent {
     }
   }
   
-
   // Handle form submission
   onSubmit(): void {
     if (this.cvFile && this.email) {
@@ -44,11 +44,14 @@ export class BecomeInstructorComponent {
       formData.append('email', this.email);    
       formData.append('message', this.message);
 
+      this.isLoading = true;
+
       this.http.post<UploadResponse>('https://localhost:7248/api/UploadCV/upload-cv', formData)
         .pipe(
           catchError(error => {
             console.error('Upload failed', error);
             alert('There was an error uploading the CV.');
+            this.isLoading = false;
             return of(null);  
           })
         )
@@ -75,6 +78,7 @@ export class BecomeInstructorComponent {
 
     this.emailService.sendEmail(emailData)
       .then((response) => {
+        this.isLoading = false;
         alert('Your CV has been submitted successfully!');
 
         this.closeModal();

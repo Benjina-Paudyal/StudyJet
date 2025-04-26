@@ -56,7 +56,10 @@
                         required name="cv" />
                     </div>
   
-                    <button type="submit" class="btn btn-success">Send CV</button>
+                    <button type="submit" class="btn btn-success" [disabled]="isLoading">
+                      <span *ngIf="isLoading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                      {{ isLoading ? 'Sending...' : 'Send CV' }}
+                    </button>
                   </form>
                 </div>
               </div>
