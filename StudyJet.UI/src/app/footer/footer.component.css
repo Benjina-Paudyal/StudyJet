@@ -1,0 +1,23 @@
+
+:host {
+    display: block;
+    margin-top: auto;  
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+router-outlet + app-footer {
+    margin-top: auto;
+}
+
+#footer a {
+    text-decoration: none; 
+    color: white; 
+}
+
+
+

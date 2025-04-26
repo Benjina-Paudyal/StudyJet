@@ -24,6 +24,7 @@
     <Folder Include="Data\Entities\" />
     <Folder Include="Data\Enums\" />
     <Folder Include="Configuration\" />
+    <Folder Include="wwwroot\uploads\CVs\" />
   </ItemGroup>
 
 </Project>

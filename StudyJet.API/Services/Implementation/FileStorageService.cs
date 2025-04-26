@@ -130,7 +130,7 @@ namespace StudyJet.API.Services.Implementation
                 throw new ArgumentException("File is too large. Maximum size allowed is 10 MB.");
             }
 
-            var cvDirectory = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "cv");
+            var cvDirectory = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "CVs");
             if (!Directory.Exists(cvDirectory))
             {
                 Directory.CreateDirectory(cvDirectory);
@@ -151,7 +151,7 @@ namespace StudyJet.API.Services.Implementation
                 throw new InvalidOperationException("Error saving the CV file to disk.", ex);
             }
 
-            return $"/uploads/cv/{fileName}";
+            return $"/uploads/CVs/{fileName}";
         }
 
 
