@@ -39,9 +39,6 @@ export class PopularCourseComponent implements OnInit {
       error: (error) => {
         console.error('Error fetching popular courses', error);
       },
-      complete: () => {
-        console.log('Completed fetching popular courses!');
-      },
     });
   }
 

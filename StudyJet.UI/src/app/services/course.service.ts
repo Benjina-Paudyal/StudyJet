@@ -17,4 +17,10 @@ export class CourseService {
   getPopularCourses(): Observable<Course[]> {
     return this.http.get<Course[]>(this.popularCourseUrl);
   }
+
+  // Fetch course by ID
+  getCourseById(courseId: number): Observable<Course>{
+    const url = `${this.courseUrl}/${courseId}`;
+    return this.http.get<Course>(url);
+  }
  }
