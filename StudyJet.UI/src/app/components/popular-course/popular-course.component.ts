@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { Course } from '../models/course.model';
-import { CourseService } from '../services/course.service';
-import { ImageService } from '../services/image.service';
+import { Course } from '../../models/course.model';
+import { CourseService } from '../../services/course.service';
+import { ImageService } from '../../services/image.service';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 
@@ -13,7 +13,6 @@ import { RouterLink } from '@angular/router';
   styleUrl: './popular-course.component.css',
 })
 export class PopularCourseComponent implements OnInit {
-  courses: Course[] = [];
   popularCourses: Course[] = [];
   selectedCourse: Course | null = null;
   modalLeft = '105%';

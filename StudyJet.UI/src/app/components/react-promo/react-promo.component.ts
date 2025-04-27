@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { CourseService } from '../services/course.service';
-import { ImageService } from '../services/image.service';
-import { Course } from '../models/course.model';
 import { RouterLink } from '@angular/router';
+import { Course } from '../../models/course.model';
+import { CourseService } from '../../services/course.service';
+import { ImageService } from '../../services/image.service';
 
 @Component({
   selector: 'app-react-promo',

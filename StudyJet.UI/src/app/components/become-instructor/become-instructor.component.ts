@@ -1,9 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, ElementRef, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { EmailService } from '../services/email.service';
+import { EmailService } from '../../services/email.service';
 import { catchError, of } from 'rxjs';
-import { UploadResponse } from '../models/uploadResponse';
+import { UploadResponse } from '../../models/uploadResponse';
 import { CommonModule } from '@angular/common';
 
 @Component({
