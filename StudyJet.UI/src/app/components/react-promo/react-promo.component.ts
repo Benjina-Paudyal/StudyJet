@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { Course } from '../../models/course.model';
+import { Course } from '../../models';
 import { CourseService } from '../../services/course.service';
 import { ImageService } from '../../services/image.service';
 
