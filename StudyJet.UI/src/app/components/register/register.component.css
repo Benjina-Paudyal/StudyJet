@@ -1,0 +1,32 @@
+
+#successModal {
+    margin: 0;
+    padding: 0;
+    border: none;
+  }
+  
+  input::placeholder {
+      color: #888;
+      opacity: 1;
+  }
+    
+  
+   .modal-content {
+      border: 1px solid #28a745;
+      border-radius: 5px;
+      box-shadow: none;
+    } 
+    
+  
+    .potential-source {
+      border: none !important;
+      background: transparent !important;
+    } 
+  
+  
+  
+  
+  
+  
+  
+  
