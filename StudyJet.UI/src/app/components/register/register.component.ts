@@ -87,7 +87,15 @@ export class RegisterComponent implements OnInit {
     this.errorMessage = null; 
     this.successMessage = null; 
 
-  // Prepare form data to be sent to the backend
+    // Clear validation errors and disable form
+  Object.keys(this.registerForm.controls).forEach(key => {
+    this.registerForm.get(key)?.setErrors(null);
+    this.registerForm.get(key)?.markAsUntouched();
+  });
+  this.registerForm.disable();
+
+
+  // Prepare form data 
     const formData = new FormData();
     formData.append('FullName', this.fullName?.value);
     formData.append('UserName', this.userName?.value);
@@ -100,10 +108,11 @@ export class RegisterComponent implements OnInit {
     if (profilePicture) {
       formData.append('ProfilePicture', profilePicture);
     }
+    // submit
     this.authService.register(formData).subscribe({
       next: () => {
         this.successMessage = "Please check your email to verify and complete your registration.";
-        this.loading = false;
+        this.registerForm.enable();
         this.registerForm.reset({
           FullName: '',
           UserName: '',
@@ -118,6 +127,7 @@ export class RegisterComponent implements OnInit {
     }, 5000);  
   },
     error: (error) => {
+      this.registerForm.enable();
       this.loading = false;
       this.handleRegistrationError(error);  
     },
@@ -145,6 +155,10 @@ export class RegisterComponent implements OnInit {
   // Dynamic error message function
   getErrorMessage(controlName: string): string | null {
     const control = this.registerForm.get(controlName);
+    if (!control || !control.touched || control.status === 'PENDING' || control.pristine) {
+      return null;  
+    }
+    
     if (control?.touched && control?.invalid) {
       // Sync validation errors
       if (control.hasError('required')) return `${controlName} is required.`;

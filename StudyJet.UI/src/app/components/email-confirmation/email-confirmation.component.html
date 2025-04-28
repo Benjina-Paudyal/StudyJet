@@ -1,0 +1,28 @@
+<div class="container d-flex align-items-center justify-content-center vh-100">
+    <div class="row justify-content-center w-100">
+      <div class="col-md-6">
+  
+        <!-- Show only the modal for confirmation success -->
+        <div *ngIf="confirmationSuccess" class="modal show" tabindex="-1" role="dialog" style="display: block;">
+          <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title text-success">Success</h5>
+              </div>
+              <div class="modal-body text-center text-success">
+                <p>{{ confirmationMessage }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+  
+        <!-- Display error message if not confirmed -->
+        <div *ngIf="!confirmationSuccess">
+          <h1 class="text-danger">Error!</h1>
+          <p>{{ confirmationMessage }}</p>
+        </div>
+  
+      </div>
+    </div>
+  </div>
+  

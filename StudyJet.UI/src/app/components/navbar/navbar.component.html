@@ -1,68 +1,55 @@
-
 <nav class="navbar navbar-expand-lg custom-bg py-3 fixed-top">
     <div class="container-fluid">
-
-        <!-- Brand-->
-        <a class="navbar-brand" href="#">StudyJet</a>
-        
-        <!-- Hamburger menu -->
-        <button class="navbar-toggler d-flex d-lg-none flex-column justify-content-around"
-            type="button"
-            (click)="toggleNavbar()"
-            data-bs-toggle="collapse"
-            data-bs-target="#navbarSupportedContent"
-            [attr.aria-controls]="'navbarSupportedContent'"
-            [attr.aria-expanded]="!isNavbarCollapsed"
-            aria-label="Toggle navigation"
-            [ngClass]="{'collapsed': isNavbarCollapsed}">
-
-        <span class="toggler-icon top-bar" ></span>
-        <span class="toggler-icon middle-bar" ></span>
-        <span class="toggler-icon bottom-bar" ></span>
-    </button>
-
-        <!-- Collapsible content -->
-        <div [ngClass]="{'collapse': isNavbarCollapsed, 'navbar-collapse':true}" id="navbarSupportedContent">
-
-            <!-- Search bar -->
-            <form class="d-flex flex-grow-1 mx-4" id="searchForm">
-                <div class="search-container flex-grow-1">
-                    <input class="form-control search-bar-input" type="search" placeholder="What do you want to learn?"  aria-label="Search" id="search-bar" autocomplete="off" aria-expanded="false" data-action="/search-suggestions">
-                </div>
-            </form>
-
-            <!-- Right side content -->
-            <div class="ms-auto order-lg-last" id="nav-right">
-                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-
-                    <li class="nav-item">
-                        <a href="#" class="nav-link  fw-semibold">Courses</a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a href="#" class="nav-link fw-semibold">About</a>
-                    </li>
-
-                    <li class="nav-item" id="login-link">
-                        <a href="#" class="nav-link  fw-semibold">Log in</a>
-                    </li>
-
-                    <li class="nav-item" id="signup-link">
-                        <a href="#" class="nav-link  fw-semibold">Register</a>
-                    </li>
-                    
-                    <li class="nav-item">
-                        <a href="#" class="nav-link"><img src="assets/images/cart.svg" alt="Cart" width="30" height="30"></a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a href="#" class="nav-link"><img src="assets/images/wishlist.svg" alt="Wishlist" width="30" height="30"></a>
-                    </li>
-
-                </ul>
-            </div>
+      <!-- Brand -->
+      <a class="navbar-brand" routerLink="/">StudyJet</a>
+  
+      <!-- Hamburger menu -->
+      <button class="navbar-toggler d-flex d-lg-none flex-column justify-content-around"
+        type="button" (click)="toggleNavbar()" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+        [attr.aria-controls]="'navbarSupportedContent'" [attr.aria-expanded]="!isNavbarCollapsed"
+        aria-label="Toggle navigation" [ngClass]="{ 'collapsed': isNavbarCollapsed }">
+        <span class="toggler-icon top-bar"></span>
+        <span class="toggler-icon middle-bar"></span>
+        <span class="toggler-icon bottom-bar"></span>
+      </button>
+  
+      <!-- Collapsible content -->
+      <div [ngClass]="{ 'collapse': isNavbarCollapsed, 'navbar-collapse': true }" id="navbarSupportedContent">
+        <!-- Search bar -->
+        <form class="d-flex flex-grow-1 mx-4" id="searchForm">
+          <div class="search-container flex-grow-1">
+            <input class="form-control search-bar-input" type="search" placeholder="What do you want to learn?" aria-label="Search" id="search-bar" autocomplete="off" aria-expanded="false" data-action="/search-suggestions">
+          </div>
+        </form>
+  
+        <!-- Right side content -->
+        <div class="ms-auto order-lg-last" id="nav-right">
+          <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <a routerLink="/courses" class="nav-link fw-semibold">Courses</a>
+            </li>
+            <li class="nav-item me-3">
+              <a routerLink="/about" class="nav-link fw-semibold">About</a>
+            </li>
+            <li class="nav-item me-3" id="login-link">
+              <a routerLink="/login" class="nav-link fw-semibold">Login</a>
+            </li>
+            <li class="nav-item me-3" id="signup-link">
+              <a routerLink="/register" class="nav-link fw-semibold">Register</a>
+            </li>
+            <li class="nav-item me-3">
+              <a routerLink="/cart" class="nav-link">
+                <img src="assets/images/cart.svg" alt="Cart" width="30" height="30" />
+              </a>
+            </li>
+            <li class="nav-item me-3">
+              <a routerLink="/wishlist" class="nav-link">
+                <img src="assets/images/wishlist.svg" alt="Wishlist" width="30" height="30" />
+              </a>
+            </li>
+          </ul>
         </div>
+      </div>
     </div>
-</nav>
-
-
+  </nav>
+  

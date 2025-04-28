@@ -47,11 +47,11 @@
     border: 0;
   }
   
-  .navbar-toggler span {
+  /* .navbar-toggler span {
     margin: 0;
     padding: 0;
   }
-  
+   */
   .toggler-icon {
     display: block;
     position: absolute;
@@ -110,25 +110,20 @@
     border: 1px solid #14A44D;
     border-radius: 20px;
     padding-left: 50px;
-    background: url('/assets/images/search.svg') ;
-    background-repeat: no-repeat;
-    background-position-x: 20px;
-    background-position-y: 50%;
+    background: url('/assets/images/search.svg') no-repeat 20px center ;
+    background-color: #ffffff;
   }
   
-  .navbar .search-container .search-bar-input{
-    background-color:#ffffff;
-  }
-  
+    
   /* Container Fluid */
   .container-fluid {
     padding: 0 15px;
   }
   
-  /* Button Block */
-  .btn-block {
-    width: 100%;
-  }
+
+
+
+  
   
   @media (max-width: 300px) {
     .navbar-brand {
