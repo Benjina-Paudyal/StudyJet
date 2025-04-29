@@ -1,0 +1,10 @@
+<div *ngIf="categories.length > 0">
+    <ul>
+      <li *ngFor="let category of categories">
+        <a [routerLink]="['/courses/category', category.categoryID]">
+          {{ category.name }}
+        </a>
+      </li>
+    </ul>
+  </div>
+  <div *ngIf="categories.length === 0">No categories available.</div>

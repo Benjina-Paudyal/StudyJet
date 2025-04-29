@@ -130,6 +130,64 @@
       font-size: 20px;
     }
   }
+
+
+
+
+  
+/* Dropdown Menu Styles */
+.nav-item.dropdown {
+  position: relative;
+}
+
+.dropdown-menu {
+  border: 1px solid #198754;
+  border-radius: 0.5rem;
+  padding: 0;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 1000;
+  display: none; 
+  opacity: 0; 
+  visibility: hidden; 
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+/* Dropdown Item Styles */
+.dropdown-item {
+  color: #198754;
+  padding: 0.5rem 1rem;
+  white-space: nowrap;
+  background-color: transparent;
+}
+
+.dropdown-item:hover {
+  color: #333;
+}
+
+/* Showing Dropdown on Hover */
+.nav-item.dropdown:hover .dropdown-menu{
+  display: block; 
+  opacity: 1; 
+  visibility: visible; 
+}
+
+/* Removing the default caret for dropdown toggles */
+.dropdown-toggle::after {
+  display: none;
+}
+
+.navbar-nav .nav-item .nav-link::after {
+  display: none; 
+}
+
+
+/* search dropown*/
+.search-dropdown {
+  width: calc(100% - 40px); 
+  max-width: calc(100% - 40px); 
+}
   
   
   

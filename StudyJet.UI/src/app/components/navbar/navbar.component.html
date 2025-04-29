@@ -21,13 +21,32 @@
             <input class="form-control search-bar-input" type="search" placeholder="What do you want to learn?" aria-label="Search" id="search-bar" autocomplete="off" aria-expanded="false" data-action="/search-suggestions">
           </div>
         </form>
+
+
   
         <!-- Right side content -->
         <div class="ms-auto order-lg-last" id="nav-right">
           <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-            <li class="nav-item">
+            <!-- <li class="nav-item">
               <a routerLink="/courses" class="nav-link fw-semibold">Courses</a>
-            </li>
+            </li> -->
+
+            <!-- Courses dropdown -->
+          <li class="nav-item dropdown me-3">
+            <a class="nav-link dropdown-toggle fw-semibold" href="#" id="navbarDropdown" role="button"
+              data-bs-toggle="dropdown" aria-expanded="false">Courses</a>
+            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+              <li *ngFor="let category of categories">
+                <a class="dropdown-item fw-semibold" [routerLink]="['/courses/category', category.categoryID]"
+                  (click)="toggleNavbar()">{{ category.name }}</a>
+              </li>
+
+              <li>
+                <a class="dropdown-item fw-semibold" [routerLink]="'/courses'" (click)="toggleNavbar()">All Courses</a>
+              </li>
+            </ul>
+          </li>
+
             <li class="nav-item me-3">
               <a routerLink="/about" class="nav-link fw-semibold">About</a>
             </li>

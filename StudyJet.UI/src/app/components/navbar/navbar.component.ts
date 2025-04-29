@@ -1,6 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component, HostListener, OnInit } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
+import { Category } from '../../models';
+import { CategoryService } from '../../services/category.service';
+import { CourseService } from '../../services/course.service';
+import { AuthService } from '../../services/auth.service';
+import { UserService } from '../../services/user.service';
 
 @Component({
   selector: 'app-navbar',
@@ -10,10 +15,19 @@ import { RouterModule } from '@angular/router';
   styleUrl: './navbar.component.css'
 })
 export class NavbarComponent implements OnInit {
-  constructor() {}
+  categories: Category[] = [];
+  constructor(
+    private categoryService: CategoryService,
+    private router: Router,
+    private courseService: CourseService,
+    private authService: AuthService,
+    private userService: UserService,
+    
+  ) {}
 
   ngOnInit() {
     this.updatePlaceholderText(window.innerWidth);
+    this.loadCategories();
   }
 
   @HostListener('window:resize', ['$event'])
@@ -37,6 +51,24 @@ export class NavbarComponent implements OnInit {
    toggleNavbar() {
     this.isNavbarCollapsed = !this.isNavbarCollapsed;
   }
+
+   // Load categories from the category service
+   loadCategories(): void {
+    this.categoryService.getCategories().subscribe({
+      next: (data: Category[]) => {
+        this.categories = data;
+      },
+      error: (err) => {
+        console.error('Error fetching categories', err);
+      },
+    });
+  }
+
+  // Handle category selection
+  onCategorySelected(category: Category): void {
+    console.log('Selected category:', category);
+  }
+
 }
 
 
