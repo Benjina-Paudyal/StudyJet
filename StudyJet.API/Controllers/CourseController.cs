@@ -11,13 +11,14 @@ using System.Security.Claims;
 namespace StudyJet.API.Controllers
 {
     [ApiController]
-    [Route("api/courses")]
+    [Route("api/[controller]")]
     public class CourseController : ControllerBase
     {
         private readonly ICourseService _courseService;
         private readonly IFileStorageService _fileService;
         private readonly INotificationService _notificationService;
         private readonly UserManager<User> _userManager;
+
         public CourseController(ICourseService courseService, IFileStorageService fileService, INotificationService notificationService, UserManager<User> userManager)
         {
             _courseService = courseService;
@@ -90,8 +91,7 @@ namespace StudyJet.API.Controllers
             return Ok(pendingCourses);
         }
 
-
-        [Authorize(Roles = "Admin")]
+       
         [HttpGet("approved")]
         public async Task<ActionResult<IEnumerable<Course>>> GetApprovedCourses()
         {

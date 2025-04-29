@@ -328,9 +328,16 @@ namespace StudyJet.API.Services.Implementation
         {
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             var encodedToken = HttpUtility.UrlEncode(token);
-            return $"https://localhost:7017/api/auth/confirm-email?token={encodedToken}&email={user.Email}";
 
+            var apiBase = _configuration["Backend:BaseUrl"]?.TrimEnd('/');
+            if (string.IsNullOrEmpty(apiBase))
+                throw new InvalidOperationException("Backend:BaseUrl is not configured.");
+
+            return $"{apiBase}/api/auth/confirm-email?token={encodedToken}"
+                 + $"&email={HttpUtility.UrlEncode(user.Email)}";
         }
+
+
 
         public async Task<IdentityResult> SendConfirmationEmailAsync(string email, string confirmationLink)
         {

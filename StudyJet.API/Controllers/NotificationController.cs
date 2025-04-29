@@ -25,7 +25,6 @@ namespace StudyJet.API.Controllers
             _userService = userService;
         }
 
-
         [HttpGet]
         public async Task<IActionResult> GetNotifications()
         {
@@ -48,7 +47,6 @@ namespace StudyJet.API.Controllers
                 return StatusCode(500, new { message = "An error occurred while fetching notifications." });
             }
         }
-
 
         [HttpPost("notify-instructor-on-course-status")]
         public async Task<IActionResult> NotifyInstructorOnCourseStatus([FromBody] CourseApprovalRequestDTO request)

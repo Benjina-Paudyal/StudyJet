@@ -224,8 +224,7 @@ namespace StudyJet.API.Controllers
             var resetToken = await _authService.GeneratePasswordResetTokenAsync(email);
 
             // Redirection to frontend 
-            var clientUrl = _configuration["Client:BaseUrl"];
-            return Redirect($"{clientUrl}/confirmation?confirmed=true&email={Uri.EscapeDataString(email)}&token={Uri.EscapeDataString(resetToken)}");
+            return Redirect($"https://localhost:4200/confirmation?confirmed=true&email={Uri.EscapeDataString(email)}&token={Uri.EscapeDataString(resetToken)}");
         }
 
 

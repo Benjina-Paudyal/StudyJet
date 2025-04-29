@@ -3,8 +3,8 @@ using StudyJet.API.Services.Interface;
 
 namespace StudyJet.API.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     public class UploadCVController : ControllerBase
     {
         private readonly IFileStorageService _fileStorageService;

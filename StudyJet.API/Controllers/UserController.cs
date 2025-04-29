@@ -9,7 +9,6 @@ namespace StudyJet.API.Controllers
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
-        
 
         public UserController(IUserService userService, IFileStorageService fileservice)
         {
@@ -33,8 +32,14 @@ namespace StudyJet.API.Controllers
         [HttpGet("email-exists")]
         public async Task<IActionResult> CheckEmailExists([FromQuery] string email)
         {
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                return BadRequest(new { message = "Email is required." });
+            }
+
             var emailInUse = await _userService.CheckIfEmailExistsAsync(email);
-            return Ok(emailInUse);
+
+            return Ok(new { emailExists = emailInUse });
         }
 
 

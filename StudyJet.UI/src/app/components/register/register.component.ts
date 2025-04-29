@@ -87,7 +87,7 @@ export class RegisterComponent implements OnInit {
     this.errorMessage = null; 
     this.successMessage = null; 
 
-    // Clear validation errors and disable form
+  // Clear validation errors and disable form
   Object.keys(this.registerForm.controls).forEach(key => {
     this.registerForm.get(key)?.setErrors(null);
     this.registerForm.get(key)?.markAsUntouched();
