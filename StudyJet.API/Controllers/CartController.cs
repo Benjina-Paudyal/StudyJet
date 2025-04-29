@@ -35,7 +35,7 @@ namespace StudyJet.API.Controllers
                     return Unauthorized(new { message = "User is not authenticated." });
                 }
 
-                // Check if the course is already in the wishlist
+                // Check if the course is already wishlist
                 var isInWishlist = await _wishlistService.IsCourseInWishlistAsync(userId, courseId);
                 if (isInWishlist)
                 {
@@ -70,7 +70,6 @@ namespace StudyJet.API.Controllers
                 return NotFound(new { message = "No items found in the cart." });
             }
 
-            // Map to CartItemDTO
             var cartItemsDTO = cartItems.Select(cartItem => new CartItemDTO
             {
                 CartID = cartItem.CartID,
@@ -82,7 +81,6 @@ namespace StudyJet.API.Controllers
                 Price = cartItem.Price
             }).ToList();
 
-            // Return a clean JSON response
             return Ok(cartItemsDTO);
         }
 
