@@ -56,6 +56,7 @@ export class NavbarComponent implements OnInit {
    loadCategories(): void {
     this.categoryService.getCategories().subscribe({
       next: (data: Category[]) => {
+        console.log('categories from API:', data);
         this.categories = data;
       },
       error: (err) => {

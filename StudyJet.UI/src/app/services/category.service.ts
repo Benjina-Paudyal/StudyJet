@@ -20,7 +20,7 @@ export class CategoryService {
     return this.http.get<Category[]>(this.apiUrl);
   }
 
-  getCourseByCategory(categoryId: number): Observable<Course[]> {
+  getCoursesByCategory(categoryId: number): Observable<Course[]> {
     return this.http.get<Course[]>(`${this.apiUrl}/${categoryId}`);
   }
 

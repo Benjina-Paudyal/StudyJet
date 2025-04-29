@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Category } from '../../models/category.model';
 import { CategoryService } from '../../services/category.service';
 
@@ -15,13 +15,15 @@ export class CategoryComponent implements OnInit{
   categories: Category[] = [];
 
   constructor(
-    private categoryService : CategoryService
-  ) {}
+    private categoryService : CategoryService,
+    private route: ActivatedRoute
+    ) {}
 
   ngOnInit(): void {
     if(this.categories.length === 0) {
       this.loadCategories();
     }
+    const categoryId = this.route.snapshot.paramMap.get('categoryId');
   }
 
   loadCategories(): void {
