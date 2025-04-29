@@ -149,6 +149,11 @@ builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("Emai
 builder.Services.AddScoped<IUserRepo, UserRepo>();
 builder.Services.AddScoped<ICourseRepo, CourseRepo>();
 builder.Services.AddScoped<INotificationRepo, NotificationRepo>();
+builder.Services.AddScoped<ICategoryRepo, CategoryRepo>();
+builder.Services.AddScoped<ICartRepo, CartRepo>();
+builder.Services.AddScoped<IWishlistRepo, WishlistRepo>();
+builder.Services.AddScoped<IUserPurchaseCourseRepo, UserPurchaseCourseRepo>();
+
 
 
 
@@ -159,6 +164,14 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IFileStorageService, FileStorageService>();
 builder.Services.AddScoped<ICourseService, CourseService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<IWishlistService, WishlistService>();
+builder.Services.AddScoped<ICartService, CartService>();
+builder.Services.AddScoped<IUserPurchaseCourseService, UserPurchaseCourseService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
+
+
+
 
 
 var app = builder.Build();
