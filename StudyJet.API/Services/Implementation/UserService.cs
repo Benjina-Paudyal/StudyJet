@@ -78,9 +78,8 @@ namespace StudyJet.API.Services.Implementation
 
         public async Task<IList<string>> GetUserRolesAsync(User user)
         {
-            //return await _userManager.GetRolesAsync(user);
             var roles = await _userManager.GetRolesAsync(user);
-            return roles.ToList();  // Ensure it returns List<string>
+            return roles.ToList();  
 
         }
 
