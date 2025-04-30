@@ -24,7 +24,7 @@ export class CartService {
     this.updateCartForUser();
   }
 
-// Get the cart items for the logged-in user
+// Get the cart items 
   getCartItems(): Observable<CartItem[]> {
     return this.http.get<CartItem[]>(`${this.cartUrl}`).pipe(
       map(cart => cart.map(item => ({
@@ -51,6 +51,8 @@ export class CartService {
   }
 
 
+  
+// Check if the course is already in the wishlist
   isCourseInWishlist(courseId: number): Observable<boolean> {
     return this.http.get<boolean>(`${this.wishlistUrl}/is-in-wishlist/${courseId}`,).pipe(
       catchError(err => {
@@ -63,7 +65,6 @@ export class CartService {
 
   // Add a course to the cart if it isn't already present
   addCourseToCart(courseId: number): Observable<void> {
-    
     return this.isCourseInCart(courseId).pipe(
       switchMap(isInCart => {
         if (isInCart) {
@@ -81,6 +82,7 @@ export class CartService {
     );
   }
 
+  
   //fetch the cart items and update the cartSubject observable
   private getCartAndEmit(): void {
     this.getCartItems().pipe(take(1)).subscribe(cart => this.cartSubject.next(cart));

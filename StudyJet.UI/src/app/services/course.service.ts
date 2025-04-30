@@ -51,6 +51,14 @@ export class CourseService {
       .pipe(catchError(this.handleError<Course[]>('getApprovedCourses', [])));
   }
 
+  // Fetch pending courses
+getPendingCourses(): Observable<Course[]> {
+  return this.http
+    .get<Course[]>(`${this.apiUrl}/courses/pending`)
+    .pipe(catchError(this.handleError<Course[]>('getPendingCourses', [])));
+}
+
+
   // Search courses
   searchCourses(query: string): Observable<Course[]> {
     return this.http.get<Course[]>(`${this.endpoints.courseUrl}/search?query=${encodeURIComponent(query)}`)
@@ -85,13 +93,6 @@ approveCourseUpdate(courseId: number): Observable<any> {
     return throwError(() => new Error('Invalid course ID provided'));
   }
   return this.http.put(`${this.apiUrl}/courses/approve-update/${courseId}`, {});
-}
-
-// Get pending courses
-getPendingCourses(): Observable<Course[]> {
-  return this.http
-    .get<Course[]>(`${this.apiUrl}/courses/pending`)
-    .pipe(catchError(this.handleError<Course[]>('getPendingCourses', [])));
 }
 
 
