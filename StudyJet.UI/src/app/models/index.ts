@@ -19,6 +19,7 @@ export *from './user/user-role-enum';
 export *from './user/login-response.dto';
 export *from './user/student.dto';
 export *from './user/instructor-registration-response.dto';
+export *from './user/user.model';
 
 
 export *from './course/course-with-student.dto'
