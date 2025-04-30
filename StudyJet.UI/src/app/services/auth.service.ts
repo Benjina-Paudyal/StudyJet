@@ -13,6 +13,7 @@ import { UserRegistration, UserLogin,LoginResponse, AuthTokenPayload, UserRegist
 export class AuthService {
   private apiUrl = `${environment.apiBaseUrl}/Auth`;
   private isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
+  public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
 
   constructor(
     private http: HttpClient,
@@ -36,17 +37,6 @@ export class AuthService {
       this.clearAuthCookies();
     }
   }
-
-    // Set the authentication state in the app
-    setAuthenticationState(isAuthenticated: boolean): void {
-      this.isAuthenticatedSubject.next(isAuthenticated);
-    }
-  
-    // Get observable of auth state
-    get authStatus$(): Observable<boolean> {
-      return this.isAuthenticatedSubject.asObservable();
-    }
-
 
   // Check if token is expired
   private isTokenExpired(token: string): boolean {
