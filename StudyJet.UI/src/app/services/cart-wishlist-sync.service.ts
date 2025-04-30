@@ -13,27 +13,29 @@ export class CartWishlistSyncService {
     private wishlistService: WishlistService
   ) {}
 
-  moveCourseToWishlist(courseId: number): Observable<void> {
-    return this.cartService.removeCourseFromCart(courseId).pipe(
-      switchMap(() => this.wishlistService.addCourseToWishlist(courseId)),
-      catchError(err => {
-        console.error('Error moving course to wishlist:', err);
-        return throwError(() => err);
 
+  private moveCourse(fromService: Observable<void>, toService: Observable<void>): Observable<void> {
+    return fromService.pipe(
+      switchMap(() => toService),
+      catchError(err => {
+        console.error('Error:', err);
+        return throwError(() => err);
       })
     );
   }
 
+  moveCourseToWishlist(courseId: number): Observable<void> {
+    return this.moveCourse(
+      this.cartService.removeCourseFromCart(courseId),
+      this.wishlistService.addCourseToWishlist(courseId)
+    );
+  }
+  
   moveCourseToCart(courseId: number): Observable<void> {
-    return this.wishlistService.removeCourseFromWishlist(courseId).pipe(
-      switchMap(() => this.cartService.addCourseToCart(courseId)),
-      catchError(err => {
-        console.error('Error moving course to cart:', err);
-        return throwError(() => err);
-
-      })
+    return this.moveCourse(
+      this.wishlistService.removeCourseFromWishlist(courseId),
+      this.cartService.addCourseToCart(courseId)
     );
   }
 }
-
 

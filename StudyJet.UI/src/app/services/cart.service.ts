@@ -1,49 +1,35 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { BehaviorSubject, catchError, map, Observable, of, switchMap, take, tap, throwError } from 'rxjs';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { WishlistService } from './wishlist.service';
 import { CookieService } from 'ngx-cookie-service';
 import { CartItem } from '../models';
+import { ImageService } from './image.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CartService {
-  private apiUrl = `${environment.apiBaseUrl}/Cart`;
+  private cartUrl = `${environment.apiBaseUrl}/Cart`;
   private wishlistUrl = `${environment.apiBaseUrl}/Wishlist`;
   public cartSubject = new BehaviorSubject<CartItem[]>([]);
 
   constructor(
     private http: HttpClient,
     private wishlistService : WishlistService,
+    private imageService: ImageService,
     private cookieService : CookieService
   ) { 
     this.updateCartForUser();
   }
 
-
-  private getHttpOptions(): { headers: HttpHeaders } {
-    const token = this.cookieService.get('authToken');
-    let headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-    if (token) {
-      headers = headers.set('Authorization', `Bearer ${token}`);
-    } else {
-      console.warn('No token found! Requests may fail.');
-    }
-    return { headers };
-  }
-
-
+// Get the cart items for the logged-in user
   getCartItems(): Observable<CartItem[]> {
-    const token = this.cookieService.get('authToken');
-    if (!token) {
-      return of([]);
-    }
-    return this.http.get<CartItem[]>(`${this.apiUrl}`, this.getHttpOptions()).pipe(
+    return this.http.get<CartItem[]>(`${this.cartUrl}`).pipe(
       map(cart => cart.map(item => ({
         ...item,
-        imageUrl: `${environment.imageBaseUrl}${item.imageUrl.replace(/^\/+/, '')}`
+        imageUrl: this.imageService.getCourseImageUrl(item.imageUrl)
       }))),
       tap(cart => this.cartSubject.next(cart)),
       catchError(err => {
@@ -54,8 +40,9 @@ export class CartService {
   }
 
 
+// Check if the course is already in the cart
   isCourseInCart(courseId: number): Observable<boolean> {
-    return this.http.get<boolean>(`${this.apiUrl}/is-in-cart/${courseId}`, this.getHttpOptions()).pipe(
+    return this.http.get<boolean>(`${this.cartUrl}/is-in-cart/${courseId}`).pipe(
       catchError(err => {
         console.error('Error checking if course is in cart:', err);
         return of(false);
@@ -65,7 +52,7 @@ export class CartService {
 
 
   isCourseInWishlist(courseId: number): Observable<boolean> {
-    return this.http.get<boolean>(`${this.wishlistUrl}/is-in-wishlist/${courseId}`, this.getHttpOptions()).pipe(
+    return this.http.get<boolean>(`${this.wishlistUrl}/is-in-wishlist/${courseId}`,).pipe(
       catchError(err => {
         console.error('Error checking if course is in wishlist:', err);
         return of(false);
@@ -74,22 +61,17 @@ export class CartService {
   }
 
 
+  // Add a course to the cart if it isn't already present
   addCourseToCart(courseId: number): Observable<void> {
-    const token = this.cookieService.get('authToken');
-    if (!token) {
-      console.warn('Please log in first.');
-      return throwError(() => new Error('Please log in first.'));
-    }
-
-
+    
     return this.isCourseInCart(courseId).pipe(
       switchMap(isInCart => {
         if (isInCart) {
           console.warn('Course is already in the cart.');
           return throwError(() => new Error('Course is already in the cart.'));
         }
-        return this.http.post<void>(`${this.apiUrl}/${courseId}/add`, {}, this.getHttpOptions()).pipe(
-          tap(() => this.updateCartForUser())
+        return this.http.post<void>(`${this.cartUrl}/${courseId}/add`, {}).pipe(
+          tap(() => this.updateCartForUser())  // Update the cart state after adding the course
         );
       }),
       catchError(err => {
@@ -99,13 +81,17 @@ export class CartService {
     );
   }
 
+  //fetch the cart items and update the cartSubject observable
+  private getCartAndEmit(): void {
+    this.getCartItems().pipe(take(1)).subscribe(cart => this.cartSubject.next(cart));
+  }
 
+
+
+  // Remove a course from the cart and update the cart state
   removeCourseFromCart(courseId: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${courseId}/remove`, {
-      ...this.getHttpOptions(),
-      observe: 'body'
-    }).pipe(
-      tap(() => this.getCartAndEmit()),
+    return this.http.delete<void>(`${this.cartUrl}/${courseId}/remove`).pipe(
+      tap(() => this.getCartAndEmit()), // Update the cart state after removal
       catchError(err => {
         console.error('Error removing course from cart:', err);
         return throwError(() => new Error('Failed to remove course from cart.'));
@@ -114,14 +100,15 @@ export class CartService {
   }
 
 
+// Move a course from the cart to the wishlist
   moveToWishlist(courseId: number): Observable<void> {
     return this.isCourseInWishlist(courseId).pipe(
       switchMap(isInWishlist => isInWishlist ? of(void 0) :
-        this.http.post<void>(`${this.apiUrl}/move-to-wishlist/${courseId}`, {}, this.getHttpOptions())
+        this.http.post<void>(`${this.cartUrl}/move-to-wishlist/${courseId}`, {})
       ),
       tap(() => {
-        this.getCartAndEmit();
-        this.wishlistService.getWishlistAndEmit();
+        this.getCartAndEmit(); // Update cart state
+        this.wishlistService.getWishlistAndEmit(); // Update wishlist state
       }),
       catchError(err => {
         console.error('Error moving course to wishlist:', err);
@@ -130,15 +117,15 @@ export class CartService {
     );
   }
 
-
+// Fetch and update the cart for the user
   updateCartForUser(): void {
     this.getCartItems().pipe(take(1)).subscribe(cart => this.cartSubject.next(cart));
   }
 
 
-
+// Get the course details
   getCourseDetails(courseId: number): Observable<any> {
-    return this.http.get(`${this.apiUrl}/course/${courseId}`, this.getHttpOptions()).pipe(
+    return this.http.get(`${this.cartUrl}/course/${courseId}`).pipe(
       catchError(err => {
         console.error('Error fetching course details:', err);
         return of(null);
@@ -147,32 +134,20 @@ export class CartService {
   }
 
 
-  private getCartAndEmit(): void {
-    this.getCartItems().pipe(take(1)).subscribe(cart => this.cartSubject.next(cart));
-  }
+// Get the observable for the cart items
   get cart$(): Observable<any[]> {
-    return this.cartSubject.asObservable();
+    return this.cartSubject.asObservable(); // Expose the cartSubject as an observable for subscribers
   }
 
 
-  createCheckoutSession(courseIds: number[]): Observable<{ url: string }> {
-    const token = this.cookieService.get('authToken');
-    if (!token) {
-      console.error("No auth token found.");
-      return throwError(() => new Error('No auth token found.'));
-    }
+ // Create a checkout session for the selected courses
+createCheckoutSession(courseIds: number[]): Observable<{ url: string }> {
+  return this.http.post<{ url: string }>(
+    `${environment.apiBaseUrl}/user/purchases/create-checkout-session`,
+    { courseIds }
+  );
+}
 
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    });
-
-    return this.http.post<{ url: string }>(
-      `${environment.apiBaseUrl}/user/purchases/create-checkout-session`,
-      { courseIds },
-      { headers }
-    );
-  }
 }
 
 

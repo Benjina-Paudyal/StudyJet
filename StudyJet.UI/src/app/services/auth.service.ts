@@ -3,7 +3,7 @@ import { environment } from '../../environments/environment';
 import { BehaviorSubject,catchError, map, Observable, of,ReplaySubject,switchMap, tap,throwError,} from 'rxjs';
 import { ImageService } from './image.service';
 import { CookieService } from 'ngx-cookie-service';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient} from '@angular/common/http';
 import { Router } from '@angular/router';
 import { UserRegistration, UserLogin,LoginResponse, AuthTokenPayload, UserRegistrationResponse, ForgotPasswordResponse, ResetPasswordResponse, InstructorRegistrationResponse, ChangePasswordResponse, VerifyPasswordResponse, Disable2FAResponse,} from '../models';
 
@@ -97,7 +97,6 @@ export class AuthService {
     this.cookieService.set('fullName', fullName, cookieOptions);
     this.cookieService.set('userId', userId, cookieOptions);
   }
-
  
   // Register student
   register(formData: FormData): Observable<UserRegistrationResponse> {
@@ -118,13 +117,10 @@ export class AuthService {
 
   // register instructor
    registerInstructor(formData: FormData): Observable<InstructorRegistrationResponse> {
-    const token = this.cookieService.get('authToken'); 
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
     return this.http
-      .post<InstructorRegistrationResponse>(`${this.apiUrl}/register-instructor`, formData, { headers })
+      .post<InstructorRegistrationResponse>(`${this.apiUrl}/register-instructor`, formData)
       .pipe(catchError(this.handleError<InstructorRegistrationResponse>('registerInstructor')));
   }
-
 
 
   // Method to create the FormData object for registration
@@ -391,30 +387,15 @@ export class AuthService {
 
   // Enable 2FA
   enable2FA(): Observable<{ qrCode: string }> {
-    const token = this.cookieService.get('authToken'); 
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
     return this.http
-      .post(`${this.apiUrl}/enable-2fa`, {}, { headers, responseType: 'blob' })
+      .post(`${this.apiUrl}/enable-2fa`, {}, {responseType: 'blob' })
       .pipe(switchMap((blob) => this.convertBlobToBase64(blob)));
   }
 
   // Check 2FA Status
   check2FAStatus(): Observable<{ isEnabled: boolean; error?: string }> {
-    const token = this.cookieService.get('authToken'); 
-    if (!token) {
-      return of({
-        isEnabled: false,
-        error: 'No authentication token found',
-      });
-    }
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`,
-    });
-
     return this.http
-      .get<{ isEnabled: boolean }>(`${this.apiUrl}/check-2fa-status`, {
-        headers,
-      })
+      .get<{ isEnabled: boolean }>(`${this.apiUrl}/check-2fa-status`)
       .pipe(
         map((response) => ({
           isEnabled: response.isEnabled,
@@ -428,6 +409,7 @@ export class AuthService {
         })
       );
   }
+
 
   // Convert Blob to Base64
   private convertBlobToBase64(blob: Blob): Observable<{ qrCode: string }> {
@@ -468,12 +450,7 @@ export class AuthService {
 
   // Disable 2FA
   disable2FA(): Observable<Disable2FAResponse> {
-    const token = this.cookieService.get('authToken');
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`,
-    });
-
-    return this.http.post<Disable2FAResponse>(`${this.apiUrl}/disable-2fa`, {}, { headers }).pipe(
+    return this.http.post<Disable2FAResponse>(`${this.apiUrl}/disable-2fa`, {}).pipe(
       catchError((error) => {
         console.error('Error disabling 2FA:', error);
         return throwError(
