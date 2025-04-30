@@ -1,11 +1,14 @@
 import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
 import { environment } from '../../environments/environment';
-import { BehaviorSubject,catchError, map, Observable, of,switchMap, tap,throwError,} from 'rxjs';
+import { BehaviorSubject,catchError, map, Observable, of,ReplaySubject,switchMap, tap,throwError,} from 'rxjs';
 import { ImageService } from './image.service';
 import { CookieService } from 'ngx-cookie-service';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { UserRegistration, UserLogin, UserProfile, LoginResponse, AuthTokenPayload,} from '../models';
+import { CartService } from './cart.service';
+import { WishlistStateService } from './wishlist-state.service';
+import { UserService } from './user.service';
 
 @Injectable({
   providedIn: 'root',
@@ -13,12 +16,15 @@ import { UserRegistration, UserLogin, UserProfile, LoginResponse, AuthTokenPaylo
 export class AuthService {
   private apiUrl = `${environment.apiBaseUrl}/Auth`;
   private profilePictureUrl: string | null = null;
-  private isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
+  private isAuthenticatedSubject = new ReplaySubject<boolean>(1);
 
   constructor(
     private http: HttpClient,
     private router: Router,
     private imageService: ImageService,
+    private cartService: CartService,
+    private wishlistStateService: WishlistStateService,
+    private userService: UserService,
     private cookieService: CookieService
   ) {
     this.checkAuthState();
@@ -35,6 +41,7 @@ export class AuthService {
       this.clearAuthCookies();
     }
   }
+
 
   // Check if token is expired
   private isTokenExpired(token: string): boolean {
@@ -146,7 +153,7 @@ export class AuthService {
           this.cookieService.set('tempToken', response.tempToken, {
             secure: true,
             sameSite: 'Strict',
-            expires: 1,
+            expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
           });
           return;
         }
