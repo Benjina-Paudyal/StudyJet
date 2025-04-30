@@ -5,50 +5,56 @@ import { ImageService } from './image.service';
 import { CookieService } from 'ngx-cookie-service';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { UserRegistration, UserLogin, UserProfile, LoginResponse, AuthTokenPayload,} from '../models';
-import { CartService } from './cart.service';
-import { WishlistStateService } from './wishlist-state.service';
-import { UserService } from './user.service';
+import { UserRegistration, UserLogin,LoginResponse, AuthTokenPayload, UserRegistrationResponse, ForgotPasswordResponse, ResetPasswordResponse, InstructorRegistrationResponse, ChangePasswordResponse, VerifyPasswordResponse, Disable2FAResponse,} from '../models';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
   private apiUrl = `${environment.apiBaseUrl}/Auth`;
-  private profilePictureUrl: string | null = null;
-  private isAuthenticatedSubject = new ReplaySubject<boolean>(1);
+  private isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
 
   constructor(
     private http: HttpClient,
     private router: Router,
     private imageService: ImageService,
-    private cartService: CartService,
-    private wishlistStateService: WishlistStateService,
-    private userService: UserService,
     private cookieService: CookieService
   ) {
     this.checkAuthState();
   }
 
-  // Check authstate
-  private checkAuthState(): void {
+   // Check authstate on app initialization
+   private checkAuthState(): void {
     const token = this.cookieService.get('authToken');
     const username = this.cookieService.get('username');
     if (token && username && !this.isTokenExpired(token)) {
+       // If token exists, username is available, and the token is not expired, mark the user as authenticated
       this.isAuthenticatedSubject.next(true);
     } else {
+       // Otherwise, mark the user as unauthenticated and clear auth-related cookies
       this.isAuthenticatedSubject.next(false);
       this.clearAuthCookies();
     }
   }
 
+    // Set the authentication state in the app
+    setAuthenticationState(isAuthenticated: boolean): void {
+      this.isAuthenticatedSubject.next(isAuthenticated);
+    }
+  
+    // Get observable of auth state
+    get authStatus$(): Observable<boolean> {
+      return this.isAuthenticatedSubject.asObservable();
+    }
+
 
   // Check if token is expired
   private isTokenExpired(token: string): boolean {
     try {
-      const payload: AuthTokenPayload = JSON.parse(atob(token.split('.')[1]));
+      const payload: AuthTokenPayload = JSON.parse(atob(token.split('.')[1])); // Decode the JWT payload
       return payload.exp * 1000 < Date.now();
     } catch (e) {
+     // If the token is invalid or malformed, assume it is expired  
       return true;
     }
   }
@@ -92,39 +98,34 @@ export class AuthService {
     this.cookieService.set('userId', userId, cookieOptions);
   }
 
-  // Set the authentication state in the app
-  setAuthenticationState(isAuthenticated: boolean): void {
-    this.isAuthenticatedSubject.next(isAuthenticated);
-  }
-
-  // Get observable of auth state
-  get authStatus$(): Observable<boolean> {
-    return this.isAuthenticatedSubject.asObservable();
-  }
-
+ 
   // Register student
-  register(formData: FormData): Observable<any> {
-    return this.http.post(`${this.apiUrl}/register`, formData).pipe(
+  register(formData: FormData): Observable<UserRegistrationResponse> {
+    return this.http.post<UserRegistrationResponse>(`${this.apiUrl}/register`, formData).pipe(
       tap({
-        next: (response: any) => {
-          if (response.profilePictureUrl) {
-            this.setProfileImage(response.profilePictureUrl);
-          }
+        next: (response: UserRegistrationResponse) => {
+          const profilePictureUrl = response.profilePictureUrl
+            ? this.imageService.getProfileImageUrl(response.profilePictureUrl)
+            : this.imageService.getProfileImageUrl('default-profile-picture.jpg'); 
+
+          this.setProfileImage(profilePictureUrl);  
         },
       }),
-      catchError(this.handleError('register'))
+      catchError(this.handleError<UserRegistrationResponse>('register'))
     );
   }
 
-  // register instructor
-   registerInstructor(formData: FormData): Observable<any> {
-    const token = this.cookieService.get('authToken'); // Use ngx-cookie-service to get the token
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
 
+  // register instructor
+   registerInstructor(formData: FormData): Observable<InstructorRegistrationResponse> {
+    const token = this.cookieService.get('authToken'); 
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
     return this.http
-      .post(`${this.apiUrl}/register-instructor`, formData, { headers })
-      .pipe(catchError(this.handleError<any>('registerInstructor')));
+      .post<InstructorRegistrationResponse>(`${this.apiUrl}/register-instructor`, formData, { headers })
+      .pipe(catchError(this.handleError<InstructorRegistrationResponse>('registerInstructor')));
   }
+
+
 
   // Method to create the FormData object for registration
   createRegistrationFormData(user: UserRegistration): FormData {
@@ -148,7 +149,6 @@ export class AuthService {
    login(user: UserLogin): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.apiUrl}/login`, user).pipe(
       tap((response: LoginResponse) => {
-        // Handle 2FA case
         if (response.requires2FA && response.tempToken) {
           this.cookieService.set('tempToken', response.tempToken, {
             secure: true,
@@ -157,16 +157,12 @@ export class AuthService {
           });
           return;
         }
-  
-        // Handle password reset case
-        if (response.requiresPasswordChange && response.resetToken) {
+       if (response.requiresPasswordChange && response.resetToken) {
           sessionStorage.setItem('resetToken', response.resetToken);
           sessionStorage.setItem('email', user.Email);
           this.router.navigate(['/reset-password']);
           return;
         }
-  
-        // Handle successful login
         if (response.token && response.username && response.roles) {
           this.handleSuccessfulLogin(response);
         }
@@ -179,21 +175,22 @@ export class AuthService {
     );
   }
   
+  // Handle the logic after a successful login
   private handleSuccessfulLogin(response: LoginResponse): void {
     if (!response.token || !response.username || !response.roles) {
       throw new Error('Invalid login response - missing required fields');
     }
-  
     const profilePictureUrl = 
       response.profilePictureUrl || '/images/profiles/profilepic.png';
-  
+
+    // Set authentication cookies
     this.setAuthCookies(
       response.token,
       response.username,
       response.roles,
-      this.imageService.getProfileImageUrl(profilePictureUrl),
-      response.fullName || '',
-      response.userId || ''
+      this.imageService.getProfileImageUrl(profilePictureUrl),  // Get the profile image URL
+      response.fullName || '', // Default to empty string if no full name
+      response.userId || '' // Default to empty string if no user ID
     );
   
     this.isAuthenticatedSubject.next(true);
@@ -237,14 +234,13 @@ export class AuthService {
   setProfileImage(url: string | null): void {
     const defaultImage = this.imageService.getProfileImageUrl('profilepic.png');
     const imageUrl = url ?? defaultImage;
-    
-    this.profilePictureUrl = imageUrl;
     this.cookieService.set('profileImageUrl', imageUrl, {
       secure: true,
       sameSite: 'Lax',
       path: '/',
     });
   }
+
 
   // Store username
   setUserName(username: string): void {
@@ -265,13 +261,10 @@ export class AuthService {
   }
 
   // Get profile image URL
-  getProfileImage(): string | null {
-    return (
-      this.profilePictureUrl ??
-      this.cookieService.get('profileImageUrl') ??
-      null
-    );
+  getProfileImage(): string {
+    return this.cookieService.get('profileImageUrl') || this.imageService.getProfileImageUrl('profilepic.png');
   }
+  
 
   // Get email
   getEmail(): Observable<string> {
@@ -293,35 +286,38 @@ export class AuthService {
   changePassword(
     currentPassword: string,
     newPassword: string
-  ): Observable<any> {
+  ): Observable<ChangePasswordResponse> {
     return this.http
-      .post(`${this.apiUrl}/change-password`, { currentPassword, newPassword })
-      .pipe(catchError(this.handleError('changePassword')));
+      .post<ChangePasswordResponse>(`${this.apiUrl}/change-password`, { currentPassword, newPassword })
+      .pipe(catchError(this.handleError<ChangePasswordResponse>('changePassword')));
   }
 
   // Forgot Password
-  forgotPassword(email: string): Observable<any> {
+  forgotPassword(email: string): Observable<ForgotPasswordResponse> {
     return this.http
-      .post(`${this.apiUrl}/forgot-password`, { email })
-      .pipe(catchError(this.handleError('forgotPassword')));
+      .post<ForgotPasswordResponse>(`${this.apiUrl}/forgot-password`, { email })
+      .pipe(catchError(this.handleError<ForgotPasswordResponse>('forgotPassword')));
   }
 
+
   // Reset Password
-  resetPassword(token: string, newPassword: string): Observable<any> {
+  resetPassword(token: string, newPassword: string): Observable<ResetPasswordResponse> {
     return this.http
-      .post(`${this.apiUrl}/reset-password`, { token, newPassword })
-      .pipe(catchError(this.handleError('resetPassword')));
+      .post<ResetPasswordResponse>(`${this.apiUrl}/reset-password`, { token, newPassword })
+      .pipe(catchError(this.handleError<ResetPasswordResponse>('resetPassword')));
   }
+
 
   // verify current password
   verifyCurrentPassword(
     email: string,
     token: string,
     currentPassword: string
-  ): Observable<any> {
+  ): Observable<VerifyPasswordResponse> {
     const url = `${this.apiUrl}/verify-password`;
-    return this.http.post(url, { email, token, password: currentPassword });
+    return this.http.post<VerifyPasswordResponse>(url, { email, token, password: currentPassword });
   }
+
 
   // Verify 2FA when login
   verify2FALogin(email: string, code: string): Observable<LoginResponse> {
@@ -336,11 +332,13 @@ export class AuthService {
       .pipe(
         tap((response) => {
           if (response.token && response.username && response.roles) {
+             // If successful, clean up temporary token and set authentication state
             this.cookieService.delete('tempToken');
 
             const profilePictureUrl =
               response.profilePictureUrl || '/images/profiles/default.png';
 
+            // Set authentication cookies and profile image
             this.setAuthCookies(
               response.token,
               response.username,
@@ -350,10 +348,11 @@ export class AuthService {
               response.userId || ''
             );
 
+            // Update authentication status
             this.isAuthenticatedSubject.next(true);
             this.setProfileImage(profilePictureUrl);
 
-            // Navigate based on role
+            // Based on user role, navigate to the corresponding dashboard
             if (response.roles.includes('Instructor')) {
               this.router.navigate(['/instructor-dashboard'], {
                 replaceUrl: true,
@@ -392,11 +391,8 @@ export class AuthService {
 
   // Enable 2FA
   enable2FA(): Observable<{ qrCode: string }> {
-    // Replace the token retrieval method to use ngx-cookie-service
-    const token = this.cookieService.get('authToken'); // Using ngx-cookie-service
-
+    const token = this.cookieService.get('authToken'); 
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-
     return this.http
       .post(`${this.apiUrl}/enable-2fa`, {}, { headers, responseType: 'blob' })
       .pipe(switchMap((blob) => this.convertBlobToBase64(blob)));
@@ -471,13 +467,13 @@ export class AuthService {
   }
 
   // Disable 2FA
-  disable2FA(): Observable<any> {
+  disable2FA(): Observable<Disable2FAResponse> {
     const token = this.cookieService.get('authToken');
     const headers = new HttpHeaders({
       Authorization: `Bearer ${token}`,
     });
 
-    return this.http.post(`${this.apiUrl}/disable-2fa`, {}, { headers }).pipe(
+    return this.http.post<Disable2FAResponse>(`${this.apiUrl}/disable-2fa`, {}, { headers }).pipe(
       catchError((error) => {
         console.error('Error disabling 2FA:', error);
         return throwError(

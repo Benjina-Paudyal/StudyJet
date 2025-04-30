@@ -12,7 +12,7 @@ import { CartItem } from '../models';
 export class CartService {
   private apiUrl = `${environment.apiBaseUrl}/Cart`;
   private wishlistUrl = `${environment.apiBaseUrl}/Wishlist`;
-  public cartSubject = new BehaviorSubject<any[]>([]);
+  public cartSubject = new BehaviorSubject<CartItem[]>([]);
 
   constructor(
     private http: HttpClient,
@@ -22,25 +22,24 @@ export class CartService {
     this.updateCartForUser();
   }
 
+
   private getHttpOptions(): { headers: HttpHeaders } {
     const token = this.cookieService.get('authToken');
     let headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-
     if (token) {
       headers = headers.set('Authorization', `Bearer ${token}`);
     } else {
       console.warn('No token found! Requests may fail.');
     }
-
     return { headers };
   }
+
 
   getCartItems(): Observable<CartItem[]> {
     const token = this.cookieService.get('authToken');
     if (!token) {
       return of([]);
     }
-
     return this.http.get<CartItem[]>(`${this.apiUrl}`, this.getHttpOptions()).pipe(
       map(cart => cart.map(item => ({
         ...item,
@@ -54,6 +53,7 @@ export class CartService {
     );
   }
 
+
   isCourseInCart(courseId: number): Observable<boolean> {
     return this.http.get<boolean>(`${this.apiUrl}/is-in-cart/${courseId}`, this.getHttpOptions()).pipe(
       catchError(err => {
@@ -62,6 +62,7 @@ export class CartService {
       })
     );
   }
+
 
   isCourseInWishlist(courseId: number): Observable<boolean> {
     return this.http.get<boolean>(`${this.wishlistUrl}/is-in-wishlist/${courseId}`, this.getHttpOptions()).pipe(
@@ -72,12 +73,14 @@ export class CartService {
     );
   }
 
+
   addCourseToCart(courseId: number): Observable<void> {
     const token = this.cookieService.get('authToken');
     if (!token) {
       console.warn('Please log in first.');
       return throwError(() => new Error('Please log in first.'));
     }
+
 
     return this.isCourseInCart(courseId).pipe(
       switchMap(isInCart => {
@@ -96,6 +99,7 @@ export class CartService {
     );
   }
 
+
   removeCourseFromCart(courseId: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${courseId}/remove`, {
       ...this.getHttpOptions(),
@@ -108,6 +112,7 @@ export class CartService {
       })
     );
   }
+
 
   moveToWishlist(courseId: number): Observable<void> {
     return this.isCourseInWishlist(courseId).pipe(
@@ -125,9 +130,12 @@ export class CartService {
     );
   }
 
+
   updateCartForUser(): void {
     this.getCartItems().pipe(take(1)).subscribe(cart => this.cartSubject.next(cart));
   }
+
+
 
   getCourseDetails(courseId: number): Observable<any> {
     return this.http.get(`${this.apiUrl}/course/${courseId}`, this.getHttpOptions()).pipe(
@@ -138,13 +146,14 @@ export class CartService {
     );
   }
 
+
   private getCartAndEmit(): void {
     this.getCartItems().pipe(take(1)).subscribe(cart => this.cartSubject.next(cart));
   }
-
   get cart$(): Observable<any[]> {
     return this.cartSubject.asObservable();
   }
+
 
   createCheckoutSession(courseIds: number[]): Observable<{ url: string }> {
     const token = this.cookieService.get('authToken');

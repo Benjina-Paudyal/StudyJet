@@ -1,5 +1,4 @@
-import { Student } from "./student.dto";
-
+import { Student } from "../user/student.dto";
 
 export interface CourseWithStudents {
   courseId: number;

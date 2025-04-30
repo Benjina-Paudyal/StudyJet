@@ -18,7 +18,8 @@ export class CartWishlistSyncService {
       switchMap(() => this.wishlistService.addCourseToWishlist(courseId)),
       catchError(err => {
         console.error('Error moving course to wishlist:', err);
-        return throwError(err);
+        return throwError(() => err);
+
       })
     );
   }
@@ -28,7 +29,8 @@ export class CartWishlistSyncService {
       switchMap(() => this.cartService.addCourseToCart(courseId)),
       catchError(err => {
         console.error('Error moving course to cart:', err);
-        return throwError(err);
+        return throwError(() => err);
+
       })
     );
   }

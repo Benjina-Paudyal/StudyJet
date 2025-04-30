@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import emailjs from 'emailjs-com';
-import { EmailFormData } from '../models/email-form-data-dto';
+import { EmailFormData } from '../models/email/email-form-data-dto';
 
 @Injectable({
     providedIn: 'root',

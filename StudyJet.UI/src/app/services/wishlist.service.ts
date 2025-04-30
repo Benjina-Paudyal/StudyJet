@@ -60,7 +60,7 @@ export class WishlistService {
       }),
       catchError(err => {
         console.error('Error fetching wishlist:', err);
-        return of([]); // Return an empty array in case of an error
+        return of([]); 
       })
     );
   }
