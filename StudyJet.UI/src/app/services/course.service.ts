@@ -12,8 +12,8 @@ export class CourseService {
   private apiUrl = `${environment.apiBaseUrl}`;
   private endpoints = {
     courseUrl: `${this.apiUrl}/course`,         
-    popularCourses: `${this.apiUrl}/popular`,   
-    approvedCourses: `${this.apiUrl}/approved`, 
+    popularCourses: `${this.apiUrl}/course/popular`,   
+    approvedCourses: `${this.apiUrl}/course/approved`, 
     purchasedCourses: `${this.apiUrl}/user/purchases`, 
   };
 

@@ -31,7 +31,7 @@
                 </div>
                 <div class="modal-body">
                   <!-- Modal Form to Upload CV -->
-                  <form (ngSubmit)="onSubmit()">
+                  <form #formElement (ngSubmit)="onSubmit()">
                     <div class="mb-3">
                       <label for="name" class="form-label text-success">Your Name</label>
                       <input type="text" class="form-control border-success" id="name" placeholder="Enter your name"

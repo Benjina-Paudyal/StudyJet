@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import emailjs from 'emailjs-com';
-import { EmailFormData } from '../models/email/email-form-data-dto';
+import emailjs, { EmailJSResponseStatus } from 'emailjs-com';
+import { EmailFormData } from '../models/email/email-form-data.dto';
+import { EmailResponse } from './../models/email/email-response.dto';
 
 @Injectable({
     providedIn: 'root',
@@ -13,8 +14,9 @@ import { EmailFormData } from '../models/email/email-form-data-dto';
   
       constructor() {}
   
-      sendEmail(formData: EmailFormData): Promise<any>{
-        return emailjs.send(this.serviceID, this.templateID, formData as any, this.userID);
+      sendEmail(formData: EmailFormData): Promise<EmailJSResponseStatus> {
+        return emailjs.send(this.serviceID, this.templateID, formData, this.userID);
       }
-
-  }
+      
+      
+}

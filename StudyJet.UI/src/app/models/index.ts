@@ -31,7 +31,8 @@ export *from './cart/cart-item.model';
 export *from './category/category.model';
 
 
-export * from './email/email-form-data-dto';
+export *from './email/email-form-data.dto';
+export *from './email/email-response.dto';
 
 
 export *from './notification/notification.model';
@@ -43,7 +44,7 @@ export *from './transaction/transaction.model';
 export * from './upload/upload-response.dto';
 
 
-export *from './wishlist/wishlist.model'
+export *from './wishlist/wishlist.model';
 
 
 
