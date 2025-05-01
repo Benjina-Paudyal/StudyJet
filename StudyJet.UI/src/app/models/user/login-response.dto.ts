@@ -9,6 +9,6 @@ export interface LoginResponse {
     username?: string;
     profilePictureUrl?: string;
     fullName?: string;
-    userId?: string;
+    userID?: string;
   }
   

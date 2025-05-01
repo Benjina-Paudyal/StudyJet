@@ -163,7 +163,7 @@ export class AuthService {
   
   // Handle the logic after a successful login
   public handleSuccessfulLogin(response: LoginResponse): void {
-    if (!response.token || !response.username || !response.roles) {
+    if (!response.token || !response.username || !response.roles || !response.userID) {
       throw new Error('Invalid login response - missing required fields');
     }
     const profilePictureUrl = 
@@ -176,7 +176,7 @@ export class AuthService {
       response.roles,
       this.imageService.getProfileImageUrl(profilePictureUrl),  // Get the profile image URL
       response.fullName || '', // Default to empty string if no full name
-      response.userId || '' // Default to empty string if no user ID
+      response.userID  
     );
   
     this.isAuthenticatedSubject.next(true);
@@ -329,7 +329,7 @@ export class AuthService {
               response.roles,
               profilePictureUrl,
               response.fullName || '',
-              response.userId || ''
+              response.userID || ''
             );
 
             // Update authentication status

@@ -74,14 +74,16 @@ export class LoginComponent {
         } else {
           this.authService.handleSuccessfulLogin(response);
           this.profileImageUrl = this.imageService.getProfileImageUrl(response.profilePictureUrl ?? 'default.png');
+
+          // Store profile picture URL in cookies to persist across page refreshes
+        this.cookieService.set('profilePictureUrl', this.profileImageUrl, { expires: 7 });
           this.loadWishlist();
 
           const navbarType = this.authService.getNavbarTypeFromRoles();
           this.navbarService.setNavbarType(navbarType);
-
-          this.navigateToDashboard(navbarType);
-          this.loading = false;
+           this.navigateToDashboard(navbarType);
         }
+        this.loading = false;
       },
         error: (error: HttpErrorResponse) => {
           this.loading = false;
@@ -98,7 +100,6 @@ export class LoginComponent {
       });
   }
 
-  
   private loadWishlist() {
     this.userService.getWishlistForCurrentUser().subscribe({
       next: (wishlist) => {
@@ -113,7 +114,6 @@ export class LoginComponent {
 
   // Navigate to dashboard based on the navbar type (Admin, Instructor, Student)
   private navigateToDashboard(navbarType: 'admin' | 'instructor' | 'student' | 'default') {
-    setTimeout(() => {
       switch (navbarType) {
         case 'admin':
           this.router.navigate(['/admin-dashboard']);
@@ -128,7 +128,7 @@ export class LoginComponent {
           this.router.navigate(['/home']);
           break;
       }
-    }, 2000);
+    
   }
 }
 

@@ -106,7 +106,7 @@ export class UserService {
   // Fetch only the enrolled students count
   getEnrolledUsersCountForInstructor(): Observable<number> {
     return this.http.get<{ count: number; students: Student[] }>(
-      `${this.apiUrl}/courses/instructor/courses/students`
+      `${this.apiUrl}/course/instructor/courses/students`
     ).pipe(
       map(response => response.count)
     );
@@ -114,7 +114,7 @@ export class UserService {
 
   
   getCoursesWithStudentsForInstructor(): Observable<CourseWithStudents[]> {
-    return this.http.get<CourseWithStudents[]>(`${this.apiUrl}/courses/instructor/courses/students`);
+    return this.http.get<CourseWithStudents[]>(`${this.apiUrl}/Course/instructor/courses/students`);
   }
   
 

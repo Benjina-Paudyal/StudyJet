@@ -8,7 +8,7 @@ export class NavbarService {
   private navbarTypeSubject = new BehaviorSubject<'admin' | 'instructor' | 'student' | 'default'| 'hidden'>('default');
   navbarType$ = this.navbarTypeSubject.asObservable();
 
-  setNavbarType(type: 'admin' | 'instructor' | 'student' | 'default') {
+  setNavbarType(type: 'admin' | 'instructor' | 'student' | 'default' | 'hidden') {
     this.navbarTypeSubject.next(type);
 
   }

@@ -6,6 +6,9 @@ import { EmailConfirmationComponent } from './components/email-confirmation/emai
 import { CategoryComponent } from './components/category/category.component';
 import { CategoryCourseComponent } from './components/category-course/category-course.component';
 import { LoginComponent } from './components/login/login.component';
+import { StudentDashboardComponent } from './components/student-dashboard/student-dashboard.component';
+import { AuthGuard } from './guards/auth.guard';
+import { InstructorDashboardComponent } from './components/instructor-dashboard/instructor-dashboard.component';
 
 
 
@@ -18,4 +21,7 @@ export const routes: Routes = [
     { path: 'category', component: CategoryComponent},
     { path: 'courses/category/:categoryId', component: CategoryCourseComponent },
     { path: 'login' , component: LoginComponent},
+    { path: 'student-dashboard', component: StudentDashboardComponent, canActivate: [AuthGuard], data: { role: 'Student'}},
+    { path: 'instructor-dashboard', component: InstructorDashboardComponent, canActivate: [AuthGuard], data: { role: 'Instructor'}},
+
 ];

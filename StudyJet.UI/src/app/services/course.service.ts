@@ -98,8 +98,7 @@ approveCourseUpdate(courseId: number): Observable<any> {
 
 // Get courses by instructor
 getCoursesByInstructor(): Observable<Course[]> {
-  console.log('Fetching courses for instructor...');
-  return this.http.get<Course[]>(`${this.apiUrl}/courses/course-by-instructor`).pipe(
+  return this.http.get<Course[]>(`${this.apiUrl}/course/course-by-instructor`).pipe(
     tap((response: Course[]) => console.log('API Response:', response)),
     catchError(this.handleError<Course[]>('getCoursesByInstructor', []))
   );
@@ -108,7 +107,7 @@ getCoursesByInstructor(): Observable<Course[]> {
 // Get the total number of courses for the instructor
 getTotalCoursesForInstructor(): Observable<{ totalCourses: number }> {
   return this.http.get<{ totalCourses: number }>(
-    `${this.apiUrl}/courses/total-courses-by-instructor`
+    `${this.apiUrl}/course/total-courses-by-instructor`
   ).pipe(
     catchError(this.handleError<{ totalCourses: number }>('getTotalCoursesForInstructor', { totalCourses: 0 }))
   );
@@ -118,7 +117,7 @@ getTotalCoursesForInstructor(): Observable<{ totalCourses: number }> {
 createCourse(courseData: any): Observable<any> {
   // Ensure course status is explicitly set to 'Pending'
   courseData.status = "Pending";
-  return this.http.post<any>(`${this.apiUrl}/courses/create`, courseData)
+  return this.http.post<any>(`${this.apiUrl}/course/create`, courseData)
     .pipe(
       catchError(this.handleError<any>('createCourse'))
     );
@@ -127,7 +126,7 @@ createCourse(courseData: any): Observable<any> {
 // Update an existing course
 updateCourse(courseId: number, courseData: any): Observable<any> {
   return this.http.post<any>(
-    `${this.apiUrl}/courses/${courseId}/submitUpdate`, 
+    `${this.apiUrl}/course/${courseId}/submitUpdate`, 
     courseData
   ).pipe(
     catchError(this.handleError<any>('updateCourse'))
@@ -137,7 +136,7 @@ updateCourse(courseId: number, courseData: any): Observable<any> {
 // Reject a course
 rejectCourse(courseId: number): Observable<any> {
   return this.http.put<any>(
-    `${this.apiUrl}/courses/reject/${courseId}`, 
+    `${this.apiUrl}/course/reject/${courseId}`, 
     {}
   ).pipe(
     catchError(this.handleError<any>('rejectCourse'))
@@ -147,7 +146,7 @@ rejectCourse(courseId: number): Observable<any> {
 // Reject a course update
 rejectCourseUpdate(courseId: number): Observable<any> {
   return this.http.post<any>(
-    `${this.apiUrl}/courses/reject-updates/${courseId}`, 
+    `${this.apiUrl}/course/reject-updates/${courseId}`, 
     {}
   ).pipe(
     catchError(this.handleError<any>('rejectCourseUpdate'))

@@ -21,14 +21,19 @@ export class AppComponent implements OnInit{
     private navbarService: NavbarService
   ) {}
 
-  ngOnInit() : void{
+  ngOnInit(): void {
+    const isLoggingIn = sessionStorage.getItem('isLoggingIn') === 'true';
+    if (isLoggingIn) return;
+    
     const token = this.cookieService.get('authToken');
     if (token) {
       const decoded: DecodedToken | null = decodeToken(token);
-      if (decoded?.role) {
-        this.navbarService.setNavbarType(decoded.role.toLowerCase());
+      const role = decoded?.role?.toLowerCase();
+      const allowedRoles = ['admin', 'instructor', 'student', 'default', 'hidden'] as const;
+
+      if (role && allowedRoles.includes(role as typeof allowedRoles[number])) {
+        this.navbarService.setNavbarType(role as typeof allowedRoles[number]);
       }
     }
   }
 }
-

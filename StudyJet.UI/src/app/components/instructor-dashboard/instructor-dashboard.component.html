@@ -1,0 +1,52 @@
+<section id="instructor-dashboard" class="py-5" style="display: flex; flex-direction: column; min-height: 86vh;">
+    <div class="container" style="flex-grow: 1;">
+      <!-- Header Section -->
+      <div class="d-flex align-items-center justify-content-between mb-5 mt-4">
+        <div class="d-flex align-items-center">
+          <img *ngIf="profileImageUrl" [src]="profileImageUrl" alt="Profile"
+            class="profile-image me-3 mb-5" style="width: 100px; height: 120px; border: 5px solid white; border-radius: 50%;" />
+          <h2 class="text-left mb-5 fw-semibold">Welcome back, {{ fullName$ | async }}!</h2>
+        </div>
+      </div>
+  
+      <!-- Counts Section -->
+      <div *ngIf="!loading " class="row justify-content-center mt-4">
+        <!-- Total Courses -->
+        <div class="col-md-4 col-lg-3 text-center mb-5">
+          <a routerLink="/instructor-courses" class="text-decoration-none">
+            <div class="count-circle card shadow-sm bg-success d-flex flex-column justify-content-center align-items-center p-3"
+              style="height: 180px; border: 5px solid white; border-radius: 50%;">
+              <h3 class="card-title text-white fw-bold">My Courses</h3>
+            </div>
+          </a>
+        </div>
+  
+        <!-- Enrolled Students -->
+        <div class="col-md-4 col-lg-3 text-center mb-5 ">
+          <a routerLink="/instructor-students" class="text-decoration-none">
+            <div class="count-circle card shadow-sm bg-success d-flex flex-column justify-content-center align-items-center p-3"
+              style="height: 180px; border: 5px solid white; border-radius: 50%;">
+              <h3 class="card-title text-white fw-bold">Enrolled Students</h3>
+            </div>
+          </a>
+        </div>
+  
+        <!-- Notifications -->
+        <div class="col-md-4 col-lg-3 text-center mb-5">
+          <a routerLink="/notifications" class="text-decoration-none">
+            <div class="count-circle card shadow-sm bg-success d-flex flex-column justify-content-center align-items-center p-3"
+              style="height: 180px; border: 5px solid white; border-radius: 50%;">
+              <h3 class="card-title text-white fw-bold">Notifications</h3>
+            </div>
+          </a>
+        </div>
+      </div>
+  
+      <!-- Error Message -->
+      <div *ngIf="error" class="alert alert-danger text-center">
+        <p>{{ error }}</p>
+      </div>
+    </div>
+  </section>
+  
+  

@@ -15,6 +15,7 @@ import { CartService } from '../../services/cart.service';
 import { InactivityService } from '../../services/inactivity.service';
 import { NotificationService } from '../../services/notification.service';
 import { ImageService } from '../../services/image.service';
+import { CookieService } from 'ngx-cookie-service';
 
 @Component({
   selector: 'app-navbar',
@@ -50,6 +51,7 @@ export class NavbarComponent implements OnInit {
   constructor(
     private categoryService: CategoryService,
     private router: Router,
+    private cookieService: CookieService,
     private courseService: CourseService,
     private purchaseCourseService: PurchaseCourseService,
     private navbarService: NavbarService,
@@ -65,20 +67,28 @@ export class NavbarComponent implements OnInit {
 
   ngOnInit() {
     this.inactivityService.startMonitoring();
+    this.loadCategories();
+
     this.subscriptions.push(
       this.navbarType$.subscribe((navbarType) => {
         this.navbarType = navbarType;
       })
     );
-
     this.subscriptions.push(
       this.authService.isAuthenticated$.subscribe((isAuthenticated) => {
         this.isAuthenticated = isAuthenticated;
         if (isAuthenticated) {
-          this.profileImageUrl = this.authService.getProfileImage();
+
+        // Check if the profile image URL is stored in cookies
+        const storedProfileImageUrl = this.cookieService.get('profilePictureUrl');
+        this.profileImageUrl = storedProfileImageUrl || this.authService.getProfileImage();
+
+        // If no URL is found, fallback to a default image
+        this.profileImageUrl = this.profileImageUrl || '/images/profiles/default.png';
+
+          //this.profileImageUrl = this.authService.getProfileImage();
           this.loadWishlist();
           this.loadCartItems();
-          this.loadCategories();
           this.loadPurchasedCourses();
           this.updatePlaceholderText(window.innerWidth);
         }
@@ -137,6 +147,7 @@ export class NavbarComponent implements OnInit {
     this.categoryService.getCategories().subscribe({
       next: (data: Category[]) => {
         this.categories = data;
+        console.log('Categories loaded:', this.categories);  
       },
       error: (err) => {
         console.error('Error fetching categories', err);
@@ -273,13 +284,6 @@ export class NavbarComponent implements OnInit {
   getCourseImageUrl(course: any): string {
     return this.imageService.getCourseImageUrl(course.imagePath);
   }
-  
-
-
-
-
-
-
 }
 
 
