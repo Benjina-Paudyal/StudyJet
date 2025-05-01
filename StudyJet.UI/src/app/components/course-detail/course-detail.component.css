@@ -1,0 +1,51 @@
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  video {
+    max-width: 100%;
+  }
+
+  /* .wishlist-icon {
+    width: 2vw; 
+    height: 2vw; 
+    cursor: pointer;
+  } */
+
+
+  .admin-actions {
+    background-color: #f8f9fa;
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #dee2e6;
+  }
+  
+  .wishlist-icon {
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+  
+  .wishlist-icon:hover {
+    transform: scale(1.1);
+  }
+
+  /* Add to your component's CSS */
+.resubmitted-alert {
+  background-color: #fff3cd;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+}
+
+.resubmitted-alert i {
+  margin-right: 5px;
+}
+  
+  
+
+

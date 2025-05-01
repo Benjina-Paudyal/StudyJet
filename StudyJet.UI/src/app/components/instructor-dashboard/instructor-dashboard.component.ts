@@ -8,6 +8,7 @@ import { UserService } from '../../services/user.service';
 import { CourseService } from '../../services/course.service';
 import { NotificationService } from '../../services/notification.service';
 import { Course, User, Notification } from '../../models';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-instructor-dashboard',
@@ -34,6 +35,7 @@ export class InstructorDashboardComponent implements OnInit {
   showStudentList = false;
   loadEnrolledStudetns = false;
   notifications: Notification[] = [];
+  authSubscription: Subscription | null = null;
 
 
   constructor(
@@ -42,46 +44,51 @@ export class InstructorDashboardComponent implements OnInit {
     private cookieService: CookieService,
     private userService: UserService,
     private courseService: CourseService,
+    private authService: AuthService,
     private notificationService: NotificationService,
   ) { }
 
   ngOnInit(): void {
+    this.authSubscription = this.authService.isAuthenticated$.subscribe((isAuth) => {
+      this.isAuthenticated = isAuth;
+  
+      if (isAuth) {
+        const userData = {
+          username: this.cookieService.get('username'),
+          fullName: this.cookieService.get('fullName'),
+          profilePicture: this.cookieService.get('profileImageUrl'),
+          instructorId: this.cookieService.get('userId'),  
+        };
+
+         // If instructor ID is missing, redirect to login
+      if (!userData.instructorId) {
+        console.error('Instructor ID is missing.');
+        this.router.navigate(['/login']);
+        return;
+      }
     
-
-    const token = this.cookieService.get('authToken');
-    console.log('Cookies:', this.cookieService.getAll());
-
-    const userData = {
-      username: this.cookieService.get('username'),
-      fullName: this.cookieService.get('fullName'),
-      profilePicture: this.cookieService.get('profileImageUrl'),
-      instructorId: this.cookieService.get('userId'),
-    };
-
-    if (token && userData) {
-      this.isAuthenticated = true;
+      // set user data
       this.userName$ = of(userData.username || '');
       this.fullName$ = of(userData.fullName || '');
       this.profileImageUrl = this.imageService.getProfileImageUrl(userData.profilePicture || 'profilepic.png');
       this.instructorId = userData.instructorId || null;
 
-      if (this.instructorId) {
+     
         this.loadCourses();
         this.loadEnrolledStudentsCount();
         this.loadTotalCourses();
       } else {
-        console.error('Instructor ID is missing.');
-        this.router.navigate(['/login']);
-      }
-    } else {
       this.isAuthenticated = false;
       this.router.navigate(['/login']);
     }
+    });
   }
 
   ngOnDestroy(): void {
-    if (this.coursesSubscription) this.coursesSubscription.unsubscribe();
-    if (this.notificationsSubscription) this.notificationsSubscription.unsubscribe();
+    this.coursesSubscription?.unsubscribe();
+    this.authSubscription?.unsubscribe();
+    this.notificationsSubscription?.unsubscribe();
+
   }
 
 

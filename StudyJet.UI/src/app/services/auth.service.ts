@@ -14,7 +14,7 @@ export class AuthService {
   private apiUrl = `${environment.apiBaseUrl}/Auth`;
   private isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
   public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
-
+  
   constructor(
     private http: HttpClient,
     private router: Router,
@@ -29,10 +29,8 @@ export class AuthService {
     const token = this.cookieService.get('authToken');
     const username = this.cookieService.get('username');
     if (token && username && !this.isTokenExpired(token)) {
-       // If token exists, username is available, and the token is not expired, mark the user as authenticated
       this.isAuthenticatedSubject.next(true);
     } else {
-       // Otherwise, mark the user as unauthenticated and clear auth-related cookies
       this.isAuthenticatedSubject.next(false);
       this.clearAuthCookies();
     }
@@ -44,7 +42,6 @@ export class AuthService {
       const payload: AuthTokenPayload = JSON.parse(atob(token.split('.')[1])); // Decode the JWT payload
       return payload.exp * 1000 < Date.now();
     } catch (e) {
-     // If the token is invalid or malformed, assume it is expired  
       return true;
     }
   }
@@ -196,6 +193,8 @@ export class AuthService {
     }
   }
 
+ 
+
   // Handle error
   private handleError<T>(operation = 'operation'): (error: any) => Observable<T> {
     return (error: any): Observable<T> => {
@@ -216,16 +215,22 @@ export class AuthService {
     };
   }
 
-  // Store profile image URL
-  setProfileImage(url: string | null): void {
-    const defaultImage = this.imageService.getProfileImageUrl('profilepic.png');
-    const imageUrl = url ?? defaultImage;
-    this.cookieService.set('profileImageUrl', imageUrl, {
-      secure: true,
-      sameSite: 'Lax',
-      path: '/',
-    });
-  }
+
+// Store profile image URL
+setProfileImage(url: string): void {
+  this.cookieService.set('profileImageUrl', url, {
+    secure: true,
+    sameSite: 'Lax',
+    path: '/',
+  });
+}
+
+// Get profile image URL
+getProfileImage(): string {
+  return this.imageService.getProfileImageUrl(this.cookieService.get('profileImageUrl'));
+}
+
+
 
 
   // Store username
@@ -246,12 +251,8 @@ export class AuthService {
     });
   }
 
-  // Get profile image URL
-  getProfileImage(): string {
-    return this.cookieService.get('profileImageUrl') || this.imageService.getProfileImageUrl('profilepic.png');
-  }
+ 
   
-
   // Get email
   getEmail(): Observable<string> {
     const email = this.cookieService.get('authEmail');
@@ -263,9 +264,9 @@ export class AuthService {
   }
 
   // Get roles
-  getRoles(): string[] {
+  getRoles(): Observable<string[]> {
     const roles = this.cookieService.get('roles');
-    return roles ? JSON.parse(roles) : [];
+    return roles ? of(JSON.parse(roles)) : of([]);  
   }
 
   // Change Password
@@ -285,14 +286,12 @@ export class AuthService {
       .pipe(catchError(this.handleError<ForgotPasswordResponse>('forgotPassword')));
   }
 
-
   // Reset Password
   resetPassword(token: string, newPassword: string): Observable<ResetPasswordResponse> {
     return this.http
       .post<ResetPasswordResponse>(`${this.apiUrl}/reset-password`, { token, newPassword })
       .pipe(catchError(this.handleError<ResetPasswordResponse>('resetPassword')));
   }
-
 
   // verify current password
   verifyCurrentPassword(
@@ -303,7 +302,6 @@ export class AuthService {
     const url = `${this.apiUrl}/verify-password`;
     return this.http.post<VerifyPasswordResponse>(url, { email, token, password: currentPassword });
   }
-
 
   // Verify 2FA when login
   verify2FALogin(email: string, code: string): Observable<LoginResponse> {
@@ -448,18 +446,22 @@ export class AuthService {
     );
   }
 
-  // Determine the navbar type based on roles
-getNavbarTypeFromRoles(): 'admin' | 'instructor' | 'student' | 'default' {
-  const roles = this.getRoles();
-  if (roles.includes('Admin')) {
-    return 'admin';
-  } else if (roles.includes('Instructor')) {
-    return 'instructor';
-  } else if (roles.includes('Student')) {
-    return 'student';
-  }
-  return 'default';
+
+getNavbarTypeFromRoles(): Observable<'admin' | 'instructor' | 'student' | 'default'> {
+  return this.getRoles().pipe(
+    map((roles) => {
+      if (roles.includes('Admin')) {
+        return 'admin';
+      } else if (roles.includes('Instructor')) {
+        return 'instructor';
+      } else if (roles.includes('Student')) {
+        return 'student';
+      }
+      return 'default';
+    })
+  );
 }
+
 
 }
 

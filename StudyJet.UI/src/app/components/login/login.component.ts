@@ -42,7 +42,6 @@ export class LoginComponent {
       Password: ['', [Validators.required]],
     });
   }
-
   
   // Form field accessors for easy reference
   get email() {
@@ -52,7 +51,6 @@ export class LoginComponent {
   get password() {
     return this.loginForm.get('Password');
   }
-
   
   onSubmit() {
     if (this.loginForm.invalid) {
@@ -79,9 +77,11 @@ export class LoginComponent {
         this.cookieService.set('profilePictureUrl', this.profileImageUrl, { expires: 7 });
           this.loadWishlist();
 
-          const navbarType = this.authService.getNavbarTypeFromRoles();
-          this.navbarService.setNavbarType(navbarType);
-           this.navigateToDashboard(navbarType);
+          this.authService.getNavbarTypeFromRoles().subscribe((navbarType) => {
+            this.navbarService.setNavbarType(navbarType);
+            this.navigateToDashboard(navbarType);
+          });
+          
         }
         this.loading = false;
       },

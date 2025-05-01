@@ -1,0 +1,153 @@
+<div class="container d-flex align-items-center justify-content-center vh-100 py-5">
+    <div class="row justify-content-center w-100">
+        <div class="col-md-6">
+            <div *ngIf="!successMessage">
+                <div class="card border-success">
+                    <!-- Form Header -->
+                    <div class="card-header text-center">
+                        <h2 class="text-success fw-semibold">Add New Course</h2>
+                    </div>
+
+                    <div class="card-body">
+                        <form [formGroup]="courseForm" (ngSubmit)="onSubmit()" enctype="multipart/form-data">
+                            <!-- Course Title -->
+                            <div class="form-group mb-3">
+                                <label for="title" class="form-label text-success required">Course Title</label>
+                                <input type="text" id="title" class="form-control border-success"
+                                    formControlName="title" placeholder="Enter course title" [ngClass]="{
+                    'is-invalid':
+                      courseForm.get('title')?.touched &&
+                      courseForm.get('title')?.invalid
+                  }" />
+
+                                <div *ngIf="
+                    courseForm.get('title')?.touched &&
+                    courseForm.get('title')?.hasError('required')
+                  " class="invalid-feedback">
+                                    Course title is required.
+                                </div>
+                            </div>
+
+                            <!-- Course Description -->
+                            <div class="form-group mb-3">
+                                <label for="description" class="form-label text-success required">Description</label>
+                                <textarea id="description" class="form-control border-success"
+                                    formControlName="description" placeholder="Enter course description" [ngClass]="{
+                    'is-invalid':
+                      courseForm.get('description')?.touched &&
+                      courseForm.get('description')?.invalid
+                  }"></textarea>
+
+                                <div *ngIf="
+                    courseForm.get('description')?.touched &&
+                    courseForm.get('description')?.hasError('required')
+                  " class="invalid-feedback">
+                                    Description is required.
+                                </div>
+                            </div>
+
+                            <!-- Course Price -->
+                            <div class="form-group mb-3">
+                                <label for="price" class="form-label text-success required">Price</label>
+                                <input type="number" id="price" class="form-control border-success"
+                                    formControlName="price" placeholder="Enter course price" [ngClass]="{
+                    'is-invalid':
+                      courseForm.get('price')?.touched &&
+                      courseForm.get('price')?.invalid
+                  }" />
+
+                                <div *ngIf="
+                    courseForm.get('price')?.touched &&
+                    courseForm.get('price')?.hasError('required')
+                  " class="invalid-feedback">
+                                    Price is required.
+                                </div>
+                                <div *ngIf="
+                    courseForm.get('price')?.touched &&
+                    courseForm.get('price')?.hasError('min')
+                  " class="invalid-feedback">
+                                    Price must be greater than zero.
+                                </div>
+                            </div>
+
+                            <!-- Category Dropdown -->
+                            <div class="form-group mb-3">
+                                <label for="category" class="form-label text-success required">Category</label>
+                                <div class="input-group">
+                                    <select id="category" class="form-control border-success"
+                                        formControlName="categoryID" (change)="selectCategory($event)" [ngClass]="{
+                      'is-invalid':
+                        courseForm.get('categoryID')?.touched &&
+                        courseForm.get('categoryID')?.invalid
+                    }">
+                                        <option value="" disabled>Select a category</option>
+                                        <option *ngFor="let category of categories" [value]="category.categoryID">
+                                            {{ category.name }}
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <div *ngIf="
+                    courseForm.get('categoryID')?.touched &&
+                    courseForm.get('categoryID')?.hasError('required')
+                  " class="invalid-feedback">
+                                    Please select a category.
+                                </div>
+                            </div>
+
+                            <!-- Course Image -->
+                            <div class="form-group mb-3">
+                                <label for="imageUrl" class="form-label text-success">Course Image</label>
+                                <input type="file" id="imageUrl" class="form-control border-success"
+                                    (change)="onFileChange($event, 'imageUrl')" />
+                            </div>
+
+                            <!-- Video URL -->
+                            <div class="form-group mb-3">
+                                <label for="videoUrl" class="form-label text-success required">Video URL</label>
+                                <input type="text" id="videoUrl" class="form-control border-success"
+                                    formControlName="videoUrl" placeholder="Enter course video URL" [ngClass]="{
+                    'is-invalid':
+                      courseForm.get('videoUrl')?.touched &&
+                      courseForm.get('videoUrl')?.invalid
+                  }" />
+
+                                <div *ngIf="
+                    courseForm.get('videoUrl')?.touched &&
+                    courseForm.get('videoUrl')?.hasError('required')
+                  " class="invalid-feedback">
+                                    Video URL is required.
+                                </div>
+                            </div>
+
+                            <!-- Error Message -->
+                            <div *ngIf="errorMessage" class="alert alert-danger">
+                                {{ errorMessage }}
+                            </div>
+
+                            <!-- Submit Button -->
+                            <button type="submit" class="btn btn-success w-100">
+                                Add Course
+                                <span *ngIf="loading" class="spinner-border spinner-border-sm ms-2"></span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Message Modal -->
+    <div *ngIf="successMessage" class="modal show" tabindex="-1" role="dialog" style="display: block">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-success fw-semibold">Success</h5>
+                </div>
+                <div class="modal-body text-center text-success">
+                    <p>{{ successMessage }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

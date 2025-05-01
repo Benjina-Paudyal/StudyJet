@@ -1,0 +1,113 @@
+
+<section id="course-detail" class="py-3 pt-5">
+    <div class="container">
+      <div *ngIf="course">
+        <!-- Header section -->
+        <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+          <h2 class="text-success fw-bold mb-0">{{ course.title }}</h2>
+          <div class="d-flex align-items-center gap-3">
+  
+            <!-- Admin Controls -->
+            <div *ngIf="isAdmin" class="bg-light p-2 rounded">
+              <!-- Show buttons if Pending (Resubmitted for approval) -->
+              <button *ngIf="course.status === 'Pending'" 
+                      (click)="approveCourse()" 
+                      [disabled]="isApproving" 
+                      class="btn btn-success btn-sm me-2">
+                <i class="fas fa-check me-1"></i>
+                {{ isApproving ? 'Processing...' : 'Approve' }}
+              </button>
+  
+              <button *ngIf="course.status === 'Pending'" 
+                      (click)="rejectCourse()" 
+                      [disabled]="isRejecting" 
+                      class="btn btn-danger btn-sm">
+                <i class="fas fa-times me-1"></i>
+                {{ isRejecting ? 'Processing...' : 'Reject' }}
+              </button>
+  
+              <!-- Status badge (only show when no actions available) -->
+              <span *ngIf="course.status !== 'Pending'" 
+                    class="badge ms-2" 
+                    [ngClass]="{
+                      'bg-success': course.status === 'Approved',
+                      'bg-danger': course.status === 'Rejected',
+                      'fw-bold': course.status === 'Approved' || course.status === 'Rejected'
+                    }">
+                {{ getStatusDisplay(course.status) }}
+              </span>
+            </div>
+          </div>
+        </div>
+  
+        <!-- Status display(only shown to admin/instructor) -->
+        <div *ngIf="isAdmin || isInstructor">
+          <p class="mb-2"><strong>Status:</strong>
+            <span [ngClass]="{
+              'text-success': course.status === 'Approved',
+              'text-danger': course.status === 'Rejected',
+              'text-warning': course.status === 'Pending',
+              'fw-bold': course.status === 'Approved' || course.status === 'Rejected' || course.status === 'Pending'
+            }">
+              {{ getStatusDisplay(course.status) }}
+            </span>
+          </p>
+        </div>
+  
+        <!-- Course Metadata -->
+        <div class="mb-4">
+          <p class="mb-2"><strong>Instructor:</strong> {{ course.instructorName }}</p>
+          <p class="mb-2">
+            <strong>Last updated:</strong>
+            {{ course.lastUpdatedDate | date:"mediumDate" }}
+          </p>
+        </div>
+  
+        <!-- Course Description -->
+        <div class="card mb-4">
+          <div class="card-body">
+            <h5 class="card-title text-success fw-bold">Description</h5>
+            <p class="card-text">{{ course.description }}</p>
+          </div>
+        </div>
+  
+        <!-- Purchase Status Messages -->
+        <div *ngIf="!isAdmin && !isInstructor">
+          <div *ngIf="isPurchased(course.courseID)" class="alert alert-success">
+            <h4 class="alert-heading">Ready to learn?</h4>
+            <p>Your purchase is confirmed! Start watching the course now.</p>
+          </div>
+  
+          <div *ngIf="!isPurchased(course.courseID)" class="alert alert-info">
+            <h4 class="alert-heading">Want full access?</h4>
+            <p>Purchase this course to unlock all content.</p>
+            <div class="mt-3">
+              <p><strong>Price:</strong> {{ course.price }} DKK</p>
+              <button (click)="addToCart(course)" class="btn btn-success">
+                <i class="fas fa-cart-plus me-2"></i> Add to Cart
+              </button>
+            </div>
+          </div>
+        </div> 
+  
+        <!-- Video Player - Fixed YouTube Embed -->
+        <div *ngIf="(isPurchased(course.courseID) || isAdmin || isInstructor)" class="mb-4">
+          <h5 class="mb-3 text-success fw-bold">Course Content</h5>
+          <div class="ratio ratio-16x9 bg-dark rounded">
+            <iframe *ngIf="videoUrl" 
+                    [src]="videoUrl" 
+                    frameborder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allowfullscreen
+                    loading="lazy">
+            </iframe>
+            <div *ngIf="!videoUrl" class="d-flex align-items-center justify-content-center text-white">
+              <i class="fas fa-video-slash fa-3x"></i>
+              <p class="ms-3 mb-0">Video content not available</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  

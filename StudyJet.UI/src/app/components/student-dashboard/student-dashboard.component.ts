@@ -1,11 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { Course } from '../../models';
-import { Observable, of } from 'rxjs';
+import { Observable, of, Subscription } from 'rxjs';
 import { PurchaseCourseService } from '../../services/purchase-course.service';
 import { Router, RouterModule } from '@angular/router';
 import { ImageService } from '../../services/image.service';
 import { CookieService } from 'ngx-cookie-service';
 import { CommonModule } from '@angular/common';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-student-dashboard',
@@ -26,32 +27,35 @@ export class StudentDashboardComponent implements OnInit {
   modalRight = 'auto';
   modalTop = 'auto';
   showFullContent = false;
+  authSubscription: Subscription | null = null;
   
   constructor(
     private purchaseCourseService: PurchaseCourseService,
     private router: Router,
     private imageService: ImageService,
     private cookieService: CookieService,
+    private authService: AuthService,
   ) { }
 
   ngOnInit(): void {
-    const token = this.cookieService.get('authToken');
-    const userData = {
-      username: this.cookieService.get('username'),
-      fullName: this.cookieService.get('fullName'),
-      profilePicture: this.cookieService.get('profileImageUrl'),
-    };
+    this.authSubscription = this.authService.isAuthenticated$.subscribe((isAuth) => {
+      this.isAuthenticated = isAuth;
 
-    if (token && userData) {
-      this.isAuthenticated = true;
-      this.userName$ = of(userData.username || '');
-      this.fullName$ = of(userData.fullName || '');
-      this.profileImageUrl = this.imageService.getProfileImageUrl(userData.profilePicture || 'profilepic.png');
+      if (isAuth) {
+        const userData = {
+          username: this.cookieService.get('username'),
+          fullName: this.cookieService.get('fullName'),
+        };
+        this.userName$ = of(userData.username || '');
+        this.fullName$ = of(userData.fullName || '');
+        this.profileImageUrl = this.authService.getProfileImage();
+
       this.purchaseCourseService.fetchPurchaseCourse();
     } else {
       this.isAuthenticated = false;
       this.router.navigate(['/login']);
     }
+  });
 
     // Get purchased courses
     this.purchaseCourseService.getPurchaseCourse().subscribe({
@@ -69,6 +73,7 @@ export class StudentDashboardComponent implements OnInit {
     });
   }
 
+  
   loadSuggestedCourses(): void {
     this.purchaseCourseService.getSuggestedCourses().subscribe({
       next: (courses: Course[]) => {
