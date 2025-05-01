@@ -24,8 +24,8 @@ import { ImageService } from '../../services/image.service';
   styleUrl: './navbar.component.css'
 })
 export class NavbarComponent implements OnInit {
-  navbarType: 'admin' | 'instructor' | 'student' | 'default' = 'default';  // Default value
-  navbarType$: Observable<'admin' | 'instructor' | 'student' | 'default'>;
+  navbarType: 'admin' | 'instructor' | 'student' | 'default' | 'hidden' = 'default';  // Default value
+  navbarType$: Observable<'admin' | 'instructor' | 'student' | 'default'| 'hidden'>;
   categories: Category[] = [];
   isNavbarCollapsed = true;
   isDropdownOpen = false;
@@ -269,6 +269,11 @@ export class NavbarComponent implements OnInit {
       }
     });
   }
+
+  getCourseImageUrl(course: any): string {
+    return this.imageService.getCourseImageUrl(course.imagePath);
+  }
+  
 
 
 

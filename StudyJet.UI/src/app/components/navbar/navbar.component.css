@@ -1,140 +1,123 @@
+
+/* Background Styles */
 .custom-bg {
-    background-color: rgb(212, 245, 185);
-  }
-  
-  .collapsed-bg {
-    background-image: linear-gradient(to bottom, rgb(228, 244, 214), white);
-  }
-  
-  /* Brand Styles */
+  background-color: rgb(212, 245, 185);
+}
+
+.collapsed-bg {
+  background-image: linear-gradient(to bottom, rgb(228, 244, 214), white);
+}
+
+/* Brand Styles */
+.navbar-brand {
+  font-family: 'Kavoon', cursive;
+  font-size: 32px;
+  color: #198754;
+}
+
+/* Navbar Link Styles */
+.navbar-nav .nav-link {
+  padding: 0.5rem;
+  color: #198754;
+  transition: color 0.3s ease, background-color 0.3s ease;
+}
+
+/* Navbar Link Hover Effect */
+.navbar-nav .nav-link:hover {
+  color: #333;
+  background-color: transparent;
+}
+
+/* Apply color filter on hover */
+.nav-link img {
+  transition: filter 0.3s ease;
+}
+
+.nav-link:hover img {
+  filter: brightness(0) saturate(100%) invert(20%) sepia(50%) hue-rotate(90deg) saturate(500%) brightness(80%);
+}
+
+/* Navbar Toggler */
+.navbar-toggler {
+  margin-top: -10px;
+  width: 20px;
+  height: 20px;
+  position: relative;
+  transition: 0.5s ease-in-out;
+  outline: none;
+  box-shadow: none;
+  border: 0;
+}
+
+.toggler-icon {
+  display: block;
+  position: absolute;
+  height: 3px;
+  width: 100%;
+  background: #198754;
+  border-radius: 1px;
+  transition: 0.25s ease-in-out;
+}
+
+/* Navbar Toggler - Collapsed State */
+.navbar-toggler.collapsed .top-bar {
+  position: absolute;
+  top: 0;
+  transform: rotate(0deg);
+}
+
+.navbar-toggler.collapsed .middle-bar {
+  top: 10px;
+  opacity: 1;
+}
+
+.navbar-toggler.collapsed .bottom-bar {
+  position: absolute;
+  top: 20px;
+  transform: rotate(0deg);
+}
+
+/* Navbar Toggler - Expanded State */
+.navbar-toggler:not(.collapsed) .top-bar {
+  transform: rotate(135deg);
+}
+
+.navbar-toggler:not(.collapsed) .middle-bar {
+  opacity: 0;
+}
+
+.navbar-toggler:not(.collapsed) .bottom-bar {
+  transform: rotate(-135deg);
+}
+
+/* Search Bar Styles */
+.search-container {
+  position: relative;
+  width: 100%;
+}
+
+.search-bar-input {
+  width: calc(100% - 40px);
+  padding: 10px 20px;
+  border: 1px solid #14A44D;
+  border-radius: 20px;
+  padding-left: 50px;
+  background: url('/assets/images/search.svg') no-repeat 20px center;
+  background-color: #ffffff;
+}
+
+/* Container Fluid */
+.container-fluid {
+  padding: 0 15px;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 300px) {
   .navbar-brand {
-    font-family: 'Kavoon', cursive;
-    font-size: 32px;
-    color: #198754;
+    font-size: 20px;
   }
-  
-  /* Navbar Link Default Styles */
-  .navbar-nav .nav-link {
-    padding: 0.5rem;
-    color: #198754; 
-    transition: color 0.3s ease, background-color 0.3s ease; 
-  }
-  
-  /* Navbar Link Hover Effect */
-  .navbar-nav .nav-link:hover {
-    color: #333;  
-    background-color: transparent; 
-  }
-  
-  /* Apply color filter on hover */
-  .nav-link img {
-    transition: filter 0.3s ease; 
-  }
-  
-  .nav-link:hover img {
-    filter: brightness(0) saturate(100%) invert(20%) sepia(50%) hue-rotate(90deg) saturate(500%) brightness(80%);
-  }
-  
-  /* Navbar Toggler */
-  .navbar-toggler {
-    margin-top: -10px;
-    width: 20px;
-    height: 20px;
-    position: relative;
-    transition: 0.5s ease-in-out;
-    outline: none;
-    box-shadow: none;
-    border: 0;
-  }
-  
-  /* .navbar-toggler span {
-    margin: 0;
-    padding: 0;
-  }
-   */
-  .toggler-icon {
-    display: block;
-    position: absolute;
-    height: 3px;
-    width: 100%;
-    background: #198754;
-    border-radius: 1px;
-    opacity: 1;
-    left: 0;
-    transform: rotate(0deg);
-    transition: 0.25s ease-in-out;
-  }
-  
-  /* Navbar Toggler - Collapsed State */
-  .navbar-toggler.collapsed .top-bar {
-    position:absolute;
-    top: 0;
-    transform: rotate(0deg);
-  }
-  
-  .navbar-toggler.collapsed .middle-bar {
-    position:absolute;
-    top: 10px;
-    opacity: 1;
-  }
-  
-  .navbar-toggler.collapsed .bottom-bar {
-    position:absolute;
-    top: 20px;
-    transform: rotate(0deg);
-  }
-  
-  /* Navbar Toggler - Expanded State */
-  .navbar-toggler:not(.collapsed) .top-bar {
-    transform: rotate(135deg);
-  }
-  
-  .navbar-toggler:not(.collapsed) .middle-bar {
-    opacity: 0;
-  }
-  
-  .navbar-toggler:not(.collapsed) .bottom-bar {
-    transform: rotate(-135deg);
-  }
-  
-  /* Search Container */
-  .search-container {
-    position: relative;
-    width: 100%;
-  }
-  
-  /* Search Bar */
-  .search-bar-input {
-    width: calc(100% - 40px);
-    padding: 10px 20px;
-    border: 1px solid #14A44D;
-    border-radius: 20px;
-    padding-left: 50px;
-    background: url('/assets/images/search.svg') no-repeat 20px center ;
-    background-color: #ffffff;
-  }
-  
-    
-  /* Container Fluid */
-  .container-fluid {
-    padding: 0 15px;
-  }
-  
+}
 
-
-
-  
-  
-  @media (max-width: 300px) {
-    .navbar-brand {
-      font-size: 20px;
-    }
-  }
-
-
-
-
-  
 /* Dropdown Menu Styles */
 .nav-item.dropdown {
   position: relative;
@@ -188,6 +171,187 @@
   width: calc(100% - 40px); 
   max-width: calc(100% - 40px); 
 }
-  
-  
-  
+
+
+/* Profile image styling */
+.profile-image {
+  border-radius: 50%; 
+  width: 30px;
+  height: 30px;
+  object-fit: cover;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+
+/* Profile image - don't apply hover effect */
+.nav-link .profile-image {
+  filter: none; 
+}
+
+/* Optionally, to ensure no other hover effects affect it */
+.nav-link:hover .profile-image {
+  filter: none;
+  transform: none;
+}
+
+/* For WISHLIST */
+
+/* For larger screens, checking if the dropdown is too far to the right */
+@media (min-width: 990px) {
+  .wishlist-dropdown {
+    left: auto; 
+    right: 0; 
+    width: 250px;
+    display: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+
+  }
+}
+
+/* Ensure the dropdown menu stays visible while hovering over both the button and the dropdown */
+.nav-item.dropdown.wishlist-container:hover .wishlist-dropdown,
+.wishlist-dropdown:hover {
+  display: block;
+  opacity: 1;
+  visibility: visible;
+}
+
+/* For smaller screens, the dropdown should fit within the viewport */
+@media (max-width: 991px) {
+  .wishlist-dropdown {
+    left: 0 !important; 
+    right: auto !important;
+    
+  }
+}
+
+
+/* for cart */
+
+/* For CART - larger screens */
+@media (min-width: 990px) {
+  .cart-dropdown {
+    left: auto;
+    right: 0;
+    width: 250px;
+    display: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+  }
+}
+
+.nav-item.dropdown.cart-container:hover .cart-dropdown,
+.cart-dropdown:hover {
+  display: block;
+  opacity: 1;
+  visibility: visible;
+}
+
+/* For CART - smaller screens */
+@media (max-width: 991px) {
+  .cart-dropdown {
+    left: 0 !important;
+    right: auto !important;
+  }
+}
+
+
+/* My Learning Dropdown */
+.my-learning-dropdown {
+  width: 250px; /* Same width as Wishlist and Cart */
+  display: none;
+  opacity: 0;
+  visibility: hidden;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  border: 1px solid #198754;
+  border-radius: 0.5rem;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+/* My Learning Dropdown on hover */
+.nav-item.dropdown.my-learning-container:hover .my-learning-dropdown,
+.my-learning-dropdown:hover {
+  display: block;
+  opacity: 1;
+  visibility: visible;
+}
+
+/* For larger screens */
+@media (min-width: 990px) {
+  .my-learning-dropdown {
+    left: auto;
+    right: 0; /* Position to the right side */
+  }
+}
+
+/* For smaller screens */
+@media (max-width: 991px) {
+  .my-learning-dropdown {
+    left: 0 !important;
+    right: auto !important;
+  }
+}
+
+
+
+/* Profile Dropdown Styles */
+.profile-dropdown {
+  width: 200px;
+  border: 1px solid #198754; 
+  border-radius: 0.5rem; 
+  display: none;
+  opacity: 0;
+  visibility: hidden;
+  position: absolute;
+  top: 100%;
+  left: 0; 
+  z-index: 1000; 
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+/* Ensure dropdown stays visible when hovered */
+.nav-item.dropdown:hover .profile-dropdown,
+.profile-dropdown:hover {
+  display: block;
+  opacity: 1;
+  visibility: visible;
+}
+
+/* For larger screens */
+@media (min-width: 990px) {
+  .profile-dropdown {
+    left: auto; 
+    right: 0; 
+  }
+}
+
+/* For smaller screens */
+@media (max-width: 991px) {
+  .profile-dropdown {
+    left: 0 !important; 
+    right: auto !important;
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
