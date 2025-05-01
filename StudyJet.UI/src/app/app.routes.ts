@@ -5,6 +5,7 @@ import { RegisterComponent } from './components/register/register.component';
 import { EmailConfirmationComponent } from './components/email-confirmation/email-confirmation.component';
 import { CategoryComponent } from './components/category/category.component';
 import { CategoryCourseComponent } from './components/category-course/category-course.component';
+import { LoginComponent } from './components/login/login.component';
 
 
 
@@ -16,4 +17,5 @@ export const routes: Routes = [
     { path: 'confirmation', component: EmailConfirmationComponent },
     { path: 'category', component: CategoryComponent},
     { path: 'courses/category/:categoryId', component: CategoryCourseComponent },
+    { path: 'login' , component: LoginComponent},
 ];

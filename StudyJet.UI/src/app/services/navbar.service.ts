@@ -5,10 +5,10 @@ import { BehaviorSubject } from 'rxjs';
   providedIn: 'root'
 })
 export class NavbarService {
-  private navbarTypeSubject = new BehaviorSubject<string>('default'); // default, student, admin, instructor
+  private navbarTypeSubject = new BehaviorSubject<'admin' | 'instructor' | 'student' | 'default'>('default');
   navbarType$ = this.navbarTypeSubject.asObservable();
 
-  setNavbarType(type: string) {
+  setNavbarType(type: 'admin' | 'instructor' | 'student' | 'default') {
     this.navbarTypeSubject.next(type);
 
   }

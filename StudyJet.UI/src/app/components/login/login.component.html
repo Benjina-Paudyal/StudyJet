@@ -1,0 +1,63 @@
+<div class="container d-flex align-items-center justify-content-center vh-100">
+    <div class="row justify-content-center w-100">
+      <div class="col-md-6">
+        <div class="card border-success">
+          <div class="card-header text-center">
+            <h2 class="text-success fw-semibold">Login</h2>
+          </div>
+          <div class="card-body">
+            <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate>
+              <!-- Email -->
+              <div class="form-group mb-3">
+                <label for="Email" class="form-label text-success">
+                  Email address</label>
+                <input type="email" id="Email" class="form-control border-success" formControlName="Email"
+                  placeholder="Enter email" [ngClass]="{ 'is-invalid': email?.invalid && email?.touched }"
+                  aria-describedby="emailError" />
+                <div *ngIf="email?.invalid && email?.touched" id="emailError" class="invalid-feedback">
+                  Please provide a valid email.
+                </div>
+              </div>
+  
+              <!-- Password -->
+              <div class="form-group mb-3">
+                <label for="Password" class="form-label text-success">
+                  Password</label>
+                <input type="password" id="Password" class="form-control border-success" formControlName="Password"
+                  placeholder="Enter password" [ngClass]="{
+                    'is-invalid': password?.invalid && password?.touched
+                  }" aria-describedby="passwordError" />
+                <div *ngIf="password?.invalid && password?.touched" class="invalid-feedback">
+                  Password is required.
+                </div>
+              </div>
+  
+              <!-- Forgot Password Link -->
+              <div class="mb-3">
+                <a [routerLink]="['/forgot-password']" class="text-success">Forgot your Password?</a>
+              </div>
+  
+              <!-- Submit Button -->
+              <button type="submit" class="btn btn-success w-100" [disabled]="loginForm.invalid || loading">
+                Login
+                <span *ngIf="loading" class="spinner-border spinner-border-sm ms-2"></span>
+              </button>
+            </form>
+  
+            <!-- Error Message -->
+            <div *ngIf="errorMessage" class="alert alert-danger mt-3">
+              {{ errorMessage }}
+            </div>
+  
+            <!-- Register Link-->
+            <div class="mt-3 text-center">
+              <p>
+                Not registered yet ? Please go to
+                <a [routerLink]="['/register']" class="text-success">Register</a>.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>

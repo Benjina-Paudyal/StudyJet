@@ -21,7 +21,6 @@ export class InactivityService {
   ngOnDestroy(): void {
     this.stopMonitoring(); 
   }
-   
   
   // Start tracking inactivity
   startMonitoring(): void {

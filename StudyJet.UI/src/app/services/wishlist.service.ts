@@ -28,7 +28,7 @@ export class WishlistService {
           ...item,
           imageUrl: this.imageService.getCourseImageUrl(item.imageUrl) 
         }));
-        this.wishlistSubject.next(updatedWishlist); // Emit the updated wishlist to subscribers
+        this.wishlistSubject.next(updatedWishlist); 
         return updatedWishlist;
       }),
       catchError(err => {

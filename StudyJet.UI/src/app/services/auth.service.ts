@@ -162,7 +162,7 @@ export class AuthService {
   }
   
   // Handle the logic after a successful login
-  private handleSuccessfulLogin(response: LoginResponse): void {
+  public handleSuccessfulLogin(response: LoginResponse): void {
     if (!response.token || !response.username || !response.roles) {
       throw new Error('Invalid login response - missing required fields');
     }
@@ -312,7 +312,6 @@ export class AuthService {
       code: code,
       email: email,
     };
-
     return this.http
       .post<LoginResponse>(`${this.apiUrl}/verify-2fa-login`, payload)
       .pipe(
@@ -320,7 +319,6 @@ export class AuthService {
           if (response.token && response.username && response.roles) {
              // If successful, clean up temporary token and set authentication state
             this.cookieService.delete('tempToken');
-
             const profilePictureUrl =
               response.profilePictureUrl || '/images/profiles/default.png';
 
@@ -449,5 +447,19 @@ export class AuthService {
       })
     );
   }
+
+  // Determine the navbar type based on roles
+getNavbarTypeFromRoles(): 'admin' | 'instructor' | 'student' | 'default' {
+  const roles = this.getRoles();
+  if (roles.includes('Admin')) {
+    return 'admin';
+  } else if (roles.includes('Instructor')) {
+    return 'instructor';
+  } else if (roles.includes('Student')) {
+    return 'student';
+  }
+  return 'default';
+}
+
 }
 

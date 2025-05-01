@@ -1,33 +1,94 @@
 import { CommonModule } from '@angular/common';
 import { Component, HostListener, OnInit } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
-import { Category } from '../../models';
+import { CartItem, Category, Course, WishlistItem } from '../../models';
 import { CategoryService } from '../../services/category.service';
 import { CourseService } from '../../services/course.service';
 import { AuthService } from '../../services/auth.service';
 import { UserService } from '../../services/user.service';
+import { FormsModule } from '@angular/forms';
+import { Observable, Subscription } from 'rxjs';
+import { NavbarService } from '../../services/navbar.service';
+import { PurchaseCourseService } from '../../services/purchase-course.service';
+import { WishlistService } from '../../services/wishlist.service';
+import { CartService } from '../../services/cart.service';
+import { InactivityService } from '../../services/inactivity.service';
+import { NotificationService } from '../../services/notification.service';
+import { ImageService } from '../../services/image.service';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, FormsModule],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.css'
 })
 export class NavbarComponent implements OnInit {
+  navbarType: 'admin' | 'instructor' | 'student' | 'default' = 'default';  // Default value
+  navbarType$: Observable<'admin' | 'instructor' | 'student' | 'default'>;
   categories: Category[] = [];
+  isNavbarCollapsed = true;
+  isDropdownOpen = false;
+  searchPlaceholder = 'What do you want to learn?';
+  searchQuery = '';
+  suggestions: Course[] = [];
+  wishlist: WishlistItem[] = [];
+  showWishlistDropdown = false;
+  cartItems: CartItem[] = [];
+  showCartDropdown = false;
+  cartItemCount = 0;
+  isLoading = false;
+  profileImageUrl: string | null = null;
+  isLoggingIn = true;
+  loggingOutText = 'Logging out, please wait...';
+  dotCount = 0;
+  purchasedCourses: Course[] = [];
+  isAuthenticated = false;
+  subscriptions: Subscription[] = [];
+  unreadNotificationsCount = 0;
+
   constructor(
     private categoryService: CategoryService,
     private router: Router,
     private courseService: CourseService,
-    private authService: AuthService,
+    private purchaseCourseService: PurchaseCourseService,
+    private navbarService: NavbarService,
     private userService: UserService,
-    
-  ) {}
+    private wishlistService: WishlistService,
+    private cartService: CartService,
+    private authService: AuthService,
+    private imageService: ImageService,
+    private inactivityService: InactivityService,
+  ) {
+    this.navbarType$ = this.navbarService.navbarType$;
+  }
 
   ngOnInit() {
-    this.updatePlaceholderText(window.innerWidth);
-    this.loadCategories();
+    this.inactivityService.startMonitoring();
+    this.subscriptions.push(
+      this.navbarType$.subscribe((navbarType) => {
+        this.navbarType = navbarType;
+      })
+    );
+
+    this.subscriptions.push(
+      this.authService.isAuthenticated$.subscribe((isAuthenticated) => {
+        this.isAuthenticated = isAuthenticated;
+        if (isAuthenticated) {
+          this.profileImageUrl = this.authService.getProfileImage();
+          this.loadWishlist();
+          this.loadCartItems();
+          this.loadCategories();
+          this.loadPurchasedCourses();
+          this.updatePlaceholderText(window.innerWidth);
+        }
+      })
+    );
+  }
+
+  ngOnDestroy() {
+    this.inactivityService.stopMonitoring();
+    this.subscriptions.forEach(sub => sub.unsubscribe());
   }
 
   @HostListener('window:resize', ['$event'])
@@ -35,28 +96,46 @@ export class NavbarComponent implements OnInit {
     this.updatePlaceholderText((event.target as Window).innerWidth);
   }
 
-  private updatePlaceholderText(width: number) {
-    const searchInput = document.getElementById('search-bar') as HTMLInputElement;
-    if (width <= 250) {
-      searchInput.placeholder = '?'; 
-    } else if (width <= 395) {
-      searchInput.placeholder = 'Courses'; 
-    } else {
-      searchInput.placeholder = 'What do you want to learn?'; 
-    }
-  }
- 
-  isNavbarCollapsed = true;
-
-   toggleNavbar() {
+  toggleNavbar() {
     this.isNavbarCollapsed = !this.isNavbarCollapsed;
   }
 
-   // Load categories from the category service
-   loadCategories(): void {
+  toggleWishlistDropdown(): void {
+    this.showWishlistDropdown = !this.showWishlistDropdown;
+  }
+
+  toggleCartDropdown(event: MouseEvent) {
+    event.preventDefault();
+    this.showCartDropdown = !this.showCartDropdown;
+  }
+
+  getTotalPrice(): number {
+    return this.cartItems.reduce((total, item) => total + item.price, 0);
+  }
+
+  trackByCourseId(index: number, item: any): number {
+    return item.courseId;
+  }
+
+
+  private updatePlaceholderText(width: number) {
+    const searchInput = document.getElementById('search-bar') as HTMLInputElement;
+    if (width > 1024) {
+      this.searchPlaceholder = 'What do you want to learn?';
+    } else if (width > 991) {
+      this.searchPlaceholder = 'Course?';
+    } else if (width > 400) {
+      this.searchPlaceholder = 'What do you want to learn?';
+    } else if (width > 300) {
+      this.searchPlaceholder = 'Course?';
+    } else {
+      this.searchPlaceholder = '?';
+    }
+  }
+
+  loadCategories(): void {
     this.categoryService.getCategories().subscribe({
       next: (data: Category[]) => {
-        console.log('categories from API:', data);
         this.categories = data;
       },
       error: (err) => {
@@ -65,10 +144,136 @@ export class NavbarComponent implements OnInit {
     });
   }
 
-  // Handle category selection
+  
   onCategorySelected(category: Category): void {
     console.log('Selected category:', category);
   }
+
+  onSearchInput(): void {
+    if (this.searchQuery.length > 2) {
+      this.courseService.searchCourses(this.searchQuery).subscribe({
+        next: (courses: Course[]) => {
+          this.suggestions = courses;
+        },
+        error: (err) => {
+          console.error('Error fetching course suggestions', err);
+          this.suggestions = [];
+        },
+      });
+    } else {
+      this.suggestions = [];
+    }
+  }
+
+  goToCourse(courseID: number) {
+    this.router.navigate(['/courses', courseID]);
+  }
+
+  onSearchSubmit() {
+    if (this.searchQuery.length > 0) {
+      this.suggestions = [];
+      this.router.navigate(['/search-results'], {
+        queryParams: { query: this.searchQuery },
+      });
+    }
+  }
+
+  logout(): void {
+    this.authService.logout().then(() => {
+      this.clearState();
+      this.router.navigate(['/home']);
+    }).catch(error => {
+      console.error('Logout failed:', error);
+    });
+  }
+
+
+  private clearState() {
+    this.userService.clearUser();
+    this.wishlist = [];
+    this.profileImageUrl = null;
+    this.isAuthenticated = false;
+    this.showWishlistDropdown = false;
+  }
+
+  navigateToStudentDashboard(): void {
+    this.router.navigate(['/student-dashboard']);
+  }
+
+  navigateToInstructorDashboard(): void {
+    this.router.navigate(['/instructor-dashboard']);
+  }
+
+  navigateToAdminDashboard(): void {
+    this.router.navigate(['/admin-dashboard']);
+  }
+
+  addToCart(course: any): void {
+    console.log('Added to the cart:', course);
+  }
+
+  openDropdown() {
+    this.isDropdownOpen = true;
+  }
+
+  closeDropdown() {
+    this.isDropdownOpen = false;
+  }
+
+  toggleDropdown() {
+    this.isDropdownOpen = !this.isDropdownOpen;
+  }
+
+
+  private loadWishlist(): void {
+    this.wishlistService.getWishlist().subscribe({
+      next: (data: WishlistItem[]) => {
+        this.wishlist = data;
+      },
+      error: (error) => {
+        console.error('Error loading wishlist:', error);
+      },
+    });
+  }
+
+
+  private loadCartItems(): void {
+    this.isLoading = true;
+    this.cartService.getCartItems().subscribe({
+      next: (cartItems: CartItem[]) => {
+        this.cartItems = cartItems;
+        this.cartItemCount = cartItems.length;
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error loading cart items:', error);
+        this.cartItemCount = 0;
+        this.isLoading = false;
+      },
+    });
+  }
+
+
+  loadPurchasedCourses(): void {
+    this.purchaseCourseService.getPurchaseCourse().subscribe({
+      next: (courses: Course[]) => {
+        this.purchasedCourses = courses.map(course => ({
+          ...course,
+          imageUrl: this.imageService.getCourseImageUrl(course.imageUrl)
+        }));
+
+        console.log('Purchased Courses:', this.purchasedCourses);
+      },
+      error: (err) => {
+        console.error('Error fetching purchased courses:', err);
+      }
+    });
+  }
+
+
+
+
+
 
 }
 
