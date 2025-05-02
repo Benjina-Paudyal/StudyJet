@@ -4,22 +4,19 @@
     overflow: visible;
     width: 20%;
   }
-  
-  
+
   .course-card {
     display: flex;
     flex-direction: column;
     height: 100%;
     position: relative;
   }
-  
-  
+
   .card-img-top {
     width: 100%;
     height: auto;
     object-fit: cover;
   }
-  
   
   .card-body {
     flex: 1;
@@ -37,11 +34,9 @@
     margin-bottom: 0.5rem;
   }
   
-  
   .card-text {
     font-size: 0.8rem;
   }
-  
   
   .card {
     transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -58,7 +53,6 @@
     position: absolute;
     top: 0;
     left: 50%;
-    /* transform: translateX(-50%); */
     width: 100%;
     max-width: 1200px;
     z-index: 10;
@@ -75,8 +69,6 @@
     overflow: visible;
     border: 1px solid green;
   }
-  
-  
   
   
   .course-wrapper:hover .course-modal {
@@ -138,7 +130,6 @@
     }
    
   }
-  
   
   .wishlist-icon {
     width: 1vw;

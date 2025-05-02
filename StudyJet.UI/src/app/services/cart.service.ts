@@ -3,7 +3,6 @@ import { environment } from '../../environments/environment';
 import { BehaviorSubject, catchError, map, Observable, of, switchMap, take, tap, throwError } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { WishlistService } from './wishlist.service';
-import { CookieService } from 'ngx-cookie-service';
 import { CartItem } from '../models';
 import { ImageService } from './image.service';
 
@@ -19,7 +18,6 @@ export class CartService {
     private http: HttpClient,
     private wishlistService : WishlistService,
     private imageService: ImageService,
-    private cookieService : CookieService
   ) { 
     this.getCartAndEmit();
   }
@@ -51,14 +49,16 @@ export class CartService {
 
   
 // Check if the course is already in the wishlist
-  isCourseInWishlist(courseId: number): Observable<boolean> {
-    return this.http.get<boolean>(`${this.wishlistUrl}/is-in-wishlist/${courseId}`,).pipe(
-      catchError(err => {
-        console.error('Error checking if course is in wishlist:', err);
-        return of(false);
-      })
-    );
-  }
+isCourseInWishlist(courseId: number): Observable<boolean> {
+  return this.http.get<any>(`${this.wishlistUrl}/is-in-wishlist/${courseId}`).pipe(
+    map(response => response.ObjectisInWishlist), 
+    catchError(err => {
+      console.error('Error checking if course is in wishlist:', err);
+      return of(false); 
+    })
+  );
+}
+
 
 
   // Add a course to the cart if it isn't already present
@@ -104,21 +104,28 @@ export class CartService {
 
 
 // Move a course from the cart to the wishlist
-  moveToWishlist(courseId: number): Observable<void> {
-    return this.isCourseInWishlist(courseId).pipe(
-      switchMap(isInWishlist => isInWishlist ? of(void 0) :
-        this.http.post<void>(`${this.cartUrl}/move-to-wishlist/${courseId}`, {})
-      ),
-      tap(() => {
-        this.getCartAndEmit(); // Update cart state
-        this.wishlistService.getWishlistAndEmit(); // Update wishlist state
-      }),
-      catchError(err => {
-        console.error('Error moving course to wishlist:', err);
-        return throwError(() => new Error('Failed to move course to wishlist.'));
-      })
-    );
-  }
+moveToWishlist(courseId: number): Observable<void> {
+  return this.isCourseInWishlist(courseId).pipe(
+    switchMap(isInWishlist => {
+      console.log('Is course in wishlist:', isInWishlist); // Log the result
+      if (isInWishlist) {
+        return of(void 0);
+      } else {
+        console.log('Sending POST request to move course to wishlist');
+        return this.http.post<void>(`${this.cartUrl}/move-to-wishlist/${courseId}`, {});
+      }
+    }),
+    tap(() => {
+      this.getCartAndEmit();
+      this.wishlistService.getWishlistAndEmit(); 
+    }),
+    catchError(err => {
+      console.error('Error moving course to wishlist:', err);
+      return throwError(() => new Error('Failed to move course to wishlist.'));
+    })
+  );
+}
+
 
 // Fetch and update the cart for the user
   updateCartForUser(): void {

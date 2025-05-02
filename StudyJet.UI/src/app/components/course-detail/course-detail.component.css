@@ -7,13 +7,6 @@
     max-width: 100%;
   }
 
-  /* .wishlist-icon {
-    width: 2vw; 
-    height: 2vw; 
-    cursor: pointer;
-  } */
-
-
   .admin-actions {
     background-color: #f8f9fa;
     padding: 8px;
@@ -32,7 +25,6 @@
     transform: scale(1.1);
   }
 
-  /* Add to your component's CSS */
 .resubmitted-alert {
   background-color: #fff3cd;
   padding: 5px 10px;

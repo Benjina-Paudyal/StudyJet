@@ -3,10 +3,20 @@
     <div class="container">
       <div *ngIf="course">
         <!-- Header section -->
-        <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+        <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3 position-relative">
           <h2 class="text-success fw-bold mb-0">{{ course.title }}</h2>
           <div class="d-flex align-items-center gap-3">
   
+
+
+            <div class="wishlist-icon-container" style="position: absolute; top: 10px; right: 10px;">
+              <img [src]="isInWishlist(course.courseID) ? 'assets/images/filled_heart.svg' : 'assets/images/empty_heart.svg'"
+                   alt="Wishlist Icon" class="wishlist-icon"
+                   (click)="toggleWishlist(course.courseID, $event)" 
+                   style="cursor: pointer" />
+            </div>
+
+
             <!-- Admin Controls -->
             <div *ngIf="isAdmin" class="bg-light p-2 rounded">
               <!-- Show buttons if Pending (Resubmitted for approval) -->

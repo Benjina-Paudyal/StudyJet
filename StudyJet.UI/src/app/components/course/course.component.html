@@ -16,7 +16,14 @@
               </p>
             </div>
           </a>
-        </div>
-      </div>
-    </div>
-  </section>
+
+           <!-- Wishlist Icon (visible on hover) -->
+        <img [src]="
+        wishlist.includes(course.courseID)
+          ? 'assets/images/filled_heart.svg'
+          : 'assets/images/empty_heart.svg'
+      " alt="Wishlist Icon" class="wishlist-icon" (click)="toggleWishlist(course.courseID, $event)" />
+  </div>
+</div>
+</div>
+</section>

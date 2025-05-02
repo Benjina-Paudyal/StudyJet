@@ -1,0 +1,37 @@
+<section>
+    <div class="container">
+      <h2 class="mb-5 text-success mb-5 text-success py-5 fw-bold">Your Wishlist</h2>
+  
+         <!-- Wishlist Items -->
+      <div class="row">
+        <div
+          class="col-lg-2 col-md-4 col-sm-6 mb-4 course-wrapper"
+          *ngFor="let item of wishlist; trackBy: trackByCourseId"
+          style="position: relative;"
+        >
+          <!-- Wishlist Card -->
+          <a [routerLink]="['/courses', item.courseID]" class="card h-100 text-center" style="cursor:pointer; text-decoration: none;">
+            <img [src]="item.imageUrl" class="card-img-top img-fluid" alt="{{ item.title }}" style="object-fit: cover; height: 120px;" />
+            <div class="card-body">
+              <h5 class="card-title">{{ item.title }}</h5>
+              <p class="card-text text-muted">{{ item.instructorName }}</p>
+              <p class="card-text text-success fw-semibold">{{ item.price }} DKK</p>
+            </div>
+          </a>
+           <!-- Wishlist Heart Icon -->
+           <img
+           [src]="isInWishlist(item.courseID) ? 'assets/images/filled_heart.svg' : 'assets/images/empty_heart.svg'"
+           alt="Wishlist Icon"
+           class="wishlist-icon"
+           [class.disabled] = "isPurchased(item.courseID)"
+           (click)="!isPurchased(item.courseID) && toggleWishlist(item)"
+         />
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Wishlist Empty Message (alternative if no items) -->
+  <div *ngIf="wishlist.length === 0">
+    <p class="text-secondary ms-5">Please add courses to your wishlist.</p>
+  </div>

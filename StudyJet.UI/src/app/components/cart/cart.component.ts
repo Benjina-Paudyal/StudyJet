@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { CartItem } from '../../models';
 import { CookieService } from 'ngx-cookie-service';
@@ -16,7 +16,7 @@ import { Subject, takeUntil } from 'rxjs';
   templateUrl: './cart.component.html',
   styleUrl: './cart.component.css'
 })
-export class CartComponent {
+export class CartComponent implements OnInit, OnDestroy {
   cart: CartItem[] = [];
   wishlist = [];
   errorMessage = '';
@@ -76,6 +76,8 @@ export class CartComponent {
     this.isLoading = true;
     this.cartService.moveToWishlist(courseID).subscribe({
       next: () => {
+        this.cart = this.cart.filter(item => item.courseID !== courseID);
+        alert('Course moved to wishlist!');
         this.isLoading = false;
       },
       error: (error) => {

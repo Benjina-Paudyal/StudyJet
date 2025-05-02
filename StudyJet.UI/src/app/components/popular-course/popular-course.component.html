@@ -33,6 +33,17 @@
             <p class="text-success">Updated: {{ selectedCourse.lastUpdatedDate | date }}</p>
             <p class="course-modal-description">{{ selectedCourse.description }}</p>
             <p><strong>{{ selectedCourse.price }} DKK</strong></p>
+
+              <!-- Wishlist and Add to Cart Row -->
+          <div class="d-flex justify-content-between align-items-center mt-3">
+            <!-- Add to Cart Button -->
+            <button class="btn btn-success w-75" (click)="addToCart(course.courseID)">Add to Cart</button>
+
+            <!-- Wishlist Icon (appears inside the modal on hover) -->
+            <img
+              [src]="wishlist.includes(course.courseID) ? 'assets/images/filled_heart.svg' : 'assets/images/empty_heart.svg'"
+              alt="Wishlist Icon" class="wishlist-icon" (click)="toggleWishlist(course.courseID); $event.stopPropagation()" />
+          </div>
           </div>
         </div>
       </div>

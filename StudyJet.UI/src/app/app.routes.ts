@@ -13,6 +13,7 @@ import { AddCourseComponent } from './components/add-course/add-course.component
 import { CourseDetailComponent } from './components/course-detail/course-detail.component';
 import { AdminDashboardComponent } from './components/admin-dashboard/admin-dashboard.component';
 import { CartComponent } from './components/cart/cart.component';
+import { WishlistComponent } from './components/wishlist/wishlist.component';
 
 
 
@@ -38,6 +39,7 @@ export const routes: Routes = [
     // Student routes
     { path: 'student-dashboard', component: StudentDashboardComponent, canActivate: [AuthGuard], data: { role: 'Student'}},
     { path: 'cart', component: CartComponent,canActivate: [AuthGuard], data: { role: 'Student'}},
+    { path: 'wishlist', component: WishlistComponent,canActivate: [AuthGuard], data: { role: 'Student'}},
 
 
 

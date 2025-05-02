@@ -1,92 +1,94 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { WishlistItem } from '../models';
-import { BehaviorSubject, catchError, map, Observable, of, take, tap } from 'rxjs';
+import { BehaviorSubject, catchError, map, Observable, of, take, tap, throwError } from 'rxjs';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { CookieService } from 'ngx-cookie-service';
 import { ImageService } from './image.service';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class WishlistService {
-  
+
   private apiUrl = `${environment.apiBaseUrl}/Wishlist`;
   public wishlistSubject = new BehaviorSubject<WishlistItem[]>([]);
 
   constructor(
     private http: HttpClient,
-    private cookieService: CookieService,
-    private imageService: ImageService
-  ) { }
+    private imageService: ImageService,
+    private authService: AuthService
+  ) {
+    if (this.authService.isAuthenticated()) {
+      this.getWishlistAndEmit();
+    }
+  }
 
-   // Fetch the wishlist
-   getWishlist(): Observable<WishlistItem[]> {
+  // Fetch the wishlist
+  getWishlist(): Observable<WishlistItem[]> {
     return this.http.get<WishlistItem[]>(`${this.apiUrl}`).pipe(
-      map(wishlist => {
-        const updatedWishlist = wishlist.map(item => ({
-          ...item,
-          imageUrl: this.imageService.getCourseImageUrl(item.imageUrl) 
-        }));
-        this.wishlistSubject.next(updatedWishlist); 
-        return updatedWishlist;
-      }),
+      map(wishlist => wishlist.map(item => ({
+        ...item,
+        imageUrl: this.imageService.getCourseImageUrl(item.imageUrl)
+      }))),
       catchError(err => {
         console.error('Error fetching wishlist:', err);
-        return of([]); 
+        return of([]);
       })
     );
   }
 
-  // Add a course to wishlist and update the local state
-  addCourseToWishlist(courseId: number): Observable<any> {
-    return this.http.post(`${this.apiUrl}/${courseId}`, {}).pipe(
-      tap(() => this.getWishlistAndEmit()), 
+  // Get and emit the wishlist
+  getWishlistAndEmit(): void {
+    this.getWishlist()
+      .pipe(take(1))
+      .subscribe(wishlist => this.wishlistSubject.next(wishlist));
+  }
+
+
+  // Add a course to wishlist
+  addCourseToWishlist(courseId: number): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/${courseId}`, {}).pipe(
+      tap(() => this.getWishlistAndEmit()),
       catchError((err) => {
         console.error('Error adding course to wishlist:', err);
-        return of(null); 
+        return of();
       })
     );
   }
+
+
 
   // Remove a course from wishlist and update the local state
-  removeCourseFromWishlist(courseId: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/${courseId}`).pipe(
-      tap(() => this.getWishlistAndEmit()), 
+  removeCourseFromWishlist(courseId: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${courseId}`).pipe(
+      tap(() => this.getWishlistAndEmit()),
       catchError((err) => {
         console.error('Error removing course from wishlist:', err);
-        return of(null); 
+        return of();
       })
     );
   }
 
-  // Helper method to fetch the wishlist and update the subject
-  getWishlistAndEmit(): void {
-    this.getWishlist().pipe(take(1)).subscribe(updatedWishlist => {
-      this.wishlistSubject.next(updatedWishlist);
-    });
-  }
 
-  moveToCart(courseId: number): Observable<any> {
-    return this.http.post(`${this.apiUrl}/move-to-cart/${courseId}`, {}).pipe(
-      tap(() => {
-        this.removeCourseFromWishlist(courseId).subscribe({
-          next: () => {
-            console.log('Course removed from wishlist and added to cart');
-          },
-          error: (err) => {
-            console.error('Error removing course from wishlist after adding to cart:', err);
-          }
-        });
-      }),
-      catchError((err) => {
+  // Move a course to the cart
+  moveToCart(courseId: number): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/move-to-cart/${courseId}`, {}).pipe(
+      tap(() => this.getWishlistAndEmit()),
+      catchError(err => {
         console.error('Error moving course to cart:', err);
-        return of(null); 
+        return throwError(() => new Error('Failed to move course to cart.'));
       })
     );
   }
 
-  // Expose the wishlist state to other components
+  // Update wishlist manually (external trigger)
+  updateWishlistForUser(): void {
+    this.getWishlistAndEmit();
+  }
+
+  // Observable to Expose 
   get wishlist$(): Observable<WishlistItem[]> {
     return this.wishlistSubject.asObservable();
   }

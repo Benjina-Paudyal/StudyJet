@@ -28,7 +28,7 @@ import { ChangeDetectorRef } from '@angular/core';
 })
 export class NavbarComponent implements OnInit {
   navbarType: 'admin' | 'instructor' | 'student' | 'default' | 'hidden' = 'default';  // Default value
-  navbarType$: Observable<'admin' | 'instructor' | 'student' | 'default'| 'hidden'>;
+  navbarType$: Observable<'admin' | 'instructor' | 'student' | 'default' | 'hidden'>;
   categories: Category[] = [];
   isNavbarCollapsed = true;
   isDropdownOpen = false;
@@ -50,7 +50,7 @@ export class NavbarComponent implements OnInit {
   subscriptions: Subscription[] = [];
   unreadNotificationsCount = 0;
   cartCount: number = 0;
-;
+  
 
 
   constructor(
@@ -89,13 +89,19 @@ export class NavbarComponent implements OnInit {
     );
 
     this.subscriptions.push(
+      this.wishlistService.wishlist$.subscribe((wishlist) => {
+        this.wishlist = wishlist;
+      })
+    );
+
+    this.subscriptions.push(
       this.authService.isAuthenticated$.subscribe((isAuthenticated) => {
         this.isAuthenticated = isAuthenticated;
         if (isAuthenticated) {
-        const rawProfileImage = this.authService.getProfileImage();
-        this.profileImageUrl = this.imageService.getProfileImageUrl(rawProfileImage); 
-          
-          this.cartService.updateCartForUser(); 
+          const rawProfileImage = this.authService.getProfileImage();
+          this.profileImageUrl = this.imageService.getProfileImageUrl(rawProfileImage);
+
+          this.cartService.updateCartForUser();
           this.loadWishlist();
           this.loadPurchasedCourses();
           this.updatePlaceholderText(window.innerWidth);
@@ -155,7 +161,7 @@ export class NavbarComponent implements OnInit {
     this.categoryService.getCategories().subscribe({
       next: (data: Category[]) => {
         this.categories = data;
-        console.log('Categories loaded:', this.categories);  
+        console.log('Categories loaded:', this.categories);
       },
       error: (err) => {
         console.error('Error fetching categories', err);
@@ -163,7 +169,7 @@ export class NavbarComponent implements OnInit {
     });
   }
 
-  
+
   onCategorySelected(category: Category): void {
     console.log('Selected category:', category);
   }
@@ -202,26 +208,26 @@ export class NavbarComponent implements OnInit {
       // Clear the profile image and other states
       this.clearState();
       this.clearProfileImage();
-  
+
       // Redirect to home page
       this.router.navigate(['/home']);
     }).catch(error => {
       console.error('Logout failed:', error);
     });
   }
-  
+
   // Clear profile image and reset UI
   clearProfileImage(): void {
     // Delete the profile image cookie
     this.cookieService.delete('profilePictureUrl');
-  
+
     // Reset profile image to default
     this.profileImageUrl = '/images/profiles/default.png';
-  
+
     // Manually trigger change detection to update the UI
     this.changeDetectorRef.detectChanges();
   }
-  
+
 
   private clearState() {
     this.userService.clearUser();

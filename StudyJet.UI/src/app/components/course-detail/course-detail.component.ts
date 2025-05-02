@@ -143,7 +143,7 @@ export class CourseDetailComponent implements OnInit, OnDestroy{
   }
 
   // Toggle wishlist state for a course (guest or authenticated)
-  toggleWishlist(courseId: number): void {
+  toggleWishlist(courseId: number, event: MouseEvent): void {
     if (!this.isAuthenticated) {
       this.router.navigate(['/login']);
       alert('Please login yourself to add courses to your wishlist.');
@@ -270,6 +270,18 @@ export class CourseDetailComponent implements OnInit, OnDestroy{
     };
     return statusMap[status] || 'Unknown';
   }
+
+
+
+  // Method to check if the course is in the wishlist
+isInWishlist(courseId: number): boolean {
+  return this.wishlist.includes(courseId);
+}
+
+
+
+
+
 
 }
 

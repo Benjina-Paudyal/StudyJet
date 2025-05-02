@@ -3,7 +3,9 @@ import { Course } from '../../models';
 import { CourseService } from '../../services/course.service';
 import { ImageService } from '../../services/image.service';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
+import { WishlistService } from '../../services/wishlist.service';
 
 @Component({
   selector: 'app-course',
@@ -15,17 +17,22 @@ import { RouterModule } from '@angular/router';
 export class CourseComponent implements OnInit {
 courses: Course[] = [];
 selectedCourse: Course | null = null;
+wishlist: number[] = [];
 modalLeft = '0px';
 modalTop = '0px';
 
 constructor(
   private courseService: CourseService,
   private imageService: ImageService,
+  private authService: AuthService,
+  private wishlistService: WishlistService,
+  private router: Router,
 
 ){}
 
 ngOnInit() : void {
   this.getCourses();
+  this.getWishlist();
 }
 
 // Fetch approved courses
@@ -39,6 +46,54 @@ getCourses(): void {
     },
   });
 }
+
+ // Fetch the wishlist for the authenticated user
+ getWishlist(): void {
+  if (this.authService.isAuthenticated()) {
+    this.wishlistService.wishlist$.subscribe({
+      next: (wishlistItems) => {
+        this.wishlist = wishlistItems.map(item => item.courseID); 
+      },
+      error: (err) => {
+        console.error('Error fetching wishlist', err);
+      }
+    });
+  }
+}
+
+toggleWishlist(courseID: number, event: MouseEvent): void {
+  event.stopPropagation(); 
+  if (!this.authService.isAuthenticated()){
+    alert('Please log in first to add to your wishlist.');
+    this.router.navigate(['/login']);
+    return;
+  }
+  
+  if (this.wishlist.includes(courseID)) {
+    this.wishlistService.removeCourseFromWishlist(courseID).subscribe({
+      next: () => {
+        this.wishlist = this.wishlist.filter((id) => id !== courseID);
+        alert('Course removed from your wishlist.');
+      },
+      error: (err) => {
+        console.error('Error removing course from wishlist', err);
+        alert('Error removing course from wishlist.');
+      },
+    });
+  } else {
+    this.wishlistService.addCourseToWishlist(courseID).subscribe({
+      next: () => {
+        this.wishlist.push(courseID);
+        alert('Course added to your wishlist.');
+      },
+      error: (err) => {
+        console.error('Error adding course to wishlist', err);
+        alert('Error adding course to wishlist.');
+      },
+    });
+  }
+}
+
 
 // Fetch course image URL
 getCourseImageUrl(imageFilename: string): string {
