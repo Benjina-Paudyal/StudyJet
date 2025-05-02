@@ -7,6 +7,7 @@ import { Router } from '@angular/router';
 import { Category } from '../../models';
 import { CookieService } from 'ngx-cookie-service';
 import { ImageService } from '../../services/image.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-add-course',
@@ -29,10 +30,10 @@ export class AddCourseComponent implements OnInit{
   constructor(
     private formBuilder: FormBuilder,
     private courseService: CourseService,
+    private authService: AuthService,
     private categoryService: CategoryService,
     private cookieService: CookieService,
     private router: Router,
-    private imageService: ImageService
   ) {}
 
   // Function to toggle dropdown visibility
@@ -43,13 +44,10 @@ export class AddCourseComponent implements OnInit{
    // Function to handle category selection
    selectCategory(event: any): void {
     const categoryId = (event.target as HTMLSelectElement).value;
-    this.selectedCategoryId = Number(categoryId); // Convert to number
-    // Ensure that categoryID in the form gets updated correctly
-    this.courseForm.patchValue({ categoryID: this.selectedCategoryId });
-    // Force the form control to update its validity
-    this.courseForm.get('categoryID')?.updateValueAndValidity();
+    this.courseForm.patchValue({ categoryID: categoryId });
     this.isDropdownOpen = false;
   }
+  
 
    // Function to get category name by ID
    getCategoryNameById(categoryId: number): string {
@@ -78,15 +76,9 @@ export class AddCourseComponent implements OnInit{
     // Fetch categories for the dropdown
     this.fetchCategories();
 
-     // Get the instructor information from cookies and set profile image
-     const username = this.cookieService.get('username');
      const userId = this.cookieService.get('userId');
-     this.profileImageUrl = this.cookieService.get('profileImageUrl') || '/default-profile.png'; // Fallback to default image
- 
-     // Set the instructor data in the form
      this.courseForm.patchValue({ instructorID: userId });
    }
-
 
    fetchCategories(): void {
     this.categoryService.getCategories().subscribe({
@@ -101,14 +93,7 @@ export class AddCourseComponent implements OnInit{
   
 
   onSubmit(): void {
-    const userId = this.cookieService.get('userId');
-    const username = this.cookieService.get('username');
-    this.courseForm.patchValue({
-      instructorID: userId,
-      instructorName: username
-    });
-
-    if (this.courseForm.invalid) {
+       if (this.courseForm.invalid) {
       this.errorMessage = 'Please fill in all required fields.';
       return;
     }
@@ -149,7 +134,6 @@ export class AddCourseComponent implements OnInit{
 onFileChange(event: any, field: 'imageUrl' | 'videoUrl'): void {
   const file = event.target.files[0];
   if (file) {
-    // Check for file type validation (e.g., image for imageUrl, video for videoUrl)
     if (field === 'imageUrl' && !file.type.startsWith('image/')) {
       this.errorMessage = 'Please upload a valid image.';
       return;
@@ -158,7 +142,6 @@ onFileChange(event: any, field: 'imageUrl' | 'videoUrl'): void {
       this.errorMessage = 'Please upload a valid video.';
       return;
     }
-
     this.courseForm.patchValue({ [field]: file });
   }
 }

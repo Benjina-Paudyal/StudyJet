@@ -11,7 +11,7 @@ export class ImageService {
   getCourseImageUrl(imageFilename: string): string {
     if (!imageFilename) {
       console.warn('Image filename is undefined or null');
-      return 'default-image.jpg'; 
+      return ''; 
     }
   
     // Check if the image is already a full URL
@@ -48,7 +48,7 @@ export class ImageService {
   private cleanImageFilename(imageFilename: string | undefined, imageType: string): string {
     if (!imageFilename) {
       console.warn('Image filename is undefined or null');
-      return '';  // or return a default image path if necessary
+      return '';  
     }
   
     if (imageType === 'courses' && imageFilename.startsWith('/images/courses/')) {

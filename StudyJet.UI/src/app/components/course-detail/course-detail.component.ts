@@ -1,5 +1,4 @@
-import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Course, WishlistItem } from '../../models';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
@@ -10,6 +9,8 @@ import { PurchaseCourseService } from '../../services/purchase-course.service';
 import { WishlistService } from '../../services/wishlist.service';
 import { CookieService } from 'ngx-cookie-service';
 import { ChangeDetectorRef } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Subject } from 'rxjs';
 
 
 @Component({
@@ -19,8 +20,8 @@ import { ChangeDetectorRef } from '@angular/core';
   templateUrl: './course-detail.component.html',
   styleUrl: './course-detail.component.css'
 })
-export class CourseDetailComponent implements OnInit{
-
+export class CourseDetailComponent implements OnInit, OnDestroy{
+  private destroy$ = new Subject<void>();
   courseId = 0;
   course: Course | null = null;
   purchasedCourses: Course[] = [];
@@ -32,7 +33,6 @@ export class CourseDetailComponent implements OnInit{
   isApproving = false;
   isRejecting = false;
   pendingCourses: Course[] = [];
-  CookieService: any;
 
   constructor(
     private route: ActivatedRoute,
@@ -60,13 +60,11 @@ export class CourseDetailComponent implements OnInit{
    if (this.isAuthenticated) {
      this.loadWishlist();
      this.purchaseCourseService.fetchPurchaseCourse();
-   }
-
-   this.authService.getRoles().subscribe((roles) => {
+    this.authService.getRoles().subscribe((roles) => {
     this.isAdmin = roles.includes('Admin');
     this.isInstructor = roles.includes('Instructor');
   });
-  
+}
 
    this.wishlistService.wishlist$.subscribe((updatedWishlist: WishlistItem[]) => {
      this.wishlist = updatedWishlist.map(item => item.courseID);
@@ -74,17 +72,21 @@ export class CourseDetailComponent implements OnInit{
    });
  }
 
-
-
+ ngOnDestroy(): void {
+  this.destroy$.next();
+  this.destroy$.complete();
+}
   
 
-  getSafeVideoUrl(url: string | undefined): SafeResourceUrl {
+  getSafeVideoUrl(url?: string): SafeResourceUrl | null {
     if (url) {
       const videoId = this.extractYouTubeVideoId(url);
+      if(videoId) {
       const embedUrl = `https://www.youtube.com/embed/${videoId}`;
       return this.sanitizer.bypassSecurityTrustResourceUrl(embedUrl);
     }
-    return '';
+  }
+    return null;
   }
 
   extractYouTubeVideoId(url: string): string {
@@ -93,6 +95,7 @@ export class CourseDetailComponent implements OnInit{
     return match ? match[1] : '';
   }
 
+
   // add to cart
   addToCart(course: any): void {
     if (!this.isAuthenticated) {
@@ -100,7 +103,6 @@ export class CourseDetailComponent implements OnInit{
       this.router.navigate(['/login']);
       return;
     }
-
     if (this.isPurchased(course.courseID)) {
       alert('You have already purchased this course.');
       return;
@@ -177,7 +179,6 @@ export class CourseDetailComponent implements OnInit{
   loadCourseDetails(): void {
     this.courseService.getCourseById(this.courseId).subscribe({
       next: (course: Course) => {
-        // Ensure the status is mapped to a string
         switch (course.status) {
           case 0:
             course.status = 'Pending';
@@ -189,25 +190,23 @@ export class CourseDetailComponent implements OnInit{
             course.status = 'Rejected';
             break;
         }
-  
-        // Instead of checking previousStatus, just rely on course.isUpdate flag from backend
         if (course.isUpdate) {
-          course.status = 'Pending'; // For resubmitted courses, show as pending
+          course.status = 'Pending'; 
         }
-  
-        this.course = course; // Update the course details
-        console.log('Updated course:', this.course); // Debugging to see the updated course
+        this.course = course; 
         this.videoUrl = this.getSafeVideoUrl(course.videoUrl);
-        this.cdr.detectChanges(); // Ensure UI updates
+        this.cdr.detectChanges();
       },
-      error: (err) => console.error('Error loading course:', err)
+      error: (err) => {
+        console.error('Error loading course:', err);
+        alert('Error loading course details. Please try again later.');
+      }
     });
   }
   
   approveCourse(): void {
     if (!this.course || this.isApproving) return;
   
-    // Confirmation dialog
     const message = this.course.isUpdate 
       ? `Are you sure you want to approve these updates for the course: ${this.course.title}?`
       : `Are you sure you want to approve the course: ${this.course.title}?`;
@@ -225,12 +224,13 @@ export class CourseDetailComponent implements OnInit{
           this.course.status = 'Approved';
           this.course.isUpdate = false;
         }
-        this.cdr.detectChanges(); // Force UI update
+        this.cdr.detectChanges(); // Force UI updat
       },
       error: (err) => console.error('Approval failed:', err),
       complete: () => this.isApproving = false
     });
   }
+
 
   rejectCourse(): void {
     if (!this.course || this.isRejecting) return;
@@ -252,7 +252,7 @@ export class CourseDetailComponent implements OnInit{
         if (this.course) {
           this.course.status = 'Rejected';
         }
-        this.loadCourseDetails(); // Reload course details
+        this.loadCourseDetails(); 
       },
       error: (err) => console.error('Rejection failed:', err),
       complete: () => this.isRejecting = false

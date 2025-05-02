@@ -71,7 +71,8 @@ export class LoginComponent {
           this.router.navigate(['/reset-password']);
         } else {
           this.authService.handleSuccessfulLogin(response);
-          this.profileImageUrl = this.imageService.getProfileImageUrl(response.profilePictureUrl ?? 'default.png');
+          this.profileImageUrl = this.authService.getProfileImage();
+          // this.profileImageUrl = this.imageService.getProfileImageUrl(response.profilePictureUrl ?? 'default.png');
 
           // Store profile picture URL in cookies to persist across page refreshes
         this.cookieService.set('profilePictureUrl', this.profileImageUrl, { expires: 7 });

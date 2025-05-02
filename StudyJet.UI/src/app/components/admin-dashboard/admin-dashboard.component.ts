@@ -69,7 +69,6 @@ export class AdminDashboardComponent implements OnInit{
     });
   }
 
-
   ngOnDestroy(): void {
     this.authSubscription?.unsubscribe();
     this.coursesSubscription?.unsubscribe();

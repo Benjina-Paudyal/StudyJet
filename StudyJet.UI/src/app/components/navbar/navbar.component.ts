@@ -49,6 +49,9 @@ export class NavbarComponent implements OnInit {
   isAuthenticated = false;
   subscriptions: Subscription[] = [];
   unreadNotificationsCount = 0;
+  cartCount: number = 0;
+;
+
 
   constructor(
     private categoryService: CategoryService,
@@ -71,9 +74,17 @@ export class NavbarComponent implements OnInit {
   ngOnInit() {
     this.inactivityService.startMonitoring();
     this.loadCategories();
+
     this.subscriptions.push(
       this.navbarType$.subscribe((navbarType) => {
         this.navbarType = navbarType;
+      })
+    );
+
+    this.subscriptions.push(
+      this.cartService.cart$.subscribe(cart => {
+        this.cartItems = cart;
+        this.cartItemCount = cart.length;
       })
     );
 
@@ -83,9 +94,9 @@ export class NavbarComponent implements OnInit {
         if (isAuthenticated) {
         const rawProfileImage = this.authService.getProfileImage();
         this.profileImageUrl = this.imageService.getProfileImageUrl(rawProfileImage); 
-        
+          
+          this.cartService.updateCartForUser(); 
           this.loadWishlist();
-          this.loadCartItems();
           this.loadPurchasedCourses();
           this.updatePlaceholderText(window.innerWidth);
         }

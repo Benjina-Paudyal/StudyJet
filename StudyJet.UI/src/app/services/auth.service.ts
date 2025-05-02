@@ -1,11 +1,11 @@
 import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
 import { environment } from '../../environments/environment';
-import { BehaviorSubject,catchError, map, Observable, of,ReplaySubject,switchMap, tap,throwError,} from 'rxjs';
+import { BehaviorSubject, catchError, map, Observable, of, ReplaySubject, switchMap, tap, throwError, } from 'rxjs';
 import { ImageService } from './image.service';
 import { CookieService } from 'ngx-cookie-service';
-import { HttpClient} from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { UserRegistration, UserLogin,LoginResponse, AuthTokenPayload, UserRegistrationResponse, ForgotPasswordResponse, ResetPasswordResponse, InstructorRegistrationResponse, ChangePasswordResponse, VerifyPasswordResponse, Disable2FAResponse,} from '../models';
+import { UserRegistration, UserLogin, LoginResponse, AuthTokenPayload, UserRegistrationResponse, ForgotPasswordResponse, ResetPasswordResponse, InstructorRegistrationResponse, ChangePasswordResponse, VerifyPasswordResponse, Disable2FAResponse, } from '../models';
 
 @Injectable({
   providedIn: 'root',
@@ -14,7 +14,7 @@ export class AuthService {
   private apiUrl = `${environment.apiBaseUrl}/Auth`;
   private isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
   public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
-  
+
   constructor(
     private http: HttpClient,
     private router: Router,
@@ -24,8 +24,8 @@ export class AuthService {
     this.checkAuthState();
   }
 
-   // Check authstate on app initialization
-   private checkAuthState(): void {
+  // Check authstate on app initialization
+  private checkAuthState(): void {
     const token = this.cookieService.get('authToken');
     const username = this.cookieService.get('username');
     if (token && username && !this.isTokenExpired(token)) {
@@ -74,7 +74,7 @@ export class AuthService {
       path: '/',
       secure: true,
       sameSite: 'Strict' as const,
-      expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), 
+      expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
     };
 
     this.cookieService.set('authToken', token, cookieOptions);
@@ -84,7 +84,7 @@ export class AuthService {
     this.cookieService.set('fullName', fullName, cookieOptions);
     this.cookieService.set('userId', userId, cookieOptions);
   }
- 
+
   // Register student
   register(formData: FormData): Observable<UserRegistrationResponse> {
     return this.http.post<UserRegistrationResponse>(`${this.apiUrl}/register`, formData).pipe(
@@ -92,9 +92,8 @@ export class AuthService {
         next: (response: UserRegistrationResponse) => {
           const profilePictureUrl = response.profilePictureUrl
             ? this.imageService.getProfileImageUrl(response.profilePictureUrl)
-            : this.imageService.getProfileImageUrl('default-profile-picture.jpg'); 
-
-          this.setProfileImage(profilePictureUrl);  
+            : this.imageService.getProfileImageUrl('default-profilepic.jpg');
+          this.setProfileImage(profilePictureUrl);
         },
       }),
       catchError(this.handleError<UserRegistrationResponse>('register'))
@@ -103,7 +102,7 @@ export class AuthService {
 
 
   // register instructor
-   registerInstructor(formData: FormData): Observable<InstructorRegistrationResponse> {
+  registerInstructor(formData: FormData): Observable<InstructorRegistrationResponse> {
     return this.http
       .post<InstructorRegistrationResponse>(`${this.apiUrl}/register-instructor`, formData)
       .pipe(catchError(this.handleError<InstructorRegistrationResponse>('registerInstructor')));
@@ -127,9 +126,9 @@ export class AuthService {
     }
     return formData;
   }
-  
+
   // Login
-   login(user: UserLogin): Observable<LoginResponse> {
+  login(user: UserLogin): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.apiUrl}/login`, user).pipe(
       tap((response: LoginResponse) => {
         if (response.requires2FA && response.tempToken) {
@@ -140,7 +139,7 @@ export class AuthService {
           });
           return;
         }
-       if (response.requiresPasswordChange && response.resetToken) {
+        if (response.requiresPasswordChange && response.resetToken) {
           sessionStorage.setItem('resetToken', response.resetToken);
           sessionStorage.setItem('email', user.Email);
           this.router.navigate(['/reset-password']);
@@ -157,13 +156,13 @@ export class AuthService {
       })
     );
   }
-  
+
   // Handle the logic after a successful login
   public handleSuccessfulLogin(response: LoginResponse): void {
     if (!response.token || !response.username || !response.roles || !response.userID) {
       throw new Error('Invalid login response - missing required fields');
     }
-    const profilePictureUrl = 
+    const profilePictureUrl =
       response.profilePictureUrl || '/images/profiles/profilepic.png';
 
     // Set authentication cookies
@@ -171,11 +170,11 @@ export class AuthService {
       response.token,
       response.username,
       response.roles,
-      this.imageService.getProfileImageUrl(profilePictureUrl),  // Get the profile image URL
-      response.fullName || '', // Default to empty string if no full name
-      response.userID  
+      this.imageService.getProfileImageUrl(profilePictureUrl),
+      response.fullName || '',
+      response.userID
     );
-  
+
     this.isAuthenticatedSubject.next(true);
     this.setProfileImage(profilePictureUrl);
   }
@@ -186,20 +185,19 @@ export class AuthService {
       this.clearAuthCookies();
       sessionStorage.clear();
       this.isAuthenticatedSubject.next(false);
-      sessionStorage.setItem('logoutSuccess', 'true'); 
+      sessionStorage.setItem('logoutSuccess', 'true');
       await this.router.navigate(['/home']);
     } catch (error) {
       console.error('Logout failed:', error);
     }
   }
 
- 
 
   // Handle error
   private handleError<T>(operation = 'operation'): (error: any) => Observable<T> {
     return (error: any): Observable<T> => {
       let errorMessage = 'Something went wrong';
-      
+
       if (error.error instanceof ErrorEvent) {
         // Client-side error
         errorMessage = `Error: ${error.error.message}`;
@@ -216,22 +214,19 @@ export class AuthService {
   }
 
 
-// Store profile image URL
-setProfileImage(url: string): void {
-  this.cookieService.set('profileImageUrl', url, {
-    secure: true,
-    sameSite: 'Lax',
-    path: '/',
-  });
-}
+  // Store profile image URL
+  setProfileImage(url: string): void {
+    this.cookieService.set('profileImageUrl', url, {
+      secure: true,
+      sameSite: 'Lax',
+      path: '/',
+    });
+  }
 
-// Get profile image URL
-getProfileImage(): string {
-  return this.imageService.getProfileImageUrl(this.cookieService.get('profileImageUrl'));
-}
-
-
-
+  // Get profile image URL
+  getProfileImage(): string {
+    return this.imageService.getProfileImageUrl(this.cookieService.get('profileImageUrl'));
+  }
 
   // Store username
   setUserName(username: string): void {
@@ -251,8 +246,6 @@ getProfileImage(): string {
     });
   }
 
- 
-  
   // Get email
   getEmail(): Observable<string> {
     const email = this.cookieService.get('authEmail');
@@ -266,7 +259,7 @@ getProfileImage(): string {
   // Get roles
   getRoles(): Observable<string[]> {
     const roles = this.cookieService.get('roles');
-    return roles ? of(JSON.parse(roles)) : of([]);  
+    return roles ? of(JSON.parse(roles)) : of([]);
   }
 
   // Change Password
@@ -315,10 +308,11 @@ getProfileImage(): string {
       .pipe(
         tap((response) => {
           if (response.token && response.username && response.roles) {
-             // If successful, clean up temporary token and set authentication state
             this.cookieService.delete('tempToken');
-            const profilePictureUrl =
-              response.profilePictureUrl || '/images/profiles/default.png';
+            const profilePictureUrl = this.imageService.getProfileImageUrl(
+              response.profilePictureUrl || 'profilepic.png'
+            );
+            this.setProfileImage(profilePictureUrl); 
 
             // Set authentication cookies and profile image
             this.setAuthCookies(
@@ -330,11 +324,9 @@ getProfileImage(): string {
               response.userID || ''
             );
 
-            // Update authentication status
             this.isAuthenticatedSubject.next(true);
             this.setProfileImage(profilePictureUrl);
-
-            // Based on user role, navigate to the corresponding dashboard
+            
             if (response.roles.includes('Instructor')) {
               this.router.navigate(['/instructor-dashboard'], {
                 replaceUrl: true,
@@ -353,7 +345,7 @@ getProfileImage(): string {
             () =>
               new Error(
                 error.error?.message ||
-                  'An error occurred during 2FA verification.'
+                'An error occurred during 2FA verification.'
               )
           );
         })
@@ -374,7 +366,7 @@ getProfileImage(): string {
   // Enable 2FA
   enable2FA(): Observable<{ qrCode: string }> {
     return this.http
-      .post(`${this.apiUrl}/enable-2fa`, {}, {responseType: 'blob' })
+      .post(`${this.apiUrl}/enable-2fa`, {}, { responseType: 'blob' })
       .pipe(switchMap((blob) => this.convertBlobToBase64(blob)));
   }
 
@@ -447,20 +439,20 @@ getProfileImage(): string {
   }
 
 
-getNavbarTypeFromRoles(): Observable<'admin' | 'instructor' | 'student' | 'default'> {
-  return this.getRoles().pipe(
-    map((roles) => {
-      if (roles.includes('Admin')) {
-        return 'admin';
-      } else if (roles.includes('Instructor')) {
-        return 'instructor';
-      } else if (roles.includes('Student')) {
-        return 'student';
-      }
-      return 'default';
-    })
-  );
-}
+  getNavbarTypeFromRoles(): Observable<'admin' | 'instructor' | 'student' | 'default'> {
+    return this.getRoles().pipe(
+      map((roles) => {
+        if (roles.includes('Admin')) {
+          return 'admin';
+        } else if (roles.includes('Instructor')) {
+          return 'instructor';
+        } else if (roles.includes('Student')) {
+          return 'student';
+        }
+        return 'default';
+      })
+    );
+  }
 
 
 }

@@ -73,7 +73,7 @@ export class InstructorDashboardComponent implements OnInit {
       this.profileImageUrl = this.imageService.getProfileImageUrl(userData.profilePicture || 'profilepic.png');
       this.instructorId = userData.instructorId || null;
 
-     
+
         this.loadCourses();
         this.loadEnrolledStudentsCount();
         this.loadTotalCourses();
@@ -90,7 +90,6 @@ export class InstructorDashboardComponent implements OnInit {
     this.notificationsSubscription?.unsubscribe();
 
   }
-
 
   // Fetch courses for the instructor
   loadCourses(): void {
@@ -128,7 +127,6 @@ export class InstructorDashboardComponent implements OnInit {
     });
   }
 
-
   // Fetch the total count of enrolled students
   loadEnrolledStudentsCount(): void {
     this.userService.getEnrolledUsersCountForInstructor().subscribe({
@@ -142,8 +140,6 @@ export class InstructorDashboardComponent implements OnInit {
     });
   }
 
-
-
   // Fetch the total count of unread notifications
   loadNotificationCount(): void {
     this.notificationService.getNotifications().subscribe({
@@ -156,8 +152,6 @@ export class InstructorDashboardComponent implements OnInit {
       }
     });
   }
-
-
 
 
   // Toggle the visibility of enrolled students list

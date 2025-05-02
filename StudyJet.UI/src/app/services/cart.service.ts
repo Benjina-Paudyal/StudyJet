@@ -21,7 +21,7 @@ export class CartService {
     private imageService: ImageService,
     private cookieService : CookieService
   ) { 
-    this.updateCartForUser();
+    this.getCartAndEmit();
   }
 
 // Get the cart items 
@@ -31,7 +31,6 @@ export class CartService {
         ...item,
         imageUrl: this.imageService.getCourseImageUrl(item.imageUrl)
       }))),
-      tap(cart => this.cartSubject.next(cart)),
       catchError(err => {
         console.error('Error fetching cart items:', err);
         return of([]);
@@ -49,7 +48,6 @@ export class CartService {
       })
     );
   }
-
 
   
 // Check if the course is already in the wishlist
@@ -69,10 +67,9 @@ export class CartService {
       switchMap(isInCart => {
         if (isInCart) {
           console.warn('Course is already in the cart.');
-          return throwError(() => new Error('Course is already in the cart.'));
         }
         return this.http.post<void>(`${this.cartUrl}/${courseId}/add`, {}).pipe(
-          tap(() => this.updateCartForUser())  // Update the cart state after adding the course
+          tap(() => this.getCartAndEmit()) 
         );
       }),
       catchError(err => {
@@ -85,7 +82,11 @@ export class CartService {
   
   //fetch the cart items and update the cartSubject observable
   private getCartAndEmit(): void {
-    this.getCartItems().pipe(take(1)).subscribe(cart => this.cartSubject.next(cart));
+    this.getCartItems()
+    .pipe(take(1))
+    .subscribe(cart => {
+      this.cartSubject.next(cart)
+  });
   }
 
 
