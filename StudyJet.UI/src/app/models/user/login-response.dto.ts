@@ -6,7 +6,7 @@ export interface LoginResponse {
     resetToken?: string;
     token?: string;
     roles?: string[];
-    username?: string;
+    userName?: string;
     profilePictureUrl?: string;
     fullName?: string;
     userID?: string;

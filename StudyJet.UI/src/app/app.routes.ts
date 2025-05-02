@@ -14,6 +14,11 @@ import { CourseDetailComponent } from './components/course-detail/course-detail.
 import { AdminDashboardComponent } from './components/admin-dashboard/admin-dashboard.component';
 import { CartComponent } from './components/cart/cart.component';
 import { WishlistComponent } from './components/wishlist/wishlist.component';
+import { SecuritySettingsComponent } from './components/security-settings/security-settings.component';
+import { ChangePasswordComponent } from './components/change-password/change-password.component';
+import { Enable2faComponent } from './components/enable2fa/enable2fa.component';
+import { Confirm2faComponent } from './components/confirm2fa/confirm2fa.component';
+import { Verify2faLoginComponent } from './components/verify2fa-login/verify2fa-login.component';
 
 
 
@@ -58,8 +63,20 @@ export const routes: Routes = [
 
     // Other common routes
     { path: 'confirmation', component: EmailConfirmationComponent },
-   
+    { path: 'verify2fa-login', component: Verify2faLoginComponent },
+    { path: 'confirm-2fa', component: Confirm2faComponent},
   
+
+
+    { path: 'security-settings', component: SecuritySettingsComponent, canActivate: [AuthGuard],
+        children: [
+          { path: '', redirectTo: 'change-password', pathMatch: 'full' },
+          { path: 'change-password', component: ChangePasswordComponent },
+          { path: 'enable-2fa', component: Enable2faComponent },
+        ],
+      },
+      
+      { path: '**', redirectTo: '/home' }
   
    
 ];

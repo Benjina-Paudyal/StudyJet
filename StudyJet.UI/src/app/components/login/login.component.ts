@@ -33,16 +33,15 @@ export class LoginComponent {
     private wishlistService: WishlistService,
     private navbarService: NavbarService,
     private userService: UserService,
-    private imageService: ImageService,
     private cookieService: CookieService
-  ){
+  ) {
     // Initialize form with validators
     this.loginForm = this.formBuilder.group({
-      Email: ['',[Validators.required, Validators.email]],
+      Email: ['', [Validators.required, Validators.email]],
       Password: ['', [Validators.required]],
     });
   }
-  
+
   // Form field accessors for easy reference
   get email() {
     return this.loginForm.get('Email');
@@ -51,7 +50,7 @@ export class LoginComponent {
   get password() {
     return this.loginForm.get('Password');
   }
-  
+
   onSubmit() {
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
@@ -64,41 +63,38 @@ export class LoginComponent {
       Password: this.password?.value,
     };
     this.authService.login(loginData).subscribe({
-      next: (response) =>{
-        if(response.requires2FA) {
-          this.router.navigate(['/verify-2fa']);
-        }else if (response.requiresPasswordChange) {
+      next: (response) => {
+        if (response.requires2FA) {
+          this.cookieService.set('authEmail', loginData.Email);
+          this.router.navigate(['/verify2fa-login']);
+        } else if (response.requiresPasswordChange) {
           this.router.navigate(['/reset-password']);
         } else {
           this.authService.handleSuccessfulLogin(response);
           this.profileImageUrl = this.authService.getProfileImage();
-          // this.profileImageUrl = this.imageService.getProfileImageUrl(response.profilePictureUrl ?? 'default.png');
-
-          // Store profile picture URL in cookies to persist across page refreshes
-        this.cookieService.set('profilePictureUrl', this.profileImageUrl, { expires: 7 });
+          this.cookieService.set('profilePictureUrl', this.profileImageUrl, { expires: 7 });
           this.loadWishlist();
-
           this.authService.getNavbarTypeFromRoles().subscribe((navbarType) => {
-            this.navbarService.setNavbarType(navbarType);
-            this.navigateToDashboard(navbarType);
+          this.navbarService.setNavbarType(navbarType);
+          this.navigateToDashboard(navbarType);
           });
-          
+
         }
         this.loading = false;
       },
-        error: (error: HttpErrorResponse) => {
-          this.loading = false;
-          if (error.status === 401) {
-            this.errorMessage = 'Incorrect email or password. Please try again.';
-          } else if (error.error?.message === 'ChangePasswordRequired') {
-            this.router.navigate(['/reset-password'], {
-              state: { email: this.email?.value },
-            });
-          } else {
-            this.errorMessage = 'An unknown error occurred. Please try again later.';
-          }
-        },
-      });
+      error: (error: HttpErrorResponse) => {
+        this.loading = false;
+        if (error.status === 401) {
+          this.errorMessage = 'Incorrect email or password. Please try again.';
+        } else if (error.error?.message === 'ChangePasswordRequired') {
+          this.router.navigate(['/reset-password'], {
+            state: { email: this.email?.value },
+          });
+        } else {
+          this.errorMessage = 'An unknown error occurred. Please try again later.';
+        }
+      },
+    });
   }
 
   private loadWishlist() {
@@ -115,21 +111,21 @@ export class LoginComponent {
 
   // Navigate to dashboard based on the navbar type (Admin, Instructor, Student)
   private navigateToDashboard(navbarType: 'admin' | 'instructor' | 'student' | 'default') {
-      switch (navbarType) {
-        case 'admin':
-          this.router.navigate(['/admin-dashboard']);
-          break;
-        case 'instructor':
-          this.router.navigate(['/instructor-dashboard']);
-          break;
-        case 'student':
-          this.router.navigate(['/student-dashboard']);
-          break;
-        default:
-          this.router.navigate(['/home']);
-          break;
-      }
-    
+    switch (navbarType) {
+      case 'admin':
+        this.router.navigate(['/admin-dashboard']);
+        break;
+      case 'instructor':
+        this.router.navigate(['/instructor-dashboard']);
+        break;
+      case 'student':
+        this.router.navigate(['/student-dashboard']);
+        break;
+      default:
+        this.router.navigate(['/home']);
+        break;
+    }
+
   }
 }
 

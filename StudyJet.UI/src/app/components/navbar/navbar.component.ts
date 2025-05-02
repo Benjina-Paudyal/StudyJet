@@ -13,7 +13,6 @@ import { PurchaseCourseService } from '../../services/purchase-course.service';
 import { WishlistService } from '../../services/wishlist.service';
 import { CartService } from '../../services/cart.service';
 import { InactivityService } from '../../services/inactivity.service';
-import { NotificationService } from '../../services/notification.service';
 import { ImageService } from '../../services/image.service';
 import { CookieService } from 'ngx-cookie-service';
 import { ChangeDetectorRef } from '@angular/core';
@@ -66,7 +65,7 @@ export class NavbarComponent implements OnInit {
     private authService: AuthService,
     private imageService: ImageService,
     private inactivityService: InactivityService,
-    private changeDetectorRef: ChangeDetectorRef,
+    private cdr: ChangeDetectorRef,
   ) {
     this.navbarType$ = this.navbarService.navbarType$;
   }
@@ -94,6 +93,16 @@ export class NavbarComponent implements OnInit {
       })
     );
 
+      // Subscribe to navbar type changes
+      this.subscriptions.push(
+        this.authService.navbarType$.subscribe((navbarType) => {
+          this.navbarType = navbarType;
+          console.log('Navbar type updated:', navbarType); // For debugging
+          this.cdr.detectChanges(); // Manually trigger change detection if necessary
+        })
+      );
+    
+
     this.subscriptions.push(
       this.authService.isAuthenticated$.subscribe((isAuthenticated) => {
         this.isAuthenticated = isAuthenticated;
@@ -106,6 +115,7 @@ export class NavbarComponent implements OnInit {
           this.loadPurchasedCourses();
           this.updatePlaceholderText(window.innerWidth);
         }
+        this.cdr.detectChanges();
       })
     );
   }
@@ -225,7 +235,7 @@ export class NavbarComponent implements OnInit {
     this.profileImageUrl = '/images/profiles/default.png';
 
     // Manually trigger change detection to update the UI
-    this.changeDetectorRef.detectChanges();
+    this.cdr.detectChanges();
   }
 
 

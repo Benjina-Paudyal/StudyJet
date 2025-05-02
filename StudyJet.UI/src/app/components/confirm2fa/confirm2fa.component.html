@@ -1,0 +1,35 @@
+<div class="container">
+  <h3 class="text-success mb-4 text-center fw-bold mt-5">Confirm Two-Factor Authentication</h3>
+
+  <p class="fw-bold">
+    Enter the 6-digit code from your authenticator app to complete the setup.
+  </p>
+
+  <form [formGroup]="verifyForm" (ngSubmit)="onSubmit()">
+    <div class="mt-3">
+      <label for="twoFactorCode" class="form-label">2FA Code</label>
+      <input
+        type="text"
+        id="twoFactorCode"
+        formControlName="code"
+        class="form-control"
+        placeholder="Enter the 6-digit code"
+      />
+    </div>
+
+    <button type="submit" class="btn btn-success mt-3" [disabled]="loading">
+      Verify 2FA
+    </button>
+  </form>
+
+  <div *ngIf="errorMessage" class="alert alert-danger mt-3">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="successMessage" class="alert alert-success mt-3">
+    {{ successMessage }}
+  </div>
+</div>
+
+
+  

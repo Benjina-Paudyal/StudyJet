@@ -9,6 +9,8 @@ export *from './auth/forgot-password-response.dto';
 export *from './auth/verify-password-request.dto';
 export *from './auth/verify-password-response.dto';
 export *from './auth/reset-password-response.dto';
+export *from './auth/verify-2fa-response.dto';
+export *from './auth/auth-types.dto';
 
 
 export *from './user/user-login.dto';

@@ -1,0 +1,51 @@
+.cart-image {
+    width: 150px;  
+    height: 150px;
+    object-fit: cover;
+    border-radius: 8px; 
+  }
+  
+  
+  .ms-2 {
+    margin-left: 10px; 
+  }
+  
+  
+  .ms-md-2 {
+    margin-left: 10px;  
+  }
+  
+  .list-group-item a {
+    text-decoration: none; 
+  }
+  
+  .list-group-item a:hover {
+    text-decoration: underline; 
+  }
+  
+  .profile-image {
+    border: 1px solid #f1f9f3; 
+  }
+  
+
+  a {
+    color: black; 
+    padding: 10px; 
+    text-decoration: none; 
+  }
+  
+
+  a:active,
+  a:focus {
+    color: inherit;
+    outline: none; 
+  }
+  
+  .active-link {
+    background-color: #198754 !important; 
+    color: white !important;
+    font-weight: bold;
+    border-radius: 5px;
+    padding: 8px;
+    display: block;
+  }

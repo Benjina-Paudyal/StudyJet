@@ -22,10 +22,7 @@ export class CategoryCourseComponent implements OnInit{
   wishlist: WishlistItem[] = [];
   isAuthenticated = false;
   private subscriptions = new Subscription();
-   private destroy$ = new Subject<void>();
-  
-
-
+  private destroy$ = new Subject<void>();
 
   constructor (
     private route: ActivatedRoute,
