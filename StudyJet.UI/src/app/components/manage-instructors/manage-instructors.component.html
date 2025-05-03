@@ -1,0 +1,38 @@
+<div class="container mt-4 py-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold mb-4 ">Registered Instructors: {{ instructors.length }}</h2>
+    <button class="btn btn-success" (click)="navigateToRegisterInstructor()">
+      +Add Instructor
+    </button>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6 mb-4 mt-4" *ngFor="let instructor of instructors">
+      <div class="card shadow-sm p-3 d-flex flex-row align-items-center">
+
+
+        <!-- Profile Image -->
+        <div class="profile-image-container me-3">
+          <img *ngIf="instructor.profilePictureUrl" [src]="'https://localhost:7248' + instructor.profilePictureUrl"
+            alt="Profile" class="profile-image" />
+        </div>
+
+        <!-- Instructor Information -->
+        <div class="instructor-info">
+          <h5 class="fw-bold">{{ instructor.fullName }}</h5>
+          <p class="mb-1"><strong>Username:</strong> {{ instructor.userName }}</p>
+          <p class="mb-1"><strong>Email:</strong> {{ instructor.email }}</p>
+          <p class="mb-0">
+            <strong>Courses Taught:</strong>
+            <span *ngIf="instructor.createdCourses && instructor.createdCourses.length > 0; else noCourses">
+              <span *ngFor="let course of instructor.createdCourses; let i = index">
+                {{ course.title }}<span *ngIf="i < instructor.createdCourses.length - 1">, </span>
+              </span>
+            </span>
+            <ng-template #noCourses>None</ng-template>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

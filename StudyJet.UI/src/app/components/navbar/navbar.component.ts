@@ -76,7 +76,6 @@ export class NavbarComponent implements OnInit {
     this.navbarType = 'hidden';
     this.loadCategories();
 
-
   // Subscribe to navbar type changes
   this.subscriptions.push(
     this.navbarService.navbarType$.subscribe((type) => {
@@ -105,14 +104,15 @@ export class NavbarComponent implements OnInit {
         this.isAuthenticated = isAuthenticated;
         if (isAuthenticated) {
           const rawProfileImage = this.authService.getProfileImage();
-          this.profileImageUrl = this.imageService.getProfileImageUrl(rawProfileImage);
+          this.profileImageUrl = `${this.imageService.getProfileImageUrl(rawProfileImage)}?t=${new Date().getTime()}`;
+          //this.profileImageUrl = this.imageService.getProfileImageUrl(rawProfileImage);
+          this.cdr.detectChanges();
 
           this.cartService.updateCartForUser();
           this.loadWishlist();
           this.loadPurchasedCourses();
           this.updatePlaceholderText(window.innerWidth);
         }
-        this.cdr.detectChanges();
       })
     );
     

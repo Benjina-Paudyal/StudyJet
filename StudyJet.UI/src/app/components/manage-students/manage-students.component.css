@@ -1,0 +1,34 @@
+
+
+.profile-image-container {
+    flex: 0 0 auto; 
+    width: 100px; 
+    height: 120px; 
+    display: flex;
+    align-items: center; 
+    justify-content: center; 
+    border: 2px solid green; 
+    overflow: hidden;
+  }
+  
+  /* Profile image */
+  .profile-image {
+    width: 100%;
+    height: 100%; 
+    object-fit: cover; 
+  }
+  
+  /* Container for student information */
+  .student-info {
+    flex: 1; 
+    padding-left: 20px; 
+  }
+  
+  /* Card layout */
+  .card {
+    display: flex;
+    align-items: center; 
+    border: 1px solid green; 
+    border-radius: 10px; 
+    padding: 15px; 
+  }

@@ -54,7 +54,7 @@ export class CourseService {
   // Fetch pending courses
 getPendingCourses(): Observable<Course[]> {
   return this.http
-    .get<Course[]>(`${this.apiUrl}/courses/pending`)
+    .get<Course[]>(`${this.apiUrl}/course/pending`)
     .pipe(catchError(this.handleError<Course[]>('getPendingCourses', [])));
 }
 
@@ -75,7 +75,7 @@ getPendingCourses(): Observable<Course[]> {
 
   // Fetch total course count
   getCourseCount(): Observable<number> {
-    return this.http.get<number>(`${this.apiUrl}/courses/GetTotalCourses`).pipe(
+    return this.http.get<number>(`${this.apiUrl}/course/GetTotalCourses`).pipe(
       catchError(this.handleError<number>('getCourseCount', 0))
     );
   }
@@ -83,7 +83,7 @@ getPendingCourses(): Observable<Course[]> {
   
  // Approve new course
   approveCourse(courseId: number): Observable<any> {
-    return this.http.put(`${this.apiUrl}/courses/approve/${courseId}`, {});
+    return this.http.put(`${this.apiUrl}/course/approve/${courseId}`, {});
   }
   
 // Approve course update
@@ -92,7 +92,7 @@ approveCourseUpdate(courseId: number): Observable<any> {
     console.error('Invalid courseId passed:', courseId);
     return throwError(() => new Error('Invalid course ID provided'));
   }
-  return this.http.put(`${this.apiUrl}/courses/approve-update/${courseId}`, {});
+  return this.http.put(`${this.apiUrl}/course/approve-update/${courseId}`, {});
 }
 
 
@@ -115,7 +115,6 @@ getTotalCoursesForInstructor(): Observable<{ totalCourses: number }> {
 
 // Add a new course
 createCourse(courseData: any): Observable<any> {
-  // Ensure course status is explicitly set to 'Pending'
   courseData.status = "Pending";
   return this.http.post<any>(`${this.apiUrl}/course/create`, courseData)
     .pipe(

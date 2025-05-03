@@ -33,10 +33,7 @@ export class AuthService {
   private checkAuthState(): void {
     const token = this.cookieService.get('authToken');
     const username = this.cookieService.get('authEmail');
-
-    console.log('Auth Token:', token);  // Log the auth token
-  console.log('Auth Email:', username);  // Log the auth email
-
+    
     if (token && username && !this.isTokenExpired(token)) {
       this.isAuthenticatedSubject.next(true);
     } else {
@@ -151,7 +148,6 @@ export class AuthService {
         if (response.requiresPasswordChange && response.resetToken) {
           sessionStorage.setItem('resetToken', response.resetToken);
           sessionStorage.setItem('email', user.Email);
-          this.router.navigate(['/reset-password']);
           return;
         }
         if (response.token && response.userName && response.roles) {
@@ -174,10 +170,7 @@ export class AuthService {
     }
     const profilePictureUrl =
       response.profilePictureUrl || '/images/profiles/profilepic.png';
-
-        // Update navbar type based on roles
     this.updateNavbarType(response.roles);
-
 
     // Store the email in cookies
     this.cookieService.set('authEmail', response.userName, {
@@ -357,11 +350,12 @@ export class AuthService {
   }
 
   // Reset Password
-  resetPassword(token: string, newPassword: string): Observable<ResetPasswordResponse> {
+  resetPassword(email: string, token: string, newPassword: string): Observable<ResetPasswordResponse> {
     return this.http
-      .post<ResetPasswordResponse>(`${this.apiUrl}/reset-password`, { token, newPassword })
+      .post<ResetPasswordResponse>(`${this.apiUrl}/reset-password`, { email, token, newPassword })
       .pipe(catchError(this.handleError<ResetPasswordResponse>('resetPassword')));
   }
+  
 
   // verify current password
   verifyCurrentPassword(

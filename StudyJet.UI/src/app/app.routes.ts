@@ -19,6 +19,14 @@ import { ChangePasswordComponent } from './components/change-password/change-pas
 import { Enable2faComponent } from './components/enable2fa/enable2fa.component';
 import { Confirm2faComponent } from './components/confirm2fa/confirm2fa.component';
 import { Verify2faLoginComponent } from './components/verify2fa-login/verify2fa-login.component';
+import { ForgotPasswordComponent } from './components/forgot-password/forgot-password.component';
+import { ResetPasswordComponent } from './components/reset-password/reset-password.component';
+import { InstructorCoursesComponent } from './components/instructor-courses/instructor-courses.component';
+import { InstructorStudentsComponent } from './components/instructor-students/instructor-students.component';
+import { ManageStudentsComponent } from './components/manage-students/manage-students.component';
+import { ManageInstructorsComponent } from './components/manage-instructors/manage-instructors.component';
+import { ManageCoursesComponent } from './components/manage-courses/manage-courses.component';
+import { RegisterInstructorComponent } from './components/register-instructor/register-instructor.component';
 
 
 
@@ -36,6 +44,11 @@ export const routes: Routes = [
 
     // Admin routes
     { path: 'admin-dashboard', component: AdminDashboardComponent, canActivate: [AuthGuard], data:{ role:'Admin' }},
+    { path: 'manage-students', component: ManageStudentsComponent, canActivate: [AuthGuard], data: { role:'Admin'}},
+    { path: 'manage-instructors', component: ManageInstructorsComponent, canActivate: [AuthGuard], data:{role:'Admin'}},
+    {path: 'manage-courses', component: ManageCoursesComponent, canActivate: [AuthGuard], data: { role: 'Admin'}},
+    { path: 'register-instructor', component: RegisterInstructorComponent, canActivate: [AuthGuard], data: { role: 'Admin'}},
+
 
 
 
@@ -55,7 +68,9 @@ export const routes: Routes = [
     // Instructor routes
     { path: 'instructor-dashboard', component: InstructorDashboardComponent, canActivate: [AuthGuard], data: { role: 'Instructor'}},
     { path: 'add-course', component: AddCourseComponent, canActivate: [AuthGuard], data: { role: 'Instructor'}},
-
+    { path: 'instructor-courses', component: InstructorCoursesComponent, canActivate: [AuthGuard], data: { role: 'Instructor'}},
+    { path: 'instructor-students', component: InstructorStudentsComponent,canActivate: [AuthGuard], data: { role: 'Instructor'}},
+   
 
 
 
@@ -65,6 +80,8 @@ export const routes: Routes = [
     { path: 'confirmation', component: EmailConfirmationComponent },
     { path: 'verify2fa-login', component: Verify2faLoginComponent },
     { path: 'confirm-2fa', component: Confirm2faComponent},
+    { path: 'forgot-password', component: ForgotPasswordComponent},
+    { path: 'reset-password', component: ResetPasswordComponent},
   
 
 

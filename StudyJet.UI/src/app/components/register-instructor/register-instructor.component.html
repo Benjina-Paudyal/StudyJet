@@ -1,0 +1,96 @@
+
+<div class="container d-flex align-items-center justify-content-center vh-100">
+    <div class="row justify-content-center w-100">
+      <div class="col-md-6">
+        <div *ngIf="!successMessage">
+          <div class="card border-success">
+            <!-- Registration form -->
+            <div class="card-header text-center">
+              <h2 class="text-success fw-semibold">Register Instructor</h2>
+            </div>
+            <div class="card-body">
+              <form [formGroup]="registerInstructorForm" (ngSubmit)="onSubmit()" enctype="multipart/form-data">
+  
+                <!-- Full Name -->
+                <div class="form-group mb-3">
+                  <label for="FullName" class="form-label text-success required">Full Name</label>
+                  <input type="text" id="FullName" class="form-control border-success" formControlName="FullName"
+                    placeholder="Enter full name"
+                    [ngClass]="{ 'is-invalid': fullName?.touched && fullName?.invalid }" />
+  
+                  <div *ngIf="fullName?.touched && fullName?.hasError('required')" class="invalid-feedback">
+                    Full Name is required.
+                  </div>
+                </div>
+  
+                <!-- Username -->
+                <div class="form-group mb-3">
+                  <label for="UserName" class="form-label text-success required">Username</label>
+                  <input type="text" id="UserName" class="form-control border-success" formControlName="UserName"
+                    placeholder="Enter username"
+                    [ngClass]="{ 'is-invalid': userName?.touched && userName?.invalid }" />
+  
+                  <div *ngIf="userName?.touched && userName?.hasError('required')" class="invalid-feedback">
+                    Username is required.
+                  </div>
+                  <div *ngIf="userName?.touched && userName?.hasError('usernameExists')" class="invalid-feedback">
+                    This username is already taken.
+                  </div>
+                </div>
+  
+                <!-- Email -->
+                <div class="form-group mb-3">
+                  <label for="Email" class="form-label text-success required">Email</label>
+                  <input type="email" id="Email" class="form-control border-success" formControlName="Email"
+                    placeholder="Enter email"
+                    [ngClass]="{ 'is-invalid': email?.touched && email?.invalid }" />
+  
+                  <div *ngIf="email?.touched && email?.hasError('required')" class="invalid-feedback">
+                    Email is required.
+                  </div>
+                  <div *ngIf="email?.touched && email?.hasError('emailInvalid')" class="invalid-feedback">
+                    Invalid email format.
+                  </div>
+                  <div *ngIf="email?.touched && email?.hasError('emailExists')" class="invalid-feedback">
+                    This email is already registered.
+                  </div>
+                </div>
+  
+                <!-- Profile Picture (Optional) -->
+                <div class="form-group mb-3">
+                  <label for="ProfilePicture" class="form-label text-success">Profile Picture</label>
+                  <input type="file" id="ProfilePicture" class="form-control border-success"
+                    (change)="onFileChange($event)" />
+                </div>
+  
+                <!-- Error Message -->
+                <div *ngIf="errorMessage" class="alert alert-danger">
+                  {{ errorMessage }}
+                </div>
+  
+                <!-- Submit Button -->
+                <button type="submit" class="btn btn-success w-100" [disabled]="registerInstructorForm.invalid || loading">
+                  Register Instructor
+                  <span *ngIf="loading" class="spinner-border spinner-border-sm ms-2"></span>
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Success Message Modal -->
+  <div *ngIf="successMessage" class="modal show" tabindex="-1" role="dialog" style="display: block;">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title text-success">Registration Successful</h5>
+        </div>
+        <div class="modal-body text-center text-success">
+          <p>{{ successMessage }}</p>
+        </div>
+      </div>
+    </div>
+  </div>

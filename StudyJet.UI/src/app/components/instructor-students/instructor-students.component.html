@@ -1,0 +1,61 @@
+<div class="container mt-4 py-5">
+    <div class="d-flex justify-content-between align-items-center mb-5">
+      <h2 class="mb-0 fw-semibold">Enrolled Students</h2>
+    </div>
+    <div class="row">
+      <!-- Loop through courses -->
+      <div class="col-md-6 mb-4" *ngFor="let course of coursesWithStudents">
+        <div class="card shadow-sm p-3 d-flex flex-row align-items-center hover-effect">
+          <!-- Course Image -->
+          <div class="course-image-container me-3">
+            <img *ngIf="course.courseImageUrl" [src]="course.courseImageUrl" alt="Course Image"
+              class="course-image img-fluid rounded" />
+            <div *ngIf="!course.imageUrl" class="bg-light d-flex align-items-center justify-content-center rounded">
+              <span class="text-muted">No Image</span>
+            </div>
+          </div>
+  
+          <!-- Course Information -->
+          <div class="course-info flex-grow-1">
+            <h5 class="fw-bold mb-2 text-success">{{ course.title }}</h5>
+            <!-- List of Students -->
+            <div *ngIf="course.students && course.students.length > 0; else noStudents">
+              <p class="mb-2"><strong>Purchased By:</strong></p>
+              <div *ngFor="let student of course.students" class="student-info mb-3">
+                <div class="d-flex flex-row align-items-center">
+  
+                   <!-- Student Profile Picture -->
+                  <div class="profile-image-container me-3">
+                    <img 
+                    *ngIf="student.profilePictureUrl" 
+                    [src]="student.profilePictureUrl" 
+                    alt="Profile"
+                    class="profile-image" />
+                <!-- Fallback if no profile picture -->
+                <div *ngIf="!student.profilePictureUrl" class="profile-image-placeholder">
+                  <i class="fas fa-user"></i>
+                </div>
+              </div>
+  
+  
+                  <!-- Student Details -->
+                  <div class="student-details">
+                    <p class="mb-1"><strong>Name:</strong> {{ student.fullName }}</p>
+                    <p class="mb-1"><strong>Email:</strong> {{ student.email }}</p>
+                    <p class="mb-1"><strong>Purchase Date:</strong> {{ student.purchaseDate | date }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+  
+            <!-- If no students are enrolled -->
+            <ng-template #noStudents>
+              <div class="alert alert-info text-center">
+                No students have purchased this course yet.
+              </div>
+            </ng-template>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>

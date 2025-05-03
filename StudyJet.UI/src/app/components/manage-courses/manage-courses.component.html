@@ -1,0 +1,68 @@
+<div class="container mt-4 py-5">
+    <h2 class="fw-bold mb-5">Available Courses: {{ courses.length }}</h2>
+  
+    <div class="row">
+      <div class="col-md-6 mb-4" *ngFor="let course of courses">
+        <div class="card shadow-sm p-3 d-flex flex-row align-items-center hover-effect">
+          <!-- Course Image -->
+          <div class="course-image-container me-3" style="width: 100px; height: 100px;">
+            <img *ngIf="course.imageUrl" [src]="course.imageUrl" alt="Course Image"
+              class="course-image img-fluid rounded" />
+            <div *ngIf="!course.imageUrl" class="bg-light d-flex align-items-center justify-content-center rounded"
+              style="width: 100px; height: 100px;">
+              <span class="text-muted">No Image</span>
+            </div>
+          </div>
+  
+          <!-- Course Information -->
+          <div class="course-info flex-grow-1">
+            <!-- Title always in success (green) color -->
+            <h5 class="fw-bold mb-2 text-success">
+              {{ course.title }}
+              <span *ngIf="course.isUpdate" class="badge bg-info text-dark ms-2">Update</span>
+            </h5>
+            <p class="mb-1"><strong>Instructor:</strong> {{ course.instructorName }}</p>
+            <p class="mb-1"><strong>Price:</strong> {{ course.price }} DKK</p>
+  
+            <!-- Status and Approve button -->
+            <div class="d-flex justify-content-between align-items-center w-100 mt-2">
+              <!-- Status message with conditional coloring -->
+              <p class="mb-0">
+                <strong>Status:</strong>
+                <span *ngIf="course.status === 'Approved'" class="text-success fw-bold">✅ Approved</span>
+                <span *ngIf="course.status === 'Pending'" class="text-warning fw-bold">
+                  ⏳ {{ course.isUpdate ? 'Update Pending' : 'Pending' }}
+                </span>
+                <span *ngIf="course.status === 'Rejected'" class="text-danger fw-bold">❌ Rejected</span>
+              </p>
+  
+              <!-- Action Buttons -->
+              <div *ngIf="isAdmin" class="d-flex justify-content-end gap-2">
+                <!-- Approve button -->
+                <button *ngIf="course.status === 'Pending'" 
+                        (click)="approveCourse(course)"
+                        [disabled]="isApproving"
+                        class="btn btn-success btn-sm hover-effect">
+                  {{ isApproving ? 'Approving...' : 'Approve' }}
+                </button>
+  
+                <!-- Reject button -->
+                <button *ngIf="course.status === 'Pending'" 
+                        (click)="rejectCourse(course)"
+                        [disabled]="isRejecting" 
+                        class="btn btn-danger btn-sm">
+                  {{ isRejecting ? 'Rejecting...' : 'Reject' }}
+                </button>
+  
+                <!-- View Details button -->
+                <a [routerLink]="['/courses', course.courseID]" 
+                   class="btn btn-secondary btn-sm hover-effect">
+                  View Details
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>

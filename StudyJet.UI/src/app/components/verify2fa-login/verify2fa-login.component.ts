@@ -5,6 +5,7 @@ import { AuthService } from '../../services/auth.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ChangeDetectorRef } from '@angular/core';
+import { NavbarService } from '../../services/navbar.service';
 
 @Component({
   selector: 'app-verify2fa-login',
@@ -23,6 +24,7 @@ export class Verify2faLoginComponent implements OnInit{
       private authService: AuthService, 
       private router: Router,
       private cookieService: CookieService,
+      private navbarService: NavbarService,
       private cdr: ChangeDetectorRef
     ) {}
   
@@ -35,28 +37,30 @@ export class Verify2faLoginComponent implements OnInit{
     }
     
     verify2FALogin() {
-      console.log('2FA login started with code:', this.code); 
-
+      // temporary
+      this.navbarService.setNavbarType('hidden');
+    
       this.authService.verify2FALogin(this.code).subscribe({
         next: (response) => {
-          console.log('2FA response:', response); // Log the response to inspect it
           if (response.token) {
-            this.authService.handleSuccessfulLogin(response);
+            this.authService.handleSuccessfulLogin(response);  // Handle successful login
             const roles = response.roles || [];
-
+    
             this.cdr.detectChanges();
-            
-            // slight delay to ensure all state is updated
+    
             setTimeout(() => {
+              this.authService.getNavbarTypeFromRoles().subscribe((navbarType) => {
+                this.navbarService.setNavbarType(navbarType); // Update navbar type
+              });
+    
               if (roles.includes('Admin')) {
                 this.router.navigate(['/admin-dashboard'], { 
                   replaceUrl: true 
                 });
               } else if (roles.includes('Instructor')) {
-                // Force reload for instructor dashboard
                 this.router.navigateByUrl('/', {skipLocationChange: true}).then(() => {
                   this.router.navigate(['/instructor-dashboard'], {
-                    replaceUrl: true
+                    replaceUrl: true 
                   });
                 });
               } else {
@@ -64,7 +68,7 @@ export class Verify2faLoginComponent implements OnInit{
                   replaceUrl: true 
                 });
               }
-            }, 100); // 100ms delay
+            }, 1000); 
           }
         },
         error: (error) => {
@@ -72,5 +76,6 @@ export class Verify2faLoginComponent implements OnInit{
         }
       });
     }
+    
   }
   

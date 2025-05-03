@@ -6,7 +6,6 @@ import { WishlistService } from '../../services/wishlist.service';
 import { Router, RouterModule } from '@angular/router';
 import { NavbarService } from '../../services/navbar.service';
 import { UserService } from '../../services/user.service';
-import { ImageService } from '../../services/image.service';
 import { CookieService } from 'ngx-cookie-service';
 import { HttpErrorResponse } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
@@ -56,27 +55,48 @@ export class LoginComponent {
       this.loginForm.markAllAsTouched();
       return;
     }
+
     this.loading = true;
     this.errorMessage = null;
+
     const loginData: UserLogin = {
       Email: this.email?.value,
       Password: this.password?.value,
     };
+
+    // temporary
+    this.navbarService.setNavbarType('hidden');
     this.authService.login(loginData).subscribe({
       next: (response) => {
+
         if (response.requires2FA) {
+          // Handle 2FA case
           this.cookieService.set('authEmail', loginData.Email);
           this.router.navigate(['/verify2fa-login']);
+
         } else if (response.requiresPasswordChange) {
-          this.router.navigate(['/reset-password']);
+          // User needs to reset password after email confirmation
+          this.cookieService.set('resetToken', response.resetToken ?? '', { secure: true, sameSite: 'Strict' });
+          this.cookieService.set('mail', response.email ?? '', { secure: true, sameSite: 'Strict' }); 
+
+          // Navigate to the reset password page, passing the email directly from the response
+          this.router.navigate(['/reset-password'], {
+            state: { 
+              email: response.email ?? '',
+              token: response.resetToken ?? '' },  
+          });
+
         } else {
           this.authService.handleSuccessfulLogin(response);
           this.profileImageUrl = this.authService.getProfileImage();
           this.cookieService.set('profilePictureUrl', this.profileImageUrl, { expires: 7 });
           this.loadWishlist();
+
           this.authService.getNavbarTypeFromRoles().subscribe((navbarType) => {
-          this.navbarService.setNavbarType(navbarType);
-          this.navigateToDashboard(navbarType);
+            setTimeout(() => {
+              this.navbarService.setNavbarType(navbarType);
+              this.navigateToDashboard(navbarType);
+            }, 1000);
           });
 
         }

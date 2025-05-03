@@ -1,0 +1,59 @@
+<div class="container mt-4 py-5">
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <h2 class="mb-0">My Courses</h2>
+        <button class="btn btn-success" (click)="navigateToAddCourse()">
+            +Add Course
+        </button>
+    </div>
+    <div class="row">
+        <div class="col-md-6 mb-4" *ngFor="let course of courses">
+            <div class="card shadow-sm p-3 d-flex flex-row align-items-center hover-effect mb-5">
+                <!-- Course Image -->
+                <div class="course-image-container me-3" style="width: 100px; height: 100px;">
+                    <img *ngIf="course.imageUrl" [src]="course.imageUrl" alt="Course Image"
+                        class="course-image img-fluid rounded" />
+                    <div *ngIf="!course.imageUrl"
+                        class="bg-light d-flex align-items-center justify-content-center rounded"
+                        style="width: 100px; height: 100px;">
+                        <span class="text-muted">No Image</span>
+                    </div>
+                </div>
+                <!-- Course Information -->
+                <div class="course-info flex-grow-1">
+                    <h5 class="fw-bold mb-2 text-success">{{ course.title }}</h5>
+                    <p class="mb-1">Updated date:{{ course.lastUpdatedDate | date: 'mediumDate' }}</p>
+
+                    <p class="mb-1">
+                        Status: 
+                        <span [class]="
+                            course.status === 'Approved' ? 'text-success fw-bold' :
+                            course.status === 'Pending' ? 'text-warning fw-bold' :
+                            course.status === 'Rejected' ? 'text-danger fw-bold' : ''">
+                            {{ 
+                                course.status === 'Approved' ? '✅ Approved' :
+                                course.status === 'Rejected' ? '❌ Rejected' :
+                                course.status === 'Pending' ? '⏳ Pending' : course.status
+                            }}
+                        </span>
+                    </p>
+
+                </div>
+                <div class="d-flex flex-column align-items-end">
+                    <a href="javascript:void(0)" (click)="updateCourse(course.courseID)"
+                        class="text-success mb-2 text-decoration-none fw-bold">
+                        Update
+                    </a>
+                    <a [routerLink]="['/courses', course.courseID]" class="text-success text-decoration-none fw-bold">
+                        View Details
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-12 text-end">
+            <h3 class="fw-bold ">Total Courses: {{ courses.length }}</h3>
+        </div>
+    </div>
+</div>

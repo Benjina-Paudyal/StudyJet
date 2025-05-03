@@ -10,5 +10,6 @@ export interface LoginResponse {
     profilePictureUrl?: string;
     fullName?: string;
     userID?: string;
+    email?: string;
   }
   
