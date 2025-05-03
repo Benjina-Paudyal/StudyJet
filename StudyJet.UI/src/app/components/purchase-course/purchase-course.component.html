@@ -1,0 +1,39 @@
+
+<section>
+    <div class="container">
+      <h2 class="mb-5 text-success py-5 fw-bold">My Learning</h2>
+  
+      <!-- Purchased Courses List -->
+      <div class="row">
+        <div
+          class="col-lg-2 col-md-4 col-sm-6 mb-4 course-wrapper"
+          *ngFor="let course of purchasedCourses; trackBy: trackByCourseId"
+          style="position: relative;"
+        >
+          <!-- Course Card -->
+          <a [routerLink]="['/courses', course.courseID]" class="card h-100 text-center" style="cursor:pointer; text-decoration: none;">
+            <img [src]="course.imageUrl" class="card-img-top img-fluid" alt="{{ course.title }}" style="object-fit: cover; height: 120px;" />
+            <div class="card-body">
+              <h5 class="card-title">{{ course.title }}</h5>
+              <p class="card-text text-muted">{{ course.instructorName }}</p>
+            </div>
+          </a>
+  
+          <!-- Buy Now Button (Only Show If Course Is Not Purchased) -->
+          <button
+            *ngIf="!isCoursePurchased(course.courseID)"
+            class="btn btn-primary mt-2 w-100"
+            (click)="proceedToCheckout(course.courseID)"
+          >
+            Buy Now
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- If No Courses Purchased -->
+  <ng-template #noCourses>
+    <p class="text-secondary ms-5">You have no purchased courses yet.</p>
+  </ng-template>
+  

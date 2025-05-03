@@ -1,0 +1,33 @@
+<section class="d-flex justify-content-center">
+    <div class="container">
+      <div class="purchase-history">
+        <h2 class="mb-5 py-5 text-success fw-bold mt-5">Purchase History</h2>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Courses</th>
+              <th>Purchased Date</th>
+              <th>Total Price</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let course of purchasedCourses; trackBy: trackByCourseId">
+              <td>
+                <a 
+                  (click)="navigateToDetail(course.courseID)" 
+                  class="text-success fw-bold" 
+                  style="cursor: pointer; text-decoration: none;">
+                  {{ course.title }}
+                </a>
+              </td>
+              <td>{{ course.purchaseDate | date }}</td>
+              <td>{{ course.totalPrice.toFixed(2) }} DKK</td>
+            </tr>
+            <tr *ngIf="purchasedCourses.length === 0">
+              <td colspan="3" class="text-danger">No purchased courses found.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
