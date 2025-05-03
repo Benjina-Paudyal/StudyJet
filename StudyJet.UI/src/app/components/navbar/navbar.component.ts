@@ -26,9 +26,7 @@ import { ChangeDetectorRef } from '@angular/core';
   styleUrl: './navbar.component.css'
 })
 export class NavbarComponent implements OnInit {
-  navbarType: 'admin' | 'instructor' | 'student' | 'default' | 'hidden' = 'default';  // Default value
-  navbarType$: Observable<'admin' | 'instructor' | 'student' | 'default' | 'hidden'>;
-  categories: Category[] = [];
+   categories: Category[] = [];
   isNavbarCollapsed = true;
   isDropdownOpen = false;
   searchPlaceholder = 'What do you want to learn?';
@@ -49,9 +47,12 @@ export class NavbarComponent implements OnInit {
   subscriptions: Subscription[] = [];
   unreadNotificationsCount = 0;
   cartCount: number = 0;
+  // Default value for navbarType
+  navbarType: 'admin' | 'instructor' | 'student' | 'default' | 'hidden' = 'default'; 
+
+  // Initialize navbarType$ inside the constructor
+  navbarType$: Observable<'admin' | 'instructor' | 'student' | 'default' | 'hidden'>;
   
-
-
   constructor(
     private categoryService: CategoryService,
     private router: Router,
@@ -66,20 +67,25 @@ export class NavbarComponent implements OnInit {
     private imageService: ImageService,
     private inactivityService: InactivityService,
     private cdr: ChangeDetectorRef,
-  ) {
+  ) { 
     this.navbarType$ = this.navbarService.navbarType$;
   }
 
   ngOnInit() {
     this.inactivityService.startMonitoring();
+    this.navbarType = 'hidden';
     this.loadCategories();
 
-    this.subscriptions.push(
-      this.navbarType$.subscribe((navbarType) => {
-        this.navbarType = navbarType;
-      })
-    );
 
+  // Subscribe to navbar type changes
+  this.subscriptions.push(
+    this.navbarService.navbarType$.subscribe((type) => {
+      this.navbarType = type;
+       this.cdr.detectChanges();
+    })
+  );
+
+    // Subscribe to cart updates
     this.subscriptions.push(
       this.cartService.cart$.subscribe(cart => {
         this.cartItems = cart;
@@ -87,21 +93,12 @@ export class NavbarComponent implements OnInit {
       })
     );
 
+    // Subscribe to wishlist updates
     this.subscriptions.push(
       this.wishlistService.wishlist$.subscribe((wishlist) => {
         this.wishlist = wishlist;
       })
     );
-
-      // Subscribe to navbar type changes
-      this.subscriptions.push(
-        this.authService.navbarType$.subscribe((navbarType) => {
-          this.navbarType = navbarType;
-          console.log('Navbar type updated:', navbarType); // For debugging
-          this.cdr.detectChanges(); // Manually trigger change detection if necessary
-        })
-      );
-    
 
     this.subscriptions.push(
       this.authService.isAuthenticated$.subscribe((isAuthenticated) => {
@@ -118,6 +115,7 @@ export class NavbarComponent implements OnInit {
         this.cdr.detectChanges();
       })
     );
+    
   }
 
   ngOnDestroy() {

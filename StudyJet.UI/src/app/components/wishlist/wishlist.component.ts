@@ -8,6 +8,7 @@ import { NavbarService } from '../../services/navbar.service';
 import { PurchaseCourseService } from '../../services/purchase-course.service';
 import { WishlistService } from '../../services/wishlist.service';
 import { CommonModule } from '@angular/common';
+import { ImageService } from '../../services/image.service';
 
 @Component({
   selector: 'app-wishlist',
@@ -29,6 +30,7 @@ export class WishlistComponent implements OnInit, OnDestroy {
     private wishlistService: WishlistService,
     private navbarService: NavbarService,
     private authService: AuthService,
+    private imageService: ImageService,
     private purchaseCourseService: PurchaseCourseService,
     private cookieService: CookieService,
     private router: Router,
@@ -41,9 +43,11 @@ export class WishlistComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const navbarType = this.cookieService.get('navbarType');
+    const navbarType = localStorage.getItem('navbarType');
+
     const validNavbarTypes = ['admin', 'instructor', 'student', 'default', 'hidden'] as const;
-    if (validNavbarTypes.includes(navbarType as typeof validNavbarTypes[number])) {
+
+    if (navbarType && validNavbarTypes.includes(navbarType as typeof validNavbarTypes[number])) {
       this.navbarService.setNavbarType(navbarType as typeof validNavbarTypes[number]);
     }
 
@@ -53,7 +57,10 @@ export class WishlistComponent implements OnInit, OnDestroy {
     .pipe(takeUntil(this.destroy$))
     .subscribe({
       next: (updatedWishlist) => {
-        this.wishlist = updatedWishlist;
+        this.wishlist = updatedWishlist.map(item => ({
+          ...item,
+          imageUrl: this.imageService.getCourseImageUrl(item.imageUrl)
+        }));
         this.errorMessage = '';
         this.isLoading = false;
         this.cdr.detectChanges();

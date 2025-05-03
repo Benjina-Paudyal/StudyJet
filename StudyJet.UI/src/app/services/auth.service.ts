@@ -6,6 +6,7 @@ import { CookieService } from 'ngx-cookie-service';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { UserRegistration, UserLogin, LoginResponse, AuthTokenPayload, UserRegistrationResponse, ForgotPasswordResponse, ResetPasswordResponse, InstructorRegistrationResponse, ChangePasswordResponse, VerifyPasswordResponse, Disable2FAResponse, AuthResponse, } from '../models';
+import { NavbarService } from './navbar.service';
 
 @Injectable({
   providedIn: 'root',
@@ -22,7 +23,8 @@ export class AuthService {
     private http: HttpClient,
     private router: Router,
     private imageService: ImageService,
-    private cookieService: CookieService
+    private cookieService: CookieService,
+    private navbarService: NavbarService,
   ) {
     this.checkAuthState();
   }
@@ -259,6 +261,7 @@ export class AuthService {
       this.isAuthenticatedSubject.next(false);
       sessionStorage.setItem('logoutSuccess', 'true');
       await this.router.navigate(['/home']);
+      this.navbarService.setNavbarType('default');
     } catch (error) {
       console.error('Logout failed:', error);
     }
