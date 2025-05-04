@@ -11,13 +11,27 @@ namespace StudyJet.API.Services.Interface
         Task<object> LoginUserAsync(UserLoginDTO loginDto);
         Task<Result> ConfirmEmailAsync(string token, string email);
         Task<bool> Is2faEnabledAsync(string userId);
-        Task<TwoFactorResultDTO> Enable2faAsync(User user);
+        //Task<TwoFactorResultDTO> Enable2faAsync(User user);
         Task<bool> Verify2faCodeAsync(User user, string verificationCode);
         Task<bool> Disable2faAsync(string userId);
         Task<bool> ForgotPasswordAsync(string email);
         Task<bool> VerifyPasswordAsync(string email, string password);
         Task<IdentityResult> ResetPasswordAsync(string email, string token, string newPassword);
-        Task<bool> ChangePasswordAsync(string userId, ChangePasswordDTO model);
+        Task<bool> ChangePasswordAsync(string username, ChangePasswordDTO model);
+
+
+
+
+
+        Task<TwoFactorResultDTO> Initiate2faSetupAsync(User user);
+        Task<TwoFactorResultDTO> Confirm2faSetupAsync(User user, string code);
+
+
+
+
+
+
+
 
 
         // Helper

@@ -56,7 +56,7 @@ namespace StudyJet.API.Controllers
             return Ok(courses);
         }
 
-
+      
         [HttpGet("search")]
         public async Task<IActionResult> Search(string query)
         {
@@ -342,6 +342,7 @@ namespace StudyJet.API.Controllers
         }
 
 
+        [Authorize(Roles = "Admin")]
         [HttpPost("reject-updates/{courseId}")]
         public async Task<IActionResult> RejectPendingUpdates(int courseId)
         {

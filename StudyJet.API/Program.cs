@@ -32,9 +32,13 @@ if (string.IsNullOrEmpty(defaultPassword))
 if (string.IsNullOrEmpty(smtpPassword))
     throw new Exception("SMTP_PASSWORD environment variable not found.");
 if (string.IsNullOrEmpty(stripeSecretKey))
+    throw new Exception("STRIPE_SECRET_KEY environment variable not found.");
 if (string.IsNullOrEmpty(stripePublishableKey))
     throw new Exception("STRIPE_PUBLISHABLE_KEY environment variable not found.");
 
+
+// Initialize Stripe SDK
+Stripe.StripeConfiguration.ApiKey = stripeSecretKey;
 
 
 // Replace the placeholder manually in connection string

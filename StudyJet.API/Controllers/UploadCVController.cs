@@ -17,23 +17,31 @@ namespace StudyJet.API.Controllers
         [HttpPost("upload-cv")]
         public async Task<IActionResult> UploadCV(IFormFile cvFile)
         {
-            if (cvFile == null)
+            if (cvFile == null || cvFile.Length == 0)
             {
-                return BadRequest("No file uploaded.");
+                return BadRequest(new { message = "No file uploaded." });
+            }
+
+            var allowedExtensions = new[] { ".pdf" };
+            var extension = Path.GetExtension(cvFile.FileName).ToLowerInvariant();
+
+            if (!allowedExtensions.Contains(extension))
+            {
+                return BadRequest(new { message = "Only PDF files are allowed." });
             }
 
             try
             {
-                // Save the CV file and get the URL
                 var fileUrl = await _fileStorageService.SaveCVAsync(cvFile);
-
-                // Return the file URL or any other response you need
                 return Ok(new { fileUrl });
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(new { message = $"Upload failed: {ex.Message}" });
             }
         }
+
+
+
     }
 }

@@ -7,6 +7,7 @@ using StudyJet.API.DTOs.User;
 using StudyJet.API.Services.Interface;
 using StudyJet.API.DTOs;
 using StudyJet.API.DTOs.Auth;
+using Azure;
 
 namespace StudyJet.API.Controllers
 {
@@ -171,7 +172,7 @@ namespace StudyJet.API.Controllers
                 {
                     Token = token,
                     Roles = rolesList,
-                    Username = user.UserName,
+                    UserName = user.UserName,
                     FullName = user.FullName,
                     ProfilePictureUrl = user.ProfilePictureUrl ?? "/images/profiles/profilepic.png",
                     Email = user.Email,
@@ -228,7 +229,7 @@ namespace StudyJet.API.Controllers
         }
 
 
-        [Authorize]
+      /*  [Authorize]
         [HttpPost("enable-2fa")]
         public async Task<IActionResult> EnableTwoFactorAuthentication()
         {
@@ -353,7 +354,7 @@ namespace StudyJet.API.Controllers
             {
                 return StatusCode(500, new { error = "Internal server error: " + ex.Message });
             }
-        }
+        }*/
 
 
         [HttpGet("check-2fa-status")]
@@ -443,22 +444,23 @@ namespace StudyJet.API.Controllers
             }
         }
 
+
         [Authorize]
         [HttpPost("change-password")]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDTO model)
         {
-            var username = User.Identity?.Name;
+            var userId = User.FindFirst("userId")?.Value;
 
-            if (string.IsNullOrEmpty(username))
+            if (string.IsNullOrEmpty(userId))
             {
-                return BadRequest(new { message = "Username not found in token." });
+                return BadRequest(new { message = "User ID not found in token." });
             }
 
-            var result = await _authService.ChangePasswordAsync(username, model);
+            // Pass userId to the service
+            var result = await _authService.ChangePasswordAsync(userId, model);
 
             if (result)
             {
-
                 return Ok(new { Message = "Password changed successfully." });
             }
             else
@@ -505,6 +507,122 @@ namespace StudyJet.API.Controllers
 
             return Ok(new { Message = "Password has been successfully reset." });
         }
+
+
+
+
+
+
+
+
+
+        [HttpPost("initiate-2fa")]
+        [Authorize]
+        public async Task<IActionResult> Initiate2FA()
+        {
+            var email = User.FindFirstValue(ClaimTypes.Email);
+            var user = await _userService.GetUserByEmailAsync(email);
+
+            var result = await _authService.Initiate2faSetupAsync(user);
+            if (!result.Success)
+                return BadRequest(new { error = result.ErrorMessage });
+
+            return File(result.QrCodeImage, "image/png");
+        }
+
+
+
+
+        [HttpPost("confirm-2fa")]
+        [Authorize]
+        public async Task<IActionResult> Confirm2FA([FromBody] Verify2faDTO model)
+        {
+            var email = User.FindFirstValue(ClaimTypes.Email);
+            var user = await _userService.GetUserByEmailAsync(email);
+
+            var result = await _authService.Confirm2faSetupAsync(user, model.Code);
+            if (!result.Success)
+                return BadRequest(new { error = result.ErrorMessage });
+
+            return Ok(new { message = "2FA enabled successfully." });
+        }
+
+
+
+
+
+        [HttpPost("verify-2fa-login")]
+        [AllowAnonymous]  
+        public async Task<IActionResult> VerifyTwoFactorLogin([FromBody] Verify2faLoginDTO model)
+        {
+            if (model == null || string.IsNullOrEmpty(model.Code) || string.IsNullOrEmpty(model.TempToken))
+            {
+                return BadRequest(new { error = "2FA code and tempToken are required." });
+            }
+
+            try
+            {
+                var user = await _authService.ValidateTempTokenAsync(model.TempToken);
+                if (user == null)
+                {
+                    return BadRequest(new { error = "Invalid or expired temporary token." });
+                }
+
+                var isValid = await _authService.Verify2faCodeAsync(user, model.Code);
+                if (!isValid)
+                {
+                    return Unauthorized(new { error = "Invalid 2FA code." });
+                }
+
+                // Generate JWT token if the code is valid
+                var token = await _authService.GenerateJwtTokenAsync(user);
+                var roles = await _userService.GetUserRolesAsync(user);
+                var defaultProfilePicUrl = _configuration["DefaultProfilePicPaths:ProfilePicture"];
+
+                return Ok(new Verify2faLoginResponse
+                {
+                    Token = token,
+                    Roles = roles,
+                    UserName = user.UserName,
+                    FullName = user.FullName,
+                    Email = user.Email,
+                    UserID = user.Id,
+                    ProfilePictureUrl = user.ProfilePictureUrl ?? defaultProfilePicUrl,
+                });
+
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = "Internal server error: " + ex.Message });
+            }
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

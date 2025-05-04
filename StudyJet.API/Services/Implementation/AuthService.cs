@@ -173,7 +173,7 @@ namespace StudyJet.API.Services.Implementation
             return isEnabled;
         }
 
-        public async Task<TwoFactorResultDTO> Enable2faAsync(User user)
+       /* public async Task<TwoFactorResultDTO> Enable2faAsync(User user)
         {
             if (user == null)
             {
@@ -210,7 +210,7 @@ namespace StudyJet.API.Services.Implementation
                 Key = key,
                 QrCodeImage = qrCodeImage
             };
-        }
+        }*/
 
         public async Task<bool> Verify2faCodeAsync(User user, string verificationCode)
         {
@@ -251,7 +251,10 @@ namespace StudyJet.API.Services.Implementation
 
             //var resetLink = $"{appUrl}/reset-password?email={Uri.EscapeDataString(user.Email)}&token={Uri.EscapeDataString(resetToken)}";
 
-            var resetLink = $"{appUrl}/reset-password?token={Uri.EscapeDataString(resetToken)}";
+            var resetLink = $"{appUrl}/reset-password?email={Uri.EscapeDataString(user.Email)}&token={Uri.EscapeDataString(resetToken)}";
+
+
+            //var resetLink = $"{appUrl}/reset-password?token={Uri.EscapeDataString(resetToken)}";
 
             var emailResult = await _emailService.SendEmailAsync(
                 recipientEmail: user.Email,
@@ -296,6 +299,7 @@ namespace StudyJet.API.Services.Implementation
             return IdentityResult.Success;
         }
 
+
         public async Task<bool> ChangePasswordAsync(string userId, ChangePasswordDTO model)
         {
             if (string.IsNullOrEmpty(userId))
@@ -312,6 +316,63 @@ namespace StudyJet.API.Services.Implementation
             var result = await _userManager.ChangePasswordAsync(appUser, model.CurrentPassword, model.NewPassword);
             return result.Succeeded;
         }
+
+        public async Task<TwoFactorResultDTO> Initiate2faSetupAsync(User user)
+        {
+            if (user == null)
+                throw new ArgumentNullException(nameof(user));
+
+            var key = await GetOrCreateAuthenticatorKeyAsync(user);
+
+            if (string.IsNullOrWhiteSpace(key))
+            {
+                return new TwoFactorResultDTO
+                {
+                    Success = false,
+                    ErrorMessage = "Failed to retrieve a valid authenticator key."
+                };
+            }
+
+            var qrCodeUri = Generate2faQrCodeUri(user.Email, key);
+            var qrCodeImage = GenerateQRCodeImage(qrCodeUri);
+
+            return new TwoFactorResultDTO
+            {
+                Success = true,
+                Key = key,
+                QrCodeImage = qrCodeImage
+            };
+        }
+
+        public async Task<TwoFactorResultDTO> Confirm2faSetupAsync(User user, string code)
+        {
+            if (user == null)
+                throw new ArgumentNullException(nameof(user));
+
+            var isValid = await Verify2faCodeAsync(user, code);
+            if (!isValid)
+            {
+                return new TwoFactorResultDTO
+                {
+                    Success = false,
+                    ErrorMessage = "Invalid 2FA verification code."
+                };
+            }
+
+            var result = await _userManager.SetTwoFactorEnabledAsync(user, true);
+            if (!result.Succeeded)
+            {
+                return new TwoFactorResultDTO
+                {
+                    Success = false,
+                    ErrorMessage = "Failed to enable two-factor authentication."
+                };
+            }
+
+            return new TwoFactorResultDTO { Success = true };
+        }
+
+
 
 
         // Helper methods
@@ -336,8 +397,6 @@ namespace StudyJet.API.Services.Implementation
             return $"{apiBase}/api/auth/confirm-email?token={encodedToken}"
                  + $"&email={HttpUtility.UrlEncode(user.Email)}";
         }
-
-
 
         public async Task<IdentityResult> SendConfirmationEmailAsync(string email, string confirmationLink)
         {

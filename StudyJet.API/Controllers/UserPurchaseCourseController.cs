@@ -20,13 +20,16 @@ namespace StudyJet.API.Controllers
         private readonly INotificationService _notificationService;
         private readonly ICartService _cartService;
         private readonly UserManager<User> _userManager;
+        private readonly IConfiguration _configuration;
 
-        public UserPurchaseCourseController(IUserPurchaseCourseService userPurchaseCourseService, INotificationService notificationService, ICartService cartService, UserManager<User> userManager)
+
+        public UserPurchaseCourseController(IUserPurchaseCourseService userPurchaseCourseService, INotificationService notificationService, ICartService cartService, UserManager<User> userManager, IConfiguration configuration)
         {
             _userPurchaseCourseService = userPurchaseCourseService;
             _notificationService = notificationService;
             _cartService = cartService;
             _userManager = userManager;
+            _configuration = configuration;
         }
 
 
@@ -62,6 +65,7 @@ namespace StudyJet.API.Controllers
         }
 
 
+
         [HttpPost("create-checkout-session")]
         public async Task<IActionResult> CreateCheckoutSession([FromBody] PurchaseRequestDTO request)
         {
@@ -81,6 +85,7 @@ namespace StudyJet.API.Controllers
 
             return Ok(new { url = sessionUrl });
         }
+        
 
 
         [AllowAnonymous]
@@ -99,11 +104,13 @@ namespace StudyJet.API.Controllers
 
             try
             {
+                var whsec = _configuration["Stripe:whsec"];
+
                 // Construct the Stripe event with the webhook secret for verification
                 var stripeEvent = EventUtility.ConstructEvent(
                     json,
                     stripeSignature,
-                    "whsec_d0e755d201723af31f5ba7e2d91b53feac2ff422b2f5f92326ef49524f5aedfd"
+                    whsec
                 );
 
                 // Check if the event is related to a completed checkout session
@@ -112,27 +119,27 @@ namespace StudyJet.API.Controllers
                     var session = stripeEvent.Data.Object as Session;
 
                     if (session?.Metadata == null ||
-                        !session.Metadata.ContainsKey("username") ||
+                        !session.Metadata.ContainsKey("userId") ||
                         !session.Metadata.ContainsKey("courseIds"))
                     {
-                        return BadRequest(new { message = "Metadata must include username and courseIds" });
+                        return BadRequest(new { message = "Metadata must include userId and courseIds" });
                     }
 
-                    var username = session.Metadata["username"];
+                    var userId = session.Metadata["userId"];
                     var courseIds = session.Metadata["courseIds"]
                         .Split(',')
                         .Select(int.Parse)
                         .ToList();
 
                     // Process purchase
-                    var purchaseSuccess = await _userPurchaseCourseService.PurchaseCourseAsync(username, courseIds);
+                    var purchaseSuccess = await _userPurchaseCourseService.PurchaseCourseAsync(userId, courseIds);
                     if (!purchaseSuccess)
                     {
                         return BadRequest(new { message = "Failed to process purchase" });
                     }
 
                     // Fetch the student based on the username
-                    var student = await _userManager.FindByNameAsync(username);
+                    var student = await _userManager.FindByIdAsync(userId);
                     if (student == null)
                     {
                         return BadRequest(new { message = "Student not found" });
@@ -151,7 +158,7 @@ namespace StudyJet.API.Controllers
                             studentDisplayName
                         );
 
-                        var cartItemRemoved = await _cartService.RemoveCourseFromCartAsync(username, courseId);
+                        var cartItemRemoved = await _cartService.RemoveCourseFromCartAsync(userId, courseId);
                         
                     }
                 }
@@ -167,5 +174,14 @@ namespace StudyJet.API.Controllers
 
             return Ok();
         }
+
+
+
+
+
+
+
+
+
     }
 }

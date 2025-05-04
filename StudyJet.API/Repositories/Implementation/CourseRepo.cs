@@ -79,9 +79,6 @@ namespace StudyJet.API.Repositories.Implementation
                                         .Include(c => c.Category)
                                         .Where(c => courseIds.Contains(c.CourseID)) 
                                         .ToListAsync();
-           
-            if (courses == null || !courses.Any()) 
-                throw new KeyNotFoundException("Courses not found for the provided IDs.");
 
             return courses;
         }
@@ -264,46 +261,37 @@ namespace StudyJet.API.Repositories.Implementation
         {
             var instructorCourses = await _context.Courses
                 .Where(c => c.InstructorID == instructorId)
-                .Include(c => c.UserPurchaseCourses) 
+                .Include(c => c.UserPurchaseCourses)
+                .ThenInclude(upc => upc.User)
                 .ToListAsync();
 
             var coursesWithStudents = new List<CourseWithStudentsDTO>();
 
             foreach (var course in instructorCourses)
             {
+                // Creating the DTO for the course and its students
                 var courseWithStudents = new CourseWithStudentsDTO
                 {
                     CourseID = course.CourseID,
                     Title = course.Title,
                     ImageUrl = course.ImageUrl, 
-                    Students = new List<StudentDTO>()
+                    Students = course.UserPurchaseCourses
+                        .Select(upc => new StudentDTO
+                        {
+                            FullName = upc.User.FullName,  
+                            UserName = upc.User.UserName,
+                            ProfilePictureUrl = upc.User.ProfilePictureUrl,
+                            Email = upc.User.Email,
+                            PurchaseDate = upc.PurchaseDate
+                        })
+                        .ToList() 
                 };
 
-                foreach (var userPurchaseCourse in course.UserPurchaseCourses)
-                {
-                    var student = await _context.Users
-                        .Where(u => u.Id == userPurchaseCourse.UserID)
-                        .Select(u => new StudentDTO
-                        {
-
-                            FullName = u.FullName,
-                            UserName = u.UserName,
-                            ProfilePictureUrl = u.ProfilePictureUrl,
-                            Email = u.Email,
-                            PurchaseDate = userPurchaseCourse.PurchaseDate
-                        })
-                        .FirstOrDefaultAsync();
-
-                    if (student != null)
-                    {
-                        courseWithStudents.Students.Add(student);
-                    }
-                }
-
+                
                 coursesWithStudents.Add(courseWithStudents);
             }
 
-            return coursesWithStudents;
+            return coursesWithStudents;  // Returning the list of courses with students
         }
 
         public async Task<CourseUpdateDTO> SelectCourseForUpdateAsync(int courseId, string instructorId)

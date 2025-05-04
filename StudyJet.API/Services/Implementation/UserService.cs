@@ -3,6 +3,7 @@ using StudyJet.API.Data.Entities;
 using StudyJet.API.DTOs.User;
 using StudyJet.API.Repositories.Interface;
 using StudyJet.API.Services.Interface;
+using static QRCoder.PayloadGenerator;
 
 namespace StudyJet.API.Services.Implementation
 {
@@ -106,8 +107,20 @@ namespace StudyJet.API.Services.Implementation
 
         public async Task<(bool Success, string Message)> RegisterInstructorAsync(InstructorRegistrationDTO instructorRegistrationDto)
         {
-            var defaultPic = _configuration["DefaultPaths:ProfilePicture"];
-            var instructorPassword = _configuration["DefaultPaths:InstructorPassword"];
+            var defaultPic = _configuration["DefaultProfilePicPaths:ProfilePicture"];
+            var instructorPassword = _configuration["DefaultPasswordInstructor:InstructorPassword"];
+
+            // Fallback to environment variable if the config is unresolved
+            if (string.IsNullOrWhiteSpace(instructorPassword) || instructorPassword.Contains("${"))
+            {
+                instructorPassword = Environment.GetEnvironmentVariable("INSTRUCTOR_PASSWORD");
+            }
+
+            if (string.IsNullOrEmpty(defaultPic) || string.IsNullOrEmpty(instructorPassword))
+            {
+                return (false, "Missing default configuration for profile picture or password.");
+            }
+
 
             if (string.IsNullOrEmpty(defaultPic) || string.IsNullOrEmpty(instructorPassword))
             {
@@ -152,7 +165,9 @@ namespace StudyJet.API.Services.Implementation
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(instructor);
 
             var appUrl = _configuration["AppUrl"];
-            var confirmationLink = $"{appUrl}/api/auth/confirm-email?token={Uri.EscapeDataString(token)}&email={Uri.EscapeDataString(instructor.Email)}";
+            //var confirmationLink = $"{appUrl}/api/auth/confirm-email?token={Uri.EscapeDataString(token)}&email={Uri.EscapeDataString(instructor.Email)}";
+
+            var confirmationLink = $"https://localhost:7248/api/auth/confirm-email?token={Uri.EscapeDataString(token)}&email={Uri.EscapeDataString(instructor.Email)}";
 
             await _emailService.SendEmailAsync(instructor.Email, "Confirm Your Email",
                 $"Click <a href='{confirmationLink}'>here</a> to confirm your email. Your temporary password is: <strong>{instructorPassword}</strong>");
@@ -163,3 +178,5 @@ namespace StudyJet.API.Services.Implementation
 
     }
 }
+
+

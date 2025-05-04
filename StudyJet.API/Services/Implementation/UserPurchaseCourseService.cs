@@ -67,8 +67,11 @@ namespace StudyJet.API.Services.Implementation
         public async Task<string> CreateCheckoutSession(string userId, List<int> courseIds)
         {
             var courses = await _courseRepo.SelectByIdsAsync(courseIds);
-            if (courses == null || !courses.Any()) return null;
-
+            if (courses == null || !courses.Any())
+            {
+                Console.WriteLine($"No courses found for the provided IDs: {string.Join(", ", courseIds)}");
+                return null;
+            }
             try
             {
                 // Preparing the session options for Stripe
@@ -111,10 +114,15 @@ namespace StudyJet.API.Services.Implementation
                 
                 return session?.Url ?? string.Empty;
             }
+            catch (KeyNotFoundException ex)
+            {
+                Console.WriteLine($"Courses not found: {ex.Message}");
+                return null;
+            }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error creating Stripe checkout session for userId: {UserId}", userId);
-                return null;
+                Console.WriteLine($"Error creating checkout session: {ex.Message}");
+                throw; 
             }
         }
 

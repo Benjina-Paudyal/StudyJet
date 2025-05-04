@@ -69,7 +69,7 @@ namespace StudyJet.API.Services.Implementation
             {
                 if (string.IsNullOrEmpty(defaultPic))
                 {
-                    return "/images/profiles/default-profile.png";
+                    return "/images/profiles/profilepic.png";
                 }
 
                 return defaultPic;
