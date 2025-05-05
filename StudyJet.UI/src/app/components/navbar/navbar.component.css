@@ -1,5 +1,4 @@
 
-/* Background Styles */
 .custom-bg {
   background-color: rgb(212, 245, 185);
 }
@@ -8,27 +7,23 @@
   background-image: linear-gradient(to bottom, rgb(228, 244, 214), white);
 }
 
-/* Brand Styles */
 .navbar-brand {
   font-family: 'Kavoon', cursive;
   font-size: 32px;
   color: #198754;
 }
 
-/* Navbar Link Styles */
 .navbar-nav .nav-link {
   padding: 0.5rem;
   color: #198754;
   transition: color 0.3s ease, background-color 0.3s ease;
 }
 
-/* Navbar Link Hover Effect */
 .navbar-nav .nav-link:hover {
   color: #333;
   background-color: transparent;
 }
 
-/* Apply color filter on hover */
 .nav-link img {
   transition: filter 0.3s ease;
 }
@@ -37,7 +32,6 @@
   filter: brightness(0) saturate(100%) invert(20%) sepia(50%) hue-rotate(90deg) saturate(500%) brightness(80%);
 }
 
-/* Navbar Toggler */
 .navbar-toggler {
   margin-top: -10px;
   width: 20px;
@@ -59,7 +53,6 @@
   transition: 0.25s ease-in-out;
 }
 
-/* Navbar Toggler - Collapsed State */
 .navbar-toggler.collapsed .top-bar {
   position: absolute;
   top: 0;
@@ -182,21 +175,16 @@
   transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
-
-/* Profile image - don't apply hover effect */
 .nav-link .profile-image {
   filter: none; 
 }
 
-/* Optionally, to ensure no other hover effects affect it */
 .nav-link:hover .profile-image {
   filter: none;
   transform: none;
 }
 
 /* For WISHLIST */
-
-/* For larger screens, checking if the dropdown is too far to the right */
 @media (min-width: 990px) {
   .wishlist-dropdown {
     left: auto; 
@@ -210,7 +198,6 @@
   }
 }
 
-/* Ensure the dropdown menu stays visible while hovering over both the button and the dropdown */
 .nav-item.dropdown.wishlist-container:hover .wishlist-dropdown,
 .wishlist-dropdown:hover {
   display: block;
@@ -218,7 +205,6 @@
   visibility: visible;
 }
 
-/* For smaller screens, the dropdown should fit within the viewport */
 @media (max-width: 991px) {
   .wishlist-dropdown {
     left: 0 !important; 
@@ -227,10 +213,8 @@
   }
 }
 
-
 /* for cart */
 
-/* For CART - larger screens */
 @media (min-width: 990px) {
   .cart-dropdown {
     left: auto;
@@ -250,7 +234,6 @@
   visibility: visible;
 }
 
-/* For CART - smaller screens */
 @media (max-width: 991px) {
   .cart-dropdown {
     left: 0 !important;
@@ -258,10 +241,8 @@
   }
 }
 
-
-/* My Learning Dropdown */
 .my-learning-dropdown {
-  width: 250px; /* Same width as Wishlist and Cart */
+  width: 250px; 
   display: none;
   opacity: 0;
   visibility: hidden;
@@ -273,7 +254,6 @@
   transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 
-/* My Learning Dropdown on hover */
 .nav-item.dropdown.my-learning-container:hover .my-learning-dropdown,
 .my-learning-dropdown:hover {
   display: block;
@@ -281,7 +261,6 @@
   visibility: visible;
 }
 
-/* For larger screens */
 @media (min-width: 990px) {
   .my-learning-dropdown {
     left: auto;
@@ -289,7 +268,6 @@
   }
 }
 
-/* For smaller screens */
 @media (max-width: 991px) {
   .my-learning-dropdown {
     left: 0 !important;
@@ -298,8 +276,6 @@
 }
 
 
-
-/* Profile Dropdown Styles */
 .profile-dropdown {
   width: 200px;
   border: 1px solid #198754; 
@@ -314,7 +290,7 @@
   transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 
-/* Ensure dropdown stays visible when hovered */
+
 .nav-item.dropdown:hover .profile-dropdown,
 .profile-dropdown:hover {
   display: block;
@@ -322,7 +298,6 @@
   visibility: visible;
 }
 
-/* For larger screens */
 @media (min-width: 990px) {
   .profile-dropdown {
     left: auto; 
@@ -330,7 +305,6 @@
   }
 }
 
-/* For smaller screens */
 @media (max-width: 991px) {
   .profile-dropdown {
     left: 0 !important; 

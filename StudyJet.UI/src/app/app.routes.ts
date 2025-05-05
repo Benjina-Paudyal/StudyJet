@@ -31,6 +31,9 @@ import { PurchaseCourseComponent } from './components/purchase-course/purchase-c
 import { MissionComponent } from './components/mission/mission.component';
 import { SuccessComponent } from './components/success/success.component';
 import { PurchaseHistoryComponent } from './components/purchase-history/purchase-history.component';
+import { SearchResultComponent } from './components/search-result/search-result.component';
+import { NotificationComponent } from './components/notification/notification.component';
+import { UpdateCourseComponent } from './components/update-course/update-course.component';
 
 
 
@@ -44,20 +47,15 @@ export const routes: Routes = [
     { path: 'login' , component: LoginComponent},
     { path: 'category', component: CategoryComponent},
     { path: 'about', component: MissionComponent},
+    { path: 'search-result', component: SearchResultComponent},
    
-
 
     // Admin routes
     { path: 'admin-dashboard', component: AdminDashboardComponent, canActivate: [authGuard], data:{ role:'Admin' }},
     { path: 'manage-students', component: ManageStudentsComponent, canActivate: [authGuard], data: { role:'Admin'}},
     { path: 'manage-instructors', component: ManageInstructorsComponent, canActivate: [authGuard], data:{role:'Admin'}},
-    {path: 'manage-courses', component: ManageCoursesComponent, canActivate: [authGuard], data: { role: 'Admin'}},
+    { path: 'manage-courses', component: ManageCoursesComponent, canActivate: [authGuard], data: { role: 'Admin'}},
     { path: 'register-instructor', component: RegisterInstructorComponent, canActivate: [authGuard], data: { role: 'Admin'}},
-
-
-
-
-
 
     // Student routes
     { path: 'student-dashboard', component: StudentDashboardComponent, canActivate: [authGuard], data: { role: 'Student'}},
@@ -67,34 +65,20 @@ export const routes: Routes = [
     { path: 'my-learning', component: PurchaseCourseComponent, canActivate: [authGuard], data: { role: 'Student'}},
     { path: 'success',component: SuccessComponent },
 
-
-
-
-
-
-
-
-
     // Instructor routes
     { path: 'instructor-dashboard', component: InstructorDashboardComponent, canActivate: [authGuard], data: { role: 'Instructor'}},
     { path: 'add-course', component: AddCourseComponent, canActivate: [authGuard], data: { role: 'Instructor'}},
+    { path: 'update-course/:id', component: UpdateCourseComponent, canActivate: [authGuard], data: { role: 'Instructor'}},
     { path: 'instructor-courses', component: InstructorCoursesComponent, canActivate: [authGuard], data: { role: 'Instructor'}},
     { path: 'instructor-students', component: InstructorStudentsComponent,canActivate: [authGuard], data: { role: 'Instructor'}},
    
-
-
-
-
-
     // Other common routes
     { path: 'confirmation', component: EmailConfirmationComponent },
     { path: 'verify2fa-login', component: Verify2faLoginComponent },
     { path: 'confirm-2fa', component: Confirm2faComponent},
     { path: 'forgot-password', component: ForgotPasswordComponent},
     { path: 'reset-password', component: ResetPasswordComponent},
-  
-
-
+    { path: 'notifications', component: NotificationComponent },
     { path: 'security-settings', component: SecuritySettingsComponent, canActivate: [authGuard],
         children: [
           { path: '', redirectTo: 'change-password', pathMatch: 'full' },
@@ -102,8 +86,6 @@ export const routes: Routes = [
           { path: 'enable-2fa', component: Enable2faComponent },
         ],
       },
-      
       { path: '**', redirectTo: '/home' }
-  
    
 ];

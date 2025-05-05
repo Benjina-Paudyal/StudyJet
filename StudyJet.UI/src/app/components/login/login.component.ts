@@ -9,6 +9,7 @@ import { UserService } from '../../services/user.service';
 import { CookieService } from 'ngx-cookie-service';
 import { HttpErrorResponse } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
+import { InactivityService } from '../../services/inactivity.service';
 
 @Component({
   selector: 'app-login',
@@ -32,7 +33,8 @@ export class LoginComponent {
     private wishlistService: WishlistService,
     private navbarService: NavbarService,
     private userService: UserService,
-    private cookieService: CookieService
+    private cookieService: CookieService,
+    private inactivityService: InactivityService
   ) {
     // Initialize form with validators
     this.loginForm = this.formBuilder.group({
@@ -98,7 +100,7 @@ export class LoginComponent {
               this.navigateToDashboard(navbarType);
             }, 1000);
           });
-
+          this.inactivityService.startMonitoring(); 
         }
         this.loading = false;
       },

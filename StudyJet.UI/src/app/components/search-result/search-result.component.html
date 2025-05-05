@@ -1,0 +1,40 @@
+<section id="courses" class="py-3 pt-5">
+    <div class="container">
+        <h2 *ngIf="courses.length > 0" class="py-3 pt-5 text-success fw-bold">
+            {{ courses.length }} result{{ courses.length !== 1 ? 's' : '' }} found for "{{ searchQuery }}"
+        </h2>
+
+        <div class="row">
+            <div class="col-lg-2 col-md-4 col-sm-6 mb-4 course-wrapper" *ngFor="let course of courses"
+                style="position: relative;">
+                <div class="card h-100 text-center">
+                    <a class="text-dark" [routerLink]="['/courses', course.courseID]"
+                        style="cursor:pointer; text-decoration: none;">
+                        <img [src]="course.imageUrl" class="card-img-top img-fluid" alt="{{ course.title }}" />
+                        <div class="card-body">
+                            <h5 class="card-title">{{ course.title }}</h5>
+                            <p class="card-text text-muted">{{ course.instructorName }}</p>
+                            <p class="card-text text-success fw-semibold">{{ course.price }} DKK</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Message when no courses are found -->
+        <div *ngIf="courses.length === 0"
+            style="background-color: white; padding: 20px; margin: 40px 20px; border-radius: 10px;">
+            <h4 class="text-success fw-bold py-3"> Sorry, we couldn't find any results for " {{ searchQuery}}. "
+            </h4>
+            <p class="text-success fw-semibold"> Try adjusting your search. Here are some suggestions:</p>
+            <ul class="text-success fw-normal">
+                <li>Make sure all words are spelled correctly.</li>
+                <li>Try more general search terms.</li>
+                <li>Use different or related keywords.</li>
+                <li>Avoid using special characters or numbers unless necessary.</li>
+                <li> Check for typos or extra spaces.</li>
+            </ul>
+        </div>
+    </div>
+</section>

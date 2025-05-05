@@ -1,10 +1,11 @@
+import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-success',
   standalone: true,
-  imports: [],
+  imports: [CommonModule, RouterModule],
   templateUrl: './success.component.html',
   styleUrl: './success.component.css'
 })
@@ -14,7 +15,7 @@ export class SuccessComponent  implements OnInit {
     private route: ActivatedRoute, 
     private router: Router
   ) {}
-
+ 
   ngOnInit(): void {
     const sessionId = this.route.snapshot.queryParamMap.get('session_id');
     if (sessionId) {
@@ -24,4 +25,3 @@ export class SuccessComponent  implements OnInit {
   }
 }
 }
-

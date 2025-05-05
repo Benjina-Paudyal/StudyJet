@@ -19,9 +19,9 @@
                   </div>
                 </div>
                 <div class="col-12 col-md-3 d-flex flex-column justify-content-between">
-                  <p (click)="removeFromCart(item.courseID)" class="text-success fw-semibold" style="cursor: pointer;">
+                  <p (click)="removeFromCart(item.courseID, item.courseTitle)" class="text-success fw-semibold" style="cursor: pointer;">
                     Remove</p>
-                  <p (click)="moveToWishlist(item.courseID)" class="text-success fw-semibold" style="cursor: pointer;">
+                  <p (click)="moveToWishlist(item.courseID, item.courseTitle)" class="text-success fw-semibold" style="cursor: pointer;">
                     Move to Wishlist</p>
                 </div>
                 <div class="col-12 col-md-3 d-flex align-items-center justify-content-center">

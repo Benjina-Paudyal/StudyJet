@@ -8,14 +8,12 @@ import { Router } from '@angular/router';
 export class InactivityService {
   private timeout: any;
   private warningTimeout: any;
-  private readonly INACTIVITY_TIMEOUT: number = 60 * 2 * 1000;
+  private readonly INACTIVITY_TIMEOUT: number = 60 * 20 * 1000;
 
   constructor(
     private authService: AuthService,
     private router: Router
-  ) { 
-    this.startMonitoring(); 
-  }
+  ) { }
 
    // Cleanup on destroy
   ngOnDestroy(): void {
@@ -41,18 +39,12 @@ export class InactivityService {
    private resetInactivityTimeout(): void {
     clearTimeout(this.timeout);
     clearTimeout(this.warningTimeout);
-    this.warningTimeout = setTimeout(() => this.showInactivityWarning(), this.INACTIVITY_TIMEOUT - 60000); // 1minute
     this.timeout = setTimeout(() => this.handleInactivity(), this.INACTIVITY_TIMEOUT); // final : 2 minute
-  }
-
-  private showInactivityWarning(): void {
-    alert('Your session will expire in 1 minute due to inactivity.');
   }
 
   // Handle inactivity and logout user
   private handleInactivity(): void {
     this.authService.logout().then(() => {
-      console.log('User logged out due to inactivity');
       this.router.navigate(['/home']);
     });
   }

@@ -4,6 +4,6 @@ export interface Notification {
     message: string;
     dateCreated: Date;
     isRead: boolean;
-    courseId? : number;
+    courseID? : number | null;
   }
  

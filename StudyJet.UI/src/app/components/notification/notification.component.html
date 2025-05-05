@@ -1,0 +1,49 @@
+<div class="container mt-4 py-5">
+  <h2 class="mb-4 fw-semibold">Notifications</h2>
+
+  <!-- Error Message -->
+  <div *ngIf="error" class="alert alert-danger text-center">
+    {{ error }}
+  </div>
+
+  <!-- Loading Spinner -->
+  <div *ngIf="loading" class="text-center my-4">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+
+  <!-- Mark All as Read -->
+  <div class="d-flex justify-content-end mb-3" *ngIf="unreadNotificationsCount > 0 && !loading">
+    <button class="btn btn-outline-success btn-sm" (click)="markAsRead()">
+      Mark all as read
+    </button>
+  </div>
+
+  <!-- Notification Cards -->
+  <div *ngIf="notifications.length > 0 && !loading; else noNotifications">
+    <div *ngFor="let notification of notifications" class="card mb-3 shadow-sm"
+         [ngClass]="{'unread': !notification.isRead, 'read': notification.isRead}"
+         (click)="handleNotificationClick(notification)"
+         role="button"
+         tabindex="0"
+         (keydown.enter)="handleNotificationClick(notification)"
+         (keydown.space)="handleNotificationClick(notification)">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h5 class="card-title" [class.fw-bold]="!notification.isRead">{{ notification.message }}</h5>
+            <small class="text-muted">{{ notification.dateCreated | date:'medium' }}</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- No Notifications Message -->
+  <ng-template #noNotifications>
+    <div class="alert alert-info text-center" *ngIf="!loading">
+      <p>No notifications found.</p>
+    </div>
+  </ng-template>
+</div>

@@ -39,6 +39,7 @@ export class CartService {
 
 // Check if the course is already in the cart
   isCourseInCart(courseId: number): Observable<boolean> {
+    console.log('Checking if course is in cart:', courseId);
     return this.http.get<boolean>(`${this.cartUrl}/is-in-cart/${courseId}`).pipe(
       catchError(err => {
         console.error('Error checking if course is in cart:', err);
@@ -67,6 +68,7 @@ isCourseInWishlist(courseId: number): Observable<boolean> {
       switchMap(isInCart => {
         if (isInCart) {
           console.warn('Course is already in the cart.');
+          return of(undefined);
         }
         return this.http.post<void>(`${this.cartUrl}/${courseId}/add`, {}).pipe(
           tap(() => this.getCartAndEmit()) 
@@ -94,7 +96,7 @@ isCourseInWishlist(courseId: number): Observable<boolean> {
   // Remove a course from the cart and update the cart state
   removeCourseFromCart(courseId: number): Observable<void> {
     return this.http.delete<void>(`${this.cartUrl}/${courseId}/remove`).pipe(
-      tap(() => this.getCartAndEmit()), // Update the cart state after removal
+      tap(() => this.getCartAndEmit()),
       catchError(err => {
         console.error('Error removing course from cart:', err);
         return throwError(() => new Error('Failed to remove course from cart.'));

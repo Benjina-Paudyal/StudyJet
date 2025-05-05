@@ -16,6 +16,7 @@ import { InactivityService } from '../../services/inactivity.service';
 import { ImageService } from '../../services/image.service';
 import { CookieService } from 'ngx-cookie-service';
 import { ChangeDetectorRef } from '@angular/core';
+import { NotificationService } from '../../services/notification.service';
 
 
 @Component({
@@ -26,12 +27,13 @@ import { ChangeDetectorRef } from '@angular/core';
   styleUrl: './navbar.component.css'
 })
 export class NavbarComponent implements OnInit {
-   categories: Category[] = [];
+  categories: Category[] = [];
   isNavbarCollapsed = true;
   isDropdownOpen = false;
   searchPlaceholder = 'What do you want to learn?';
   searchQuery = '';
   suggestions: Course[] = [];
+  dropdownVisible: boolean = false; 
   wishlist: WishlistItem[] = [];
   showWishlistDropdown = false;
   cartItems: CartItem[] = [];
@@ -46,12 +48,14 @@ export class NavbarComponent implements OnInit {
   isAuthenticated = false;
   subscriptions: Subscription[] = [];
   unreadNotificationsCount = 0;
+  errorMessage = '';
   cartCount: number = 0;
   // Default value for navbarType
   navbarType: 'admin' | 'instructor' | 'student' | 'default' | 'hidden' = 'default'; 
 
   // Initialize navbarType$ inside the constructor
   navbarType$: Observable<'admin' | 'instructor' | 'student' | 'default' | 'hidden'>;
+
   
   constructor(
     private categoryService: CategoryService,
@@ -66,6 +70,7 @@ export class NavbarComponent implements OnInit {
     private authService: AuthService,
     private imageService: ImageService,
     private inactivityService: InactivityService,
+    private notificationService: NotificationService,
     private cdr: ChangeDetectorRef,
   ) { 
     this.navbarType$ = this.navbarService.navbarType$;
@@ -99,15 +104,31 @@ export class NavbarComponent implements OnInit {
       })
     );
 
+      // Subscribe to authentication and load user-specific data
     this.subscriptions.push(
       this.authService.isAuthenticated$.subscribe((isAuthenticated) => {
         this.isAuthenticated = isAuthenticated;
+
         if (isAuthenticated) {
+          // Load notifications only when logged in
+          this.notificationService.getNotifications().subscribe(notifications => {
+            this.notificationService.updateUnreadNotificationsCount(notifications);
+          });
+    
+          
+        //  Track unread count
+        const unreadSub = this.notificationService.unreadCount$.subscribe(count => {
+            this.unreadNotificationsCount = count;
+            this.cdr.detectChanges(); 
+          });
+          this.subscriptions.push(unreadSub);
+
+            // Load profile image
           const rawProfileImage = this.authService.getProfileImage();
           this.profileImageUrl = `${this.imageService.getProfileImageUrl(rawProfileImage)}?t=${new Date().getTime()}`;
-          //this.profileImageUrl = this.imageService.getProfileImageUrl(rawProfileImage);
           this.cdr.detectChanges();
 
+           // Load user-related data
           this.cartService.updateCartForUser();
           this.loadWishlist();
           this.loadPurchasedCourses();
@@ -115,7 +136,6 @@ export class NavbarComponent implements OnInit {
         }
       })
     );
-    
   }
 
   ngOnDestroy() {
@@ -130,6 +150,8 @@ export class NavbarComponent implements OnInit {
 
   toggleNavbar() {
     this.isNavbarCollapsed = !this.isNavbarCollapsed;
+    console.log('isNavbarCollapsed:', this.isNavbarCollapsed);
+    this.updatePlaceholderText(window.innerWidth);
   }
 
   toggleWishlistDropdown(): void {
@@ -182,34 +204,14 @@ export class NavbarComponent implements OnInit {
     console.log('Selected category:', category);
   }
 
-  onSearchInput(): void {
-    if (this.searchQuery.length > 2) {
-      this.courseService.searchCourses(this.searchQuery).subscribe({
-        next: (courses: Course[]) => {
-          this.suggestions = courses;
-        },
-        error: (err) => {
-          console.error('Error fetching course suggestions', err);
-          this.suggestions = [];
-        },
-      });
-    } else {
-      this.suggestions = [];
-    }
-  }
+
 
   goToCourse(courseID: number) {
     this.router.navigate(['/courses', courseID]);
   }
 
-  onSearchSubmit() {
-    if (this.searchQuery.length > 0) {
-      this.suggestions = [];
-      this.router.navigate(['/search-results'], {
-        queryParams: { query: this.searchQuery },
-      });
-    }
-  }
+
+ 
 
   logout(): void {
     this.authService.logout().then(() => {
@@ -228,10 +230,7 @@ export class NavbarComponent implements OnInit {
   clearProfileImage(): void {
     // Delete the profile image cookie
     this.cookieService.delete('profilePictureUrl');
-
-    // Reset profile image to default
-    this.profileImageUrl = '/images/profiles/default.png';
-
+  
     // Manually trigger change detection to update the UI
     this.cdr.detectChanges();
   }
@@ -257,9 +256,25 @@ export class NavbarComponent implements OnInit {
     this.router.navigate(['/admin-dashboard']);
   }
 
-  addToCart(course: any): void {
-    console.log('Added to the cart:', course);
+
+  // Add course to cart
+  addToCart(item: WishlistItem): void {
+    this.cartService.addCourseToCart(item.courseID).subscribe({
+      next: () => {
+        this.wishlist = this.wishlist.filter(w => w.courseID !== item.courseID);
+        window.alert(`"${item.title}" has been moved to your cart.`);
+      },
+      error: (error) => {
+        this.errorMessage = 'Failed to add course to cart.';
+        console.error('Error adding course to cart:', error);
+      }
+    });
   }
+  
+  
+  
+  
+  
 
   openDropdown() {
     this.isDropdownOpen = true;
@@ -322,6 +337,50 @@ export class NavbarComponent implements OnInit {
   getCourseImageUrl(course: any): string {
     return this.imageService.getCourseImageUrl(course.imageUrl);
   }
+
+
+  
+
+  onSearchInput(): void {
+    if (this.searchQuery.length > 2) {
+      this.courseService.searchCourses(this.searchQuery).subscribe({
+        next: (courses: Course[]) => {
+          this.suggestions = courses;
+          this.dropdownVisible = this.suggestions.length > 0;
+        },
+        error: (err) => {
+          console.error('Error fetching course suggestions', err);
+          this.suggestions = [];
+          this.dropdownVisible = false;
+        },
+      });
+    } else {
+      this.suggestions = [];
+      this.dropdownVisible = false;
+    }
+  }
+
+  onSearchSubmit() {
+    if (this.searchQuery.length > 0) {
+      this.suggestions = [];
+      this.dropdownVisible = false;
+      this.router.navigate(['/search-results'], {
+        queryParams: { query: this.searchQuery },
+      });
+    }
+  }
+
+  clearSearch() {
+    this.searchQuery = '';
+    this.suggestions = []; 
+    this.dropdownVisible = false;
+  }
+
+  isOnCourseDetailPage(): boolean {
+    return this.router.url.includes('/courses/');
+  }
+  
+  
 }
 
 

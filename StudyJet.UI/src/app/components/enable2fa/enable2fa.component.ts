@@ -21,6 +21,7 @@ export class Enable2faComponent {
   successMessage: string | null = null;
 
   is2FAEnabled = false;
+
   constructor(
     private formBuilder: FormBuilder,
     private authService: AuthService,
@@ -90,15 +91,3 @@ export class Enable2faComponent {
   }
 
 }
-
-
-
-
-
-
-
-
-
-
-
-

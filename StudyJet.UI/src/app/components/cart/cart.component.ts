@@ -58,10 +58,11 @@ export class CartComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  removeFromCart(courseID: number): void {
+  removeFromCart(courseID: number, title: string): void {
     this.isLoading = true;
     this.cartService.removeCourseFromCart(courseID).subscribe({
       next: () => {
+        window.alert(`"${title}" has been removed from your cart.`);
         this.isLoading = false;
       },
       error: (error) => {
@@ -72,12 +73,13 @@ export class CartComponent implements OnInit, OnDestroy {
     });
   }
 
-  moveToWishlist(courseID: number): void {
+  moveToWishlist(courseID: number, title: string): void {
     this.isLoading = true;
     this.cartService.moveToWishlist(courseID).subscribe({
       next: () => {
         this.cart = this.cart.filter(item => item.courseID !== courseID);
-        alert('Course moved to wishlist!');
+        window.alert(`"${title}" has been moved to your wishlist.`);
+
         this.isLoading = false;
       },
       error: (error) => {
@@ -95,6 +97,7 @@ export class CartComponent implements OnInit, OnDestroy {
     }
     this.isLoading = true;
     const courseIds = this.cart.map(item => item.courseID);
+    
     this.cartService.createCheckoutSession(courseIds).subscribe({
       next: (response) => {
         if (response.url) {

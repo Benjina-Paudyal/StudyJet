@@ -59,19 +59,22 @@ getPendingCourses(): Observable<Course[]> {
 }
 
 
-  // Search courses
+ 
+  
   searchCourses(query: string): Observable<Course[]> {
     return this.http.get<Course[]>(`${this.endpoints.courseUrl}/search?query=${encodeURIComponent(query)}`)
       .pipe(
-        // Optional transformation if needed
-        map(courses => courses.map(course => ({
-          ...course,
-          instructorName: course.instructorName || 'Unknown' 
-        }))),
-        catchError(this.handleError<Course[]>('searchCourses', []))
+        map((courses: Course[]) => {
+          // Optional: map instructor's name explicitly if necessary
+          return courses.map(course => {
+            if (course.instructorName) {
+              course.instructorName = course.instructorName;
+            }
+            return course;
+          });
+        })
       );
   }
-  
 
   // Fetch total course count
   getCourseCount(): Observable<number> {

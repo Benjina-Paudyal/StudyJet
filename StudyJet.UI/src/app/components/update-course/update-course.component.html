@@ -1,1 +1,64 @@
-<p>update-course works!</p>
+<div class="container d-flex align-items-center justify-content-center vh-100 py-5">
+    <div class="row justify-content-center w-100">
+        <div class="col-md-6">
+            <div class="card border-success">
+                <!-- Form Header -->
+                <div class="card-header text-center">
+                    <h2 class="text-success fw-semibold">Update Existing Course</h2>
+                </div>
+  
+                <div class="card-body">
+                    <form [formGroup]="updateCourseForm" (ngSubmit)="updateCourse()" enctype="multipart/form-data">
+                        <!-- Course Title -->
+                        <div class="form-group mb-3">
+                            <label for="title" class="form-label text-success required">Course Title</label>
+                            <input type="text" id="title" class="form-control border-success"
+                                formControlName="title" placeholder="Enter course title" />
+                        </div>
+  
+                        <!-- Course Description -->
+                        <div class="form-group mb-3">
+                            <label for="description" class="form-label text-success required">Description</label>
+                            <textarea id="description" class="form-control border-success"
+                                formControlName="description" placeholder="Enter course description"></textarea>
+                        </div>
+  
+                        <!-- Course Price -->
+                        <div class="form-group mb-3">
+                            <label for="price" class="form-label text-success required">Price</label>
+                            <input type="number" id="price" class="form-control border-success"
+                                formControlName="price" placeholder="Enter course price" />
+                        </div>
+  
+                        <!-- Video URL -->
+                        <div class="form-group mb-3">
+                            <label for="videoUrl" class="form-label text-success required">Video URL</label>
+                            <input type="text" id="videoUrl" class="form-control border-success"
+                                formControlName="videoUrl" placeholder="Enter course video URL" />
+                        </div>
+  
+                        <!-- Course Image Upload -->
+                        <div class="form-group mb-3">
+                            <label for="imageUrl" class="form-label text-success">Upload Image</label>
+                            <input type="file" id="imageUrl" class="form-control border-success"
+                                (change)="onFileChange($event)" />
+                        </div>
+  
+                        <!-- Existing Image Preview -->
+                        <div *ngIf="imagePreview" class="mb-3 text-center">
+                            <p class="text-muted">Current Image Preview:</p>
+                            <img [src]="imagePreview" alt="Course Image" class="img-thumbnail" width="200" />
+                        </div>
+  
+                        <!-- Submit Button -->
+                        <button type="submit" class="btn btn-success w-100">
+                            Update Course
+                            <span *ngIf="loading" class="spinner-border spinner-border-sm ms-2"></span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+  </div>
+  

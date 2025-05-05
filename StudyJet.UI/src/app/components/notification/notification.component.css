@@ -1,0 +1,45 @@
+.card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+  cursor: pointer;
+}
+
+.card-title {
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.text-muted {
+  font-size: 0.9rem;
+}
+
+.btn-outline-success {
+  border-radius: 20px;
+  padding: 0.25rem 0.75rem;
+}
+
+.alert-info {
+  background-color: #e9f5ff;
+  border-color: #b6e0fe;
+  color: #004085;
+}
+
+/* Unread notification */
+.unread {
+  background-color: #9cdeb6;
+  border-left: 4px solid #2e8b57;
+  font-weight: bold;
+}
+
+/* Read notification */
+.read {
+  background-color: #f1f1f1;
+  font-weight: normal;
+  opacity: 0.9;
+}
+
+/* Optional: Hover effect for both states */
+.card:hover {
+  background-color: #eef5f1;
+}

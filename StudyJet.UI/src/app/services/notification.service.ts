@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { Notification } from '../models';
 
 @Injectable({
@@ -9,6 +9,8 @@ import { Notification } from '../models';
 })
 export class NotificationService {
   private apiUrl = environment.apiBaseUrl;
+  private unreadCountSubject = new BehaviorSubject<number>(0);
+  unreadCount$ = this.unreadCountSubject.asObservable();
 
   constructor(
     private http: HttpClient
@@ -22,6 +24,12 @@ export class NotificationService {
  // Mark notification as read
  markAsRead(notificationId: number): Observable<any> {
   return this.http.put(`${this.apiUrl}/Notification/mark-read/${notificationId}`, {});
+}
+
+ // Update unread notifications count
+ updateUnreadNotificationsCount(notifications: Notification[]): void {
+  const unreadCount = notifications.filter(n => !n.isRead).length;
+  this.unreadCountSubject.next(unreadCount); // Broadcast the updated count
 }
   
 }

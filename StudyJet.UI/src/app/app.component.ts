@@ -4,6 +4,7 @@ import { RouterOutlet } from '@angular/router';
 import { FooterComponent } from './components/footer/footer.component';
 import { NavbarService } from './services/navbar.service';
 import { DecodedToken, decodeToken } from './models';
+import { CookieService } from 'ngx-cookie-service';
 
 @Component({
   selector: 'app-root',
@@ -15,17 +16,11 @@ import { DecodedToken, decodeToken } from './models';
 export class AppComponent implements OnInit{
   title = 'StudyJet.UI';
   navbarType= 'default'; 
-  cookieService: any;
 
   constructor(
-    private navbarService: NavbarService
+    private navbarService: NavbarService,
+    private cookieService: CookieService
   ) {}
-
-  // ngOnInit(): void {
-  //   this.navbarService.navbarType$.subscribe(type => {
-  //     this.navbarType = type;
-  //   });
-  // }
 
   ngOnInit(): void {
     const token = this.cookieService.get('authToken');
@@ -45,12 +40,40 @@ export class AppComponent implements OnInit{
         } else {
           this.navbarService.setNavbarType('default');
         }
-      }, 100); // short delay
+      }, 100); 
     } else {
-      // Not logged in, show default navbar (so they can click Login)
       this.navbarService.setNavbarType('default');
     }
   }
   
   
 }  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ // ngOnInit(): void {
+  //   this.navbarService.navbarType$.subscribe(type => {
+  //     this.navbarType = type;
+  //   });
+  // }
