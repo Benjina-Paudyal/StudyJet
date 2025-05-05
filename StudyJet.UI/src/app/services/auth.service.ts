@@ -3,7 +3,7 @@ import { environment } from '../../environments/environment';
 import { BehaviorSubject, catchError, map, Observable, of, ReplaySubject, switchMap, tap, throwError, } from 'rxjs';
 import { ImageService } from './image.service';
 import { CookieService } from 'ngx-cookie-service';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { UserRegistration, UserLogin, LoginResponse, AuthTokenPayload, UserRegistrationResponse, ForgotPasswordResponse, ResetPasswordResponse, InstructorRegistrationResponse, ChangePasswordResponse, VerifyPasswordResponse, Disable2FAResponse, AuthResponse, } from '../models';
 import { NavbarService } from './navbar.service';
@@ -42,7 +42,6 @@ export class AuthService {
     }
   }
 
-  // Check if token is expired
   private isTokenExpired(token: string): boolean {
     try {
       const payload: AuthTokenPayload = JSON.parse(atob(token.split('.')[1])); // Decode the JWT payload
@@ -52,7 +51,6 @@ export class AuthService {
     }
   }
 
-  // Clear all authentication cookies
   private clearAuthCookies(): void {
     const cookiesToRemove = [
       'authToken',
@@ -67,7 +65,6 @@ export class AuthService {
     cookiesToRemove.forEach((cookie) => this.cookieService.delete(cookie, '/'));
   }
 
-  // Set authentication cookies securely
   private setAuthCookies(
     token: string,
     username: string,
@@ -76,12 +73,7 @@ export class AuthService {
     fullName: string,
     userId: string
   ): void {
-    const cookieOptions = {
-      path: '/',
-      secure: true,
-      sameSite: 'Strict' as const,
-      expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-    };
+    const cookieOptions = { path: '/', secure: true,  sameSite: 'Strict' as const, expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),};
 
     this.cookieService.set('authToken', token, cookieOptions);
     this.cookieService.set('username', username, cookieOptions);
@@ -106,8 +98,7 @@ export class AuthService {
     );
   }
 
-
-  // register instructor
+  // Register instructor
   registerInstructor(formData: FormData): Observable<InstructorRegistrationResponse> {
     return this.http
       .post<InstructorRegistrationResponse>(`${this.apiUrl}/register-instructor`, formData)
@@ -115,7 +106,6 @@ export class AuthService {
   }
 
 
-  // Method to create the FormData object for registration
   createRegistrationFormData(user: UserRegistration): FormData {
     const formData = new FormData();
     formData.append('UserName', user.UserName);
@@ -133,7 +123,6 @@ export class AuthService {
     return formData;
   }
 
-  // Login
   login(user: UserLogin): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.apiUrl}/login`, user).pipe(
       tap((response: LoginResponse) => {
@@ -156,13 +145,12 @@ export class AuthService {
       }),
       map((response: LoginResponse) => response),
       catchError((error: any) => {
-        const handledError = this.handleError<LoginResponse>('login')(error);
-        return throwError(() => handledError);
+        console.error('Login failed:', error);
+        return throwError(() => error);
       })
     );
   }
 
-  //Handle the logic after a successful login
   public handleSuccessfulLogin(response: LoginResponse): void {
     
         if (!response.token || !response.userName || !response.roles || !response.userID) {
@@ -172,48 +160,15 @@ export class AuthService {
       response.profilePictureUrl || '/images/profiles/profilepic.png';
     this.updateNavbarType(response.roles);
 
-    // Store the email in cookies
-    this.cookieService.set('authEmail', response.userName, {
-      secure: true,
-      sameSite: 'Strict',
-      path: '/',
-    });
-
-     // Set auth token cookie
-    this.cookieService.set('authToken', response.token, {
-      secure: true,
-      sameSite: 'Strict',
-      path: '/',
-      expires: 7 
-    });
-
-      // Additional cookies for user data
-  this.cookieService.set('userID', response.userID, {
-    secure: true,
-    sameSite: 'Strict',
-    path: '/',
-  });
-    
-
-    // Set authentication cookies
-    this.setAuthCookies(
-      response.token,
-      response.userName,
-      response.roles,
-      this.imageService.getProfileImageUrl(profilePictureUrl),
-      response.fullName || '',
-      response.userID
-    );
-
+    this.cookieService.set('authEmail', response.userName, { secure: true, sameSite: 'Strict', path: '/', });
+    this.cookieService.set('authToken', response.token, {  secure: true,  sameSite: 'Strict',   path: '/', expires: 7  });
+    this.cookieService.set('userID', response.userID, { secure: true,  sameSite: 'Strict', path: '/', });
+    this.setAuthCookies( response.token, response.userName,  response.roles, this.imageService.getProfileImageUrl(profilePictureUrl),response.fullName || '',  response.userID  );
     this.isAuthenticatedSubject.next(true);
     this.setProfileImage(profilePictureUrl);
-
-     // Remove tempToken after successful login
-  this.cookieService.delete('tempToken'); // Clean up tempToken
-  
+    this.cookieService.delete('tempToken'); 
   }
 
-  //Navbar type
   getNavbarTypeFromRoles(): Observable<'admin' | 'instructor' | 'student' | 'default'> {
     return this.getRoles().pipe(
       map((roles) => {
@@ -229,7 +184,6 @@ export class AuthService {
     );
   }
 
-   // Update navbar type based on user roles
     updateNavbarType(roles: string[]): void {
     let navbarType: 'admin' | 'instructor' | 'student' | 'default' = 'default';
     if (roles.includes('Admin')) {
@@ -260,79 +214,47 @@ export class AuthService {
     }
   }
 
-
-  // Handle error
-  private handleError<T>(operation = 'operation'): (error: any) => Observable<T> {
+  handleError<T>(operation = 'operation'): (error: any) => Observable<T> {
     return (error: any): Observable<T> => {
+      console.error(`${operation} failed:`, error);
+  
+      if (error instanceof HttpErrorResponse) {
+        return throwError(() => error);
+      }
+  
+      // general error
       let errorMessage = 'Something went wrong';
-
       if (error.error instanceof ErrorEvent) {
-        // Client-side error
         errorMessage = `Error: ${error.error.message}`;
       } else if (error.error?.message) {
-        // Server-side error with message
         errorMessage = error.error.message;
       } else if (error.message) {
-        // Other error with message
         errorMessage = error.message;
       }
-      console.error(`${operation} failed:`, error);
       return throwError(() => new Error(errorMessage));
     };
   }
+  
+  setProfileImage(url: string): void { this.cookieService.set('profileImageUrl', url, { secure: true, sameSite: 'Lax', path: '/', }); }
+  getProfileImage(): string { return this.imageService.getProfileImageUrl(this.cookieService.get('profileImageUrl'));}
+  setUserName(username: string): void { this.cookieService.set('username', username, { secure: true, sameSite: 'Strict', path: '/',});  }
+  setEmail(email: string): void {this.cookieService.set('authEmail', email, {  secure: true,  sameSite: 'Strict',  path: '/',});  }
 
-
-  // Store profile image URL
-  setProfileImage(url: string): void {
-    this.cookieService.set('profileImageUrl', url, {
-      secure: true,
-      sameSite: 'Lax',
-      path: '/',
-    });
-  }
-
-  // Get profile image URL
-  getProfileImage(): string {
-    return this.imageService.getProfileImageUrl(this.cookieService.get('profileImageUrl'));
-  }
-
-  // Store username
-  setUserName(username: string): void {
-    this.cookieService.set('username', username, {
-      secure: true,
-      sameSite: 'Strict',
-      path: '/',
-    });
-  }
-
-  // Store email 
-  setEmail(email: string): void {
-    this.cookieService.set('authEmail', email, {
-      secure: true,
-      sameSite: 'Strict',
-      path: '/',
-    });
-  }
-
-  // Get email
+  
   getEmail(): Observable<string> {
     const email = this.cookieService.get('authEmail');
-    console.log('Retrieved email from cookie:', email);
-
     if (email) {
       return of(email);
     } else {
       return throwError(() => new Error('Email not found.'));
     }
   }
-
-  // Get roles
+  
   getRoles(): Observable<string[]> {
     const roles = this.cookieService.get('roles');
     return roles ? of(JSON.parse(roles)) : of([]);
   }
 
-  // Change Password
   changePassword(
     currentPassword: string,
     newPassword: string
@@ -342,22 +264,18 @@ export class AuthService {
       .pipe(catchError(this.handleError<ChangePasswordResponse>('changePassword')));
   }
 
-  // Forgot Password
   forgotPassword(email: string): Observable<ForgotPasswordResponse> {
     return this.http
       .post<ForgotPasswordResponse>(`${this.apiUrl}/forgot-password`, { email })
       .pipe(catchError(this.handleError<ForgotPasswordResponse>('forgotPassword')));
   }
 
-  // Reset Password
   resetPassword(email: string, token: string, newPassword: string): Observable<ResetPasswordResponse> {
     return this.http
       .post<ResetPasswordResponse>(`${this.apiUrl}/reset-password`, { email, token, newPassword })
       .pipe(catchError(this.handleError<ResetPasswordResponse>('resetPassword')));
   }
-  
 
-  // verify current password
   verifyCurrentPassword(
     email: string,
     token: string,
@@ -367,8 +285,6 @@ export class AuthService {
     return this.http.post<VerifyPasswordResponse>(url, { email, token, password: currentPassword });
   }
 
-
-  // Checking if user is authenticated
   isAuthenticated(): boolean {
     const token = this.cookieService.get('authToken');
     return (
@@ -378,16 +294,12 @@ export class AuthService {
     );
   }
 
-
-// Enable 2FA
   enable2FA(): Observable<{ qrCode: string }> {
     return this.http
       .post(`${this.apiUrl}/initiate-2fa`, {}, { responseType: 'blob' })
       .pipe(switchMap((blob) => this.convertBlobToBase64(blob)));
   }
 
-
-// Convert Blob to Base64
   private convertBlobToBase64(blob: Blob): Observable<{ qrCode: string }> {
     return new Observable((observer) => {
       const reader = new FileReader();
@@ -403,7 +315,6 @@ export class AuthService {
   }
 
 
-// Confirm 2FA 
   confirm2FA(code: string): Observable<any> {
     const email = this.cookieService.get('authEmail'); 
     if (!email) {
@@ -419,7 +330,6 @@ export class AuthService {
   }
 
 
-  // Verify 2FA code for login
 verify2FALogin(code: string): Observable<LoginResponse> {
   const tempToken = this.cookieService.get('tempToken');
   if (!tempToken) {
@@ -445,7 +355,6 @@ verify2FALogin(code: string): Observable<LoginResponse> {
 }
 
 
-//Check 2FA Status
 check2FAStatus(): Observable<{ isEnabled: boolean; error?: string }> {
   return this.http
     .get<{ isEnabled: boolean }>(`${this.apiUrl}/check-2fa-status`)
@@ -464,7 +373,6 @@ check2FAStatus(): Observable<{ isEnabled: boolean; error?: string }> {
 }
 
 
-//Disable 2FA
 disable2FA(): Observable<Disable2FAResponse> {
   return this.http.post<Disable2FAResponse>(`${this.apiUrl}/disable-2fa`, {}).pipe(
     catchError((error) => {
@@ -475,63 +383,4 @@ disable2FA(): Observable<Disable2FAResponse> {
     })
   );
 }
-
-
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// verify2FALogin(email: string, code: string): Observable<LoginResponse> {
-//   const payload = {
-//     tempToken: this.cookieService.get('tempToken'),
-//     code: code,
-//     email: email,
-//   };
-//   return this.http.post<LoginResponse>(`${this.apiUrl}/verify-2fa-login`, payload).pipe(
-//     catchError((error) => {
-//       return throwError(() => new Error(
-//         error.error?.message || 'An error occurred during 2FA verification.'
-//       ));
-//     })
-//   );
-// }
-
-
-
-
-
-
-
-

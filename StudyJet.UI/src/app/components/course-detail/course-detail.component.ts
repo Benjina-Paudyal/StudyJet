@@ -20,7 +20,7 @@ import { Subject } from 'rxjs';
   templateUrl: './course-detail.component.html',
   styleUrl: './course-detail.component.css'
 })
-export class CourseDetailComponent implements OnInit, OnDestroy{
+export class CourseDetailComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   courseId = 0;
   course: Course | null = null;
@@ -44,7 +44,7 @@ export class CourseDetailComponent implements OnInit, OnDestroy{
     private purchaseCourseService: PurchaseCourseService,
     private router: Router,
     private cdr: ChangeDetectorRef
-    
+
   ) { }
 
   ngOnInit(): void {
@@ -55,37 +55,36 @@ export class CourseDetailComponent implements OnInit, OnDestroy{
       console.error('No course ID provided in the route.');
     }
 
-   // Handle authentication and roles using AuthService
-   this.isAuthenticated = this.authService.isAuthenticated();
-   if (this.isAuthenticated) {
-     this.loadWishlist();
-     this.purchaseCourseService.fetchPurchaseCourse();
-    this.authService.getRoles().subscribe((roles) => {
-    this.isAdmin = roles.includes('Admin');
-    this.isInstructor = roles.includes('Instructor');
-  });
-}
+    this.isAuthenticated = this.authService.isAuthenticated();
+    if (this.isAuthenticated) {
+      this.loadWishlist();
+      this.purchaseCourseService.fetchPurchaseCourse();
+      this.authService.getRoles().subscribe((roles) => {
+        this.isAdmin = roles.includes('Admin');
+        this.isInstructor = roles.includes('Instructor');
+      });
+    }
 
-   this.wishlistService.wishlist$.subscribe((updatedWishlist: WishlistItem[]) => {
-     this.wishlist = updatedWishlist.map(item => item.courseID);
-     this.cdr.detectChanges();
-   });
- }
+    this.wishlistService.wishlist$.subscribe((updatedWishlist: WishlistItem[]) => {
+      this.wishlist = updatedWishlist.map(item => item.courseID);
+      this.cdr.detectChanges();
+    });
+  }
 
- ngOnDestroy(): void {
-  this.destroy$.next();
-  this.destroy$.complete();
-}
-  
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
 
   getSafeVideoUrl(url?: string): SafeResourceUrl | null {
     if (url) {
       const videoId = this.extractYouTubeVideoId(url);
-      if(videoId) {
-      const embedUrl = `https://www.youtube.com/embed/${videoId}`;
-      return this.sanitizer.bypassSecurityTrustResourceUrl(embedUrl);
+      if (videoId) {
+        const embedUrl = `https://www.youtube.com/embed/${videoId}`;
+        return this.sanitizer.bypassSecurityTrustResourceUrl(embedUrl);
+      }
     }
-  }
     return null;
   }
 
@@ -96,7 +95,6 @@ export class CourseDetailComponent implements OnInit, OnDestroy{
   }
 
 
-  // add to cart
   addToCart(course: any): void {
     if (!this.isAuthenticated) {
       alert('Please log in first to add courses to the cart.');
@@ -119,7 +117,6 @@ export class CourseDetailComponent implements OnInit, OnDestroy{
     });
   }
 
-  // Load purchased courses
   loadPurchasedCourses(): void {
     this.purchaseCourseService.purchasedCourses$.subscribe((courses) => {
       this.purchasedCourses = courses;
@@ -127,34 +124,29 @@ export class CourseDetailComponent implements OnInit, OnDestroy{
     });
   }
 
-  // Check if the course is purchased by using the PurchaseCourseService
   isPurchased(courseId: number): boolean {
-    return this.purchaseCourseService.isCoursePurchased(courseId); // Use the service method to check
+    return this.purchaseCourseService.isCoursePurchased(courseId); 
   }
 
-  // Load wishlist from the server (if logged in)
   loadWishlist(): void {
     this.wishlistService.getWishlist().subscribe({
       next: (wishlist) => {
-        this.wishlist = wishlist.map((course: any) => course.courseID);  // Adjust based on API response structure
+        this.wishlist = wishlist.map((course: any) => course.courseID);  
       },
       error: (err) => console.error('Error fetching wishlist:', err)
     });
   }
 
-  // Toggle wishlist state for a course (guest or authenticated)
   toggleWishlist(courseId: number, event: MouseEvent): void {
     if (!this.isAuthenticated) {
       this.router.navigate(['/login']);
       alert('Please login yourself to add courses to your wishlist.');
       return;
     }
-
     if (this.isPurchased(courseId)) {
       alert('You have already purchased this course.');
       return;
     }
-
     if (this.wishlist.includes(courseId)) {
       this.wishlistService.removeCourseFromWishlist(courseId).subscribe({
         next: () => {
@@ -164,7 +156,6 @@ export class CourseDetailComponent implements OnInit, OnDestroy{
         error: (err) => console.error('Error removing course from wishlist:', err)
       });
     } else {
-      // Add to wishlist
       this.wishlistService.addCourseToWishlist(courseId).subscribe({
         next: () => {
           this.wishlist.push(courseId);
@@ -191,9 +182,9 @@ export class CourseDetailComponent implements OnInit, OnDestroy{
             break;
         }
         if (course.isUpdate) {
-          course.status = 'Pending'; 
+          course.status = 'Pending';
         }
-        this.course = course; 
+        this.course = course;
         this.videoUrl = this.getSafeVideoUrl(course.videoUrl);
         this.cdr.detectChanges();
       },
@@ -203,28 +194,26 @@ export class CourseDetailComponent implements OnInit, OnDestroy{
       }
     });
   }
-  
+
   approveCourse(): void {
     if (!this.course || this.isApproving) return;
-  
-    const message = this.course.isUpdate 
+    const message = this.course.isUpdate
       ? `Are you sure you want to approve these updates for the course: ${this.course.title}?`
       : `Are you sure you want to approve the course: ${this.course.title}?`;
-  
-    if (!window.confirm(message)) return;  // If the user cancels, return early
-  
+
+    if (!window.confirm(message)) return; 
     this.isApproving = true;
     const approval$ = this.course.isUpdate
       ? this.courseService.approveCourseUpdate(this.course.courseID)
       : this.courseService.approveCourse(this.course.courseID);
-  
+
     approval$.subscribe({
       next: () => {
         if (this.course) {
           this.course.status = 'Approved';
           this.course.isUpdate = false;
         }
-        this.cdr.detectChanges(); // Force UI updat
+        this.cdr.detectChanges(); // Force UI update
       },
       error: (err) => console.error('Approval failed:', err),
       complete: () => this.isApproving = false
@@ -234,25 +223,22 @@ export class CourseDetailComponent implements OnInit, OnDestroy{
 
   rejectCourse(): void {
     if (!this.course || this.isRejecting) return;
-  
-    // Confirmation dialog
-    const message = this.course.isUpdate 
+    const message = this.course.isUpdate
       ? `Are you sure you want to reject the updates for the course: ${this.course.title}?`
       : `Are you sure you want to reject the course: ${this.course.title}?`;
-  
-    if (!window.confirm(message)) return;  // If the user cancels, return early
-  
+
+    if (!window.confirm(message)) return;  
     this.isRejecting = true;
     const rejection$ = this.course.isUpdate
       ? this.courseService.rejectCourseUpdate(this.course.courseID)
       : this.courseService.rejectCourse(this.course.courseID);
-  
+
     rejection$.subscribe({
       next: () => {
         if (this.course) {
           this.course.status = 'Rejected';
         }
-        this.loadCourseDetails(); 
+        this.loadCourseDetails();
       },
       error: (err) => console.error('Rejection failed:', err),
       complete: () => this.isRejecting = false
@@ -265,8 +251,8 @@ export class CourseDetailComponent implements OnInit, OnDestroy{
       1: '✅ Approved',
       2: '❌ Rejected',
       'Pending': '⏳ Pending',
-    'Approved': '✅ Approved',
-    'Rejected': '❌ Rejected'
+      'Approved': '✅ Approved',
+      'Rejected': '❌ Rejected'
     };
     return statusMap[status] || 'Unknown';
   }
@@ -274,9 +260,9 @@ export class CourseDetailComponent implements OnInit, OnDestroy{
 
 
   // Method to check if the course is in the wishlist
-isInWishlist(courseId: number): boolean {
-  return this.wishlist.includes(courseId);
-}
+  isInWishlist(courseId: number): boolean {
+    return this.wishlist.includes(courseId);
+  }
 
 
 

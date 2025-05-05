@@ -33,12 +33,10 @@ export class AddCourseComponent implements OnInit {
     private router: Router,
   ) { }
 
-  // Function to toggle dropdown visibility
   toggleDropdown(): void {
     this.isDropdownOpen = !this.isDropdownOpen;
   }
 
-  // Function to handle category selection
   selectCategory(event: any): void {
     const categoryId = (event.target as HTMLSelectElement).value;
     this.selectedCategoryId = Number(categoryId);
@@ -47,8 +45,6 @@ export class AddCourseComponent implements OnInit {
     this.isDropdownOpen = false;
   }
 
-
-  // Function to get category name by ID
   getCategoryNameById(categoryId: number): string {
     const category = this.categories.find(c => c.categoryID === categoryId);
     return category ? category.name : 'Select a category';
@@ -71,8 +67,6 @@ export class AddCourseComponent implements OnInit {
       status: ['Pending', [Validators.required]]
 
     });
-
-    // Fetch categories for the dropdown
     this.fetchCategories();
   }
 
@@ -87,17 +81,14 @@ export class AddCourseComponent implements OnInit {
     });
   }
 
-
   // Handle the form submission
   onSubmit(): void {
-
     const userId = this.cookieService.get('userId');
     const username = this.cookieService.get('username');
     this.courseForm.patchValue({
       instructorID: userId,
       instructorName: username
     });
-
     if (this.courseForm.invalid) {
       this.errorMessage = 'Please fill in all required fields.';
       return;
@@ -153,10 +144,3 @@ export class AddCourseComponent implements OnInit {
   }
 
 }
-
-
-
-
-
-
-

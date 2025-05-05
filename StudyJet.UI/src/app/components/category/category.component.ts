@@ -11,16 +11,16 @@ import { CategoryService } from '../../services/category.service';
   templateUrl: './category.component.html',
   styleUrl: './category.component.css'
 })
-export class CategoryComponent implements OnInit{
+export class CategoryComponent implements OnInit {
   categories: Category[] = [];
 
   constructor(
-    private categoryService : CategoryService,
+    private categoryService: CategoryService,
     private route: ActivatedRoute
-    ) {}
+  ) { }
 
   ngOnInit(): void {
-    if(this.categories.length === 0) {
+    if (this.categories.length === 0) {
       this.loadCategories();
     }
     const categoryId = this.route.snapshot.paramMap.get('categoryId');
@@ -29,12 +29,11 @@ export class CategoryComponent implements OnInit{
   loadCategories(): void {
     this.categoryService.getCategories().subscribe({
       next: (data: Category[]) => {
-        this.categories = data; 
+        this.categories = data;
       },
       error: (err) => {
         console.error('Error fetching categories', err);
       }
     });
   }
-
 }

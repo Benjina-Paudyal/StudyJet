@@ -29,13 +29,10 @@ export class BecomeInstructorComponent {
     private emailService: EmailService
   ) { }
 
-// Handle file change event
 onFileChange(event: Event): void {
   const input = event.target as HTMLInputElement;
   if (input?.files?.length) {
     const file = input.files[0]; 
-
-    // Check if the file is a PDF
     const allowedExtensions = ['application/pdf'];
     if (!allowedExtensions.includes(file.type)) {
       alert('Only PDF format is allowed.');
@@ -46,11 +43,9 @@ onFileChange(event: Event): void {
     this.cvFile = file; 
   }
 }
-
   
-  // Handle form submission
   onSubmit(): void {
-   // Custom email validation using the validator
+   // Custom email validation 
    const emailControl = new FormControl(this.email, [Validators.required, emailValidator]);
    if (emailControl.invalid) {
      alert('Please enter a valid email address.');
@@ -111,10 +106,8 @@ onFileChange(event: Event): void {
         if (error.status === 0) {
           alert('Network error! Please check your internet connection.');
         } else if (error.error?.message) {
-          // Specific message from backend
           alert(`Error: ${error.error.message}`);
         } else if (error.error?.errors) {
-          // Multiple validation errors 
           const errorMessages = Object.values(error.error.errors).flat().join('\n');
           alert(`Validation errors:\n${errorMessages}`);
         } else {
@@ -123,7 +116,6 @@ onFileChange(event: Event): void {
       });
     }
 
-  // Close modal manually
   private closeModal(): void {
     const modal = document.getElementById('becomeInstructorModal');
     const backdrop = document.querySelector('.modal-backdrop');

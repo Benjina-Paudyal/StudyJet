@@ -15,107 +15,102 @@ import { WishlistService } from '../../services/wishlist.service';
   styleUrl: './course.component.css'
 })
 export class CourseComponent implements OnInit {
-courses: Course[] = [];
-selectedCourse: Course | null = null;
-wishlist: number[] = [];
-modalLeft = '0px';
-modalTop = '0px';
+  courses: Course[] = [];
+  selectedCourse: Course | null = null;
+  wishlist: number[] = [];
+  modalLeft = '0px';
+  modalTop = '0px';
 
-constructor(
-  private courseService: CourseService,
-  private imageService: ImageService,
-  private authService: AuthService,
-  private wishlistService: WishlistService,
-  private router: Router,
+  constructor(
+    private courseService: CourseService,
+    private imageService: ImageService,
+    private authService: AuthService,
+    private wishlistService: WishlistService,
+    private router: Router,
 
-){}
+  ) { }
 
-ngOnInit() : void {
-  this.getCourses();
-  this.getWishlist();
-}
-
-// Fetch approved courses
-getCourses(): void {
-  this.courseService.getApprovedCourses().subscribe({
-    next: (courses: Course[]) => {
-      this.courses = courses;
-    },
-    error: (error) => {
-      console.error('Error fetching popular courses', error);
-    },
-  });
-}
-
- // Fetch the wishlist for the authenticated user
- getWishlist(): void {
-  if (this.authService.isAuthenticated()) {
-    this.wishlistService.wishlist$.subscribe({
-      next: (wishlistItems) => {
-        this.wishlist = wishlistItems.map(item => item.courseID); 
-      },
-      error: (err) => {
-        console.error('Error fetching wishlist', err);
-      }
-    });
+  ngOnInit(): void {
+    this.getCourses();
+    this.getWishlist();
   }
-}
 
-toggleWishlist(courseID: number, event: MouseEvent): void {
-  event.stopPropagation(); 
-  if (!this.authService.isAuthenticated()){
-    alert('Please log in first to add to your wishlist.');
-    this.router.navigate(['/login']);
-    return;
-  }
-  
-  if (this.wishlist.includes(courseID)) {
-    this.wishlistService.removeCourseFromWishlist(courseID).subscribe({
-      next: () => {
-        this.wishlist = this.wishlist.filter((id) => id !== courseID);
-        alert('Course removed from your wishlist.');
+  // Fetch approved courses
+  getCourses(): void {
+    this.courseService.getApprovedCourses().subscribe({
+      next: (courses: Course[]) => {
+        this.courses = courses;
       },
-      error: (err) => {
-        console.error('Error removing course from wishlist', err);
-        alert('Error removing course from wishlist.');
-      },
-    });
-  } else {
-    this.wishlistService.addCourseToWishlist(courseID).subscribe({
-      next: () => {
-        this.wishlist.push(courseID);
-        alert('Course added to your wishlist.');
-      },
-      error: (err) => {
-        console.error('Error adding course to wishlist', err);
-        alert('Error adding course to wishlist.');
+      error: (error) => {
+        console.error('Error fetching popular courses', error);
       },
     });
   }
-}
 
-
-// Fetch course image URL
-getCourseImageUrl(imageFilename: string): string {
-  return this.imageService.getCourseImageUrl(imageFilename);
-}
-
-// Show modal for a selected course
-showModal(course: Course, event: MouseEvent): void {
-  this.selectedCourse = course;
-  const cardElement = (event.target as HTMLElement).closest('.course-wrapper');
-  if (cardElement) {
-    const cardRect = cardElement.getBoundingClientRect();
-
-    this.modalLeft = `${cardRect.left}px`;
-    this.modalTop = `${cardRect.top - cardElement.clientHeight}px`;
+  getWishlist(): void {
+    if (this.authService.isAuthenticated()) {
+      this.wishlistService.wishlist$.subscribe({
+        next: (wishlistItems) => {
+          this.wishlist = wishlistItems.map(item => item.courseID);
+        },
+        error: (err) => {
+          console.error('Error fetching wishlist', err);
+        }
+      });
+    }
   }
-}
 
-// Hide modal
-hideModal(): void {
-  this.selectedCourse = null;
-}
+  toggleWishlist(courseID: number, event: MouseEvent): void {
+    event.stopPropagation();
+    if (!this.authService.isAuthenticated()) {
+      alert('Please log in first to add to your wishlist.');
+      this.router.navigate(['/login']);
+      return;
+    }
+
+    if (this.wishlist.includes(courseID)) {
+      this.wishlistService.removeCourseFromWishlist(courseID).subscribe({
+        next: () => {
+          this.wishlist = this.wishlist.filter((id) => id !== courseID);
+          alert('Course removed from your wishlist.');
+        },
+        error: (err) => {
+          console.error('Error removing course from wishlist', err);
+          alert('Error removing course from wishlist.');
+        },
+      });
+    } else {
+      this.wishlistService.addCourseToWishlist(courseID).subscribe({
+        next: () => {
+          this.wishlist.push(courseID);
+          alert('Course added to your wishlist.');
+        },
+        error: (err) => {
+          console.error('Error adding course to wishlist', err);
+          alert('Error adding course to wishlist.');
+        },
+      });
+    }
+  }
+
+  getCourseImageUrl(imageFilename: string): string {
+    return this.imageService.getCourseImageUrl(imageFilename);
+  }
+
+  showModal(course: Course, event: MouseEvent): void {
+    this.selectedCourse = course;
+    const cardElement = (event.target as HTMLElement).closest('.course-wrapper');
+    if (cardElement) {
+      const cardRect = cardElement.getBoundingClientRect();
+
+      this.modalLeft = `${cardRect.left}px`;
+      this.modalTop = `${cardRect.top - cardElement.clientHeight}px`;
+    }
+  }
+
+  hideModal(): void {
+    this.selectedCourse = null;
+  }
 
 }
 

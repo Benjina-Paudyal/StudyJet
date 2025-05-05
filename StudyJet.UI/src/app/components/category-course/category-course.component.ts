@@ -15,8 +15,8 @@ import { Subject, Subscription } from 'rxjs';
   templateUrl: './category-course.component.html',
   styleUrl: './category-course.component.css'
 })
-export class CategoryCourseComponent implements OnInit{
-  categoryId : number | null = null;
+export class CategoryCourseComponent implements OnInit {
+  categoryId: number | null = null;
   categoryName = '';
   courses: Course[] = [];
   wishlist: WishlistItem[] = [];
@@ -24,14 +24,14 @@ export class CategoryCourseComponent implements OnInit{
   private subscriptions = new Subscription();
   private destroy$ = new Subject<void>();
 
-  constructor (
+  constructor(
     private route: ActivatedRoute,
     private categoryService: CategoryService,
     private imageService: ImageService,
     private authService: AuthService,
     private wishlistService: WishlistService,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.route.paramMap.subscribe((params) => {
@@ -42,28 +42,27 @@ export class CategoryCourseComponent implements OnInit{
       }
     });
 
-  // Track auth status
-  this.subscriptions.add(
-    this.authService.isAuthenticated$.subscribe((status) => {
-      this.isAuthenticated = status;
-      if (status) {
-        this.loadWishlist(); 
-      }
-    })
-  );
+    // Track auth status
+    this.subscriptions.add(
+      this.authService.isAuthenticated$.subscribe((status) => {
+        this.isAuthenticated = status;
+        if (status) {
+          this.loadWishlist();
+        }
+      })
+    );
 
-  // Track wishlist changes
-  this.subscriptions.add(
-    this.wishlistService.wishlist$.subscribe((items) => {
-      this.wishlist = items;
-    })
-  );
-}
+    // Track wishlist changes
+    this.subscriptions.add(
+      this.wishlistService.wishlist$.subscribe((items) => {
+        this.wishlist = items;
+      })
+    );
+  }
 
-ngOnDestroy(): void {
-  this.subscriptions.unsubscribe();
-}
-
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+  }
 
   loadCourses(categoryId: number): void {
     console.log('Calling loadCourses for categoryID:', categoryId);
@@ -81,57 +80,54 @@ ngOnDestroy(): void {
   }
 
 
-loadCategoryName(categoryId: number): void {
-  this.categoryService.getCategoryById(categoryId).subscribe({
-    next: (cat: Category) => this.categoryName = cat.name,
-    error: (err)   => console.error('Error fetching category name', err),
-  });
-}
-
-loadWishlist(): void {
-  this.wishlistService.getWishlist().subscribe({
-    next: () => {},
-    error: (err) => console.error('Error loading wishlist:', err)
-  });
-}
-
-getCourseImageUrl(imageFilename: string): string {
-  return this.imageService.getCourseImageUrl(imageFilename);
-}
-
-isInWishlist(courseId: number): boolean {
-  return this.wishlist.some(item => item.courseID === courseId);
-}
-
-
-toggleWishlist(courseId: number, event: MouseEvent): void {
-  event.stopPropagation(); // Prevent card click
-
-  if (!this.isAuthenticated) {
-    alert('Please log in first to use the wishlist.');
-    this.router.navigate(['/login']);
-    return;
-  }
-
-  if (this.isInWishlist(courseId)) {
-    this.wishlistService.removeCourseFromWishlist(courseId).subscribe({
-      next: () => alert('Course removed from wishlist.'),
-      error: (err) => console.error('Error removing course from wishlist:', err)
-    });
-  } else {
-    this.wishlistService.addCourseToWishlist(courseId).subscribe({
-      next: () => alert('Course added to wishlist!'),
-      error: (err) => console.error('Error adding course to wishlist:', err)
+  loadCategoryName(categoryId: number): void {
+    this.categoryService.getCategoryById(categoryId).subscribe({
+      next: (cat: Category) => this.categoryName = cat.name,
+      error: (err) => console.error('Error fetching category name', err),
     });
   }
-}
+
+  loadWishlist(): void {
+    this.wishlistService.getWishlist().subscribe({
+      next: () => { },
+      error: (err) => console.error('Error loading wishlist:', err)
+    });
+  }
+
+  getCourseImageUrl(imageFilename: string): string {
+    return this.imageService.getCourseImageUrl(imageFilename);
+  }
+
+  isInWishlist(courseId: number): boolean {
+    return this.wishlist.some(item => item.courseID === courseId);
+  }
 
 
+  toggleWishlist(courseId: number, event: MouseEvent): void {
+    event.stopPropagation(); // Prevent card click
 
+    if (!this.isAuthenticated) {
+      alert('Please log in first to use the wishlist.');
+      this.router.navigate(['/login']);
+      return;
+    }
 
-navigateToDetail(courseId: number): void {
-  this.router.navigate(['/courses', courseId]);
-}
+    if (this.isInWishlist(courseId)) {
+      this.wishlistService.removeCourseFromWishlist(courseId).subscribe({
+        next: () => alert('Course removed from wishlist.'),
+        error: (err) => console.error('Error removing course from wishlist:', err)
+      });
+    } else {
+      this.wishlistService.addCourseToWishlist(courseId).subscribe({
+        next: () => alert('Course added to wishlist!'),
+        error: (err) => console.error('Error adding course to wishlist:', err)
+      });
+    }
+  }
+
+  navigateToDetail(courseId: number): void {
+    this.router.navigate(['/courses', courseId]);
+  }
 }
 
 

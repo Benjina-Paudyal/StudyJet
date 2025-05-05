@@ -40,11 +40,9 @@ export class AdminDashboardComponent implements OnInit{
 
   constructor(
     private router: Router,
-    private imageService: ImageService,
     private cookieService: CookieService,
     private userService: UserService,
     private courseService: CourseService,
-    private navbarService: NavbarService,
     private notificationService: NotificationService,
     private authService: AuthService,
   ) { }
@@ -75,7 +73,6 @@ export class AdminDashboardComponent implements OnInit{
     this.usersSubscription?.unsubscribe();
     this.notificationsSubscription?.unsubscribe();
   }
-
   
   fetchCounts(): void {
     this.userService.getStudentCount().subscribe({
@@ -110,7 +107,6 @@ export class AdminDashboardComponent implements OnInit{
     });
   }
 
-  // Fetch notifications 
   fetchNotifications(): void {
     this.notificationsSubscription = this.notificationService.getNotifications().subscribe(
       (notifications) => {
@@ -124,8 +120,3 @@ export class AdminDashboardComponent implements OnInit{
     );
   }
 }
-
-
-
-
-

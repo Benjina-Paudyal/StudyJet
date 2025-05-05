@@ -9,13 +9,13 @@ import { CourseService } from '../../services/course.service';
 @Component({
   selector: 'app-instructor-courses',
   standalone: true,
-  imports: [CommonModule,RouterLink,FormsModule],
+  imports: [CommonModule, RouterLink, FormsModule],
   templateUrl: './instructor-courses.component.html',
   styleUrl: './instructor-courses.component.css'
 })
-export class InstructorCoursesComponent implements OnInit{
+export class InstructorCoursesComponent implements OnInit {
   courses: Course[] = [];
-  errorMessage  = '';
+  errorMessage = '';
   loading = true;
   private imageBaseUrl = environment.imageBaseUrl;
   isEditMode = false;
@@ -25,7 +25,7 @@ export class InstructorCoursesComponent implements OnInit{
 
 
   constructor(
-    private courseService: CourseService, 
+    private courseService: CourseService,
     private router: Router,
   ) { }
 
@@ -34,7 +34,6 @@ export class InstructorCoursesComponent implements OnInit{
     this.loadTotalCourses();
   }
 
-  // Fetch courses for the instructor
   fetchCourses(): void {
     this.courseService.getCoursesByInstructor().subscribe({
       next: (courses: Course[]) => {
@@ -51,34 +50,29 @@ export class InstructorCoursesComponent implements OnInit{
               course.status = 'Rejected';
               break;
           }
-  
-          // Prepending the base URL to the imageUrl
           course.imageUrl = `${this.imageBaseUrl}${course.imageUrl}`;
-          console.log("Instructor's courses:", course);
           return course;
         });
       },
       error: (err) => console.error('Error fetching courses', err)
     });
   }
-  
-   // Submit the form (Add or Update)
-   onSubmit(): void {
+
+  // Submit the form (Add or Update)
+  onSubmit(): void {
     if (!this.selectedCourse) {
       alert('No course selected.');
       return;
     }
 
-    // Ensure the course status is properly set
     if (!this.selectedCourse.status) {
-      this.selectedCourse.status = "Pending"; 
+      this.selectedCourse.status = "Pending";
     }
 
     if (this.isEditMode) {
-      // Update course
       this.courseService.updateCourse(this.selectedCourse.courseID, this.selectedCourse).subscribe({
         next: () => {
-          this.fetchCourses(); 
+          this.fetchCourses();
           alert('Course updated successfully!');
         },
         error: (err) => {
@@ -87,10 +81,9 @@ export class InstructorCoursesComponent implements OnInit{
         }
       });
     } else {
-      // Add new course
       this.courseService.createCourse(this.selectedCourse).subscribe({
         next: () => {
-          this.fetchCourses(); 
+          this.fetchCourses();
           alert('Course added successfully!');
         },
         error: (err) => {
@@ -100,32 +93,29 @@ export class InstructorCoursesComponent implements OnInit{
       });
     }
   }
-   
-  // Fetch total number of courses
-loadTotalCourses(): void {
-  this.courseService.getTotalCoursesForInstructor().subscribe(
-    (response: { totalCourses: number }) => { 
-      if (response && response.totalCourses !== undefined) {
-        this.totalCourses = response.totalCourses; 
-      } else {
-        this.totalCourses = 0;
-      }
-      this.loading = false; 
-    },
-    (error) => {
-      console.error('Error fetching total courses:', error);
-      this.error = "Failed to fetch courses.";
-      this.loading = false; 
-    }
-  );
-}
 
-  // Update course details
+  loadTotalCourses(): void {
+    this.courseService.getTotalCoursesForInstructor().subscribe(
+      (response: { totalCourses: number }) => {
+        if (response && response.totalCourses !== undefined) {
+          this.totalCourses = response.totalCourses;
+        } else {
+          this.totalCourses = 0;
+        }
+        this.loading = false;
+      },
+      (error) => {
+        console.error('Error fetching total courses:', error);
+        this.error = "Failed to fetch courses.";
+        this.loading = false;
+      }
+    );
+  }
+
   updateCourse(courseId: number): void {
     this.router.navigate(['/update-course', courseId]);
   }
 
-  // Navigate to the "Add Course" page
   navigateToAddCourse(): void {
     this.router.navigate(['/add-course']);
   }

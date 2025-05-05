@@ -24,9 +24,9 @@ export class Confirm2faComponent {
     private router: Router,
   ) {
 
-     this.verifyForm = this.formBuilder.group({
-          code: ['', [Validators.required, Validators.minLength(6)]],
-        });
+    this.verifyForm = this.formBuilder.group({
+      code: ['', [Validators.required, Validators.minLength(6)]],
+    });
   }
 
   onSubmit(): void {
@@ -54,4 +54,3 @@ export class Confirm2faComponent {
     });
   }
 }
-

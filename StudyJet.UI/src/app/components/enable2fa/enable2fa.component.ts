@@ -19,8 +19,8 @@ export class Enable2faComponent {
   loading = false;
   errorMessage: string | null = null;
   successMessage: string | null = null;
-
   is2FAEnabled = false;
+  qrScanned = false;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -58,12 +58,16 @@ export class Enable2faComponent {
       next: (response) => {
         this.qrCode = 'data:image/png;base64,' + response.qrCode;
         this.errorMessage = null;
-        setTimeout(() => this.router.navigate(['/confirm-2fa']), 6000);
       },
       error: (error) => {
         this.errorMessage = error.error?.message || 'An error occurred while enabling 2FA.';
       },
     });
+  }
+
+  confirm2FASetup(): void {
+    this.qrScanned = true;
+    this.router.navigate(['/confirm-2fa']);
   }
 
   disable2FA(): void {
@@ -89,5 +93,4 @@ export class Enable2faComponent {
       this.disable2FA();
     }
   }
-
 }

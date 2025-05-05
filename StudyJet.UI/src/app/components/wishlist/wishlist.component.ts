@@ -71,15 +71,12 @@ export class WishlistComponent implements OnInit, OnDestroy {
         this.isLoading = false;
       }
     });
-
-       // Purchased courses
        this.purchaseCourseService.purchasedCourses$
        .pipe(takeUntil(this.destroy$))
        .subscribe((courses) => {
          this.purchasedCourses = courses;
        });
- 
-     // Initial load
+       
      this.loadWishlist();
    }
 

@@ -21,7 +21,6 @@ export class CartComponent implements OnInit, OnDestroy {
   wishlist = [];
   errorMessage = '';
   isLoading = false;
-
   private destroy$ = new Subject<void>(); // to clean up subscription
 
   constructor(
@@ -113,7 +112,6 @@ export class CartComponent implements OnInit, OnDestroy {
         this.isLoading = false;
       }
     });
-
   }
 
   getTotalPrice(): number {

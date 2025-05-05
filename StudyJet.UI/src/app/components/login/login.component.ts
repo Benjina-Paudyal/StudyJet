@@ -18,6 +18,7 @@ import { InactivityService } from '../../services/inactivity.service';
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
 })
+
 export class LoginComponent {
   loginForm: FormGroup;
   loading = false;
@@ -43,7 +44,6 @@ export class LoginComponent {
     });
   }
 
-  // Form field accessors for easy reference
   get email() {
     return this.loginForm.get('Email');
   }
@@ -66,28 +66,18 @@ export class LoginComponent {
       Password: this.password?.value,
     };
 
-    // temporary
     this.navbarService.setNavbarType('hidden');
     this.authService.login(loginData).subscribe({
       next: (response) => {
-
         if (response.requires2FA) {
-          // Handle 2FA case
           this.cookieService.set('authEmail', loginData.Email);
           this.router.navigate(['/verify2fa-login']);
-
         } else if (response.requiresPasswordChange) {
-          // User needs to reset password after email confirmation
           this.cookieService.set('resetToken', response.resetToken ?? '', { secure: true, sameSite: 'Strict' });
           this.cookieService.set('mail', response.email ?? '', { secure: true, sameSite: 'Strict' }); 
-
-          // Navigate to the reset password page, passing the email directly from the response
           this.router.navigate(['/reset-password'], {
-            state: { 
-              email: response.email ?? '',
-              token: response.resetToken ?? '' },  
+            state: { email: response.email ?? '',  token: response.resetToken ?? '' }, 
           });
-
         } else {
           this.authService.handleSuccessfulLogin(response);
           this.profileImageUrl = this.authService.getProfileImage();
@@ -106,16 +96,18 @@ export class LoginComponent {
       },
       error: (error: HttpErrorResponse) => {
         this.loading = false;
-        if (error.status === 401) {
-          this.errorMessage = 'Incorrect email or password. Please try again.';
-        } else if (error.error?.message === 'ChangePasswordRequired') {
+        console.error('Login error:', error); 
+
+        if (error.error?.message === 'ChangePasswordRequired') {
           this.router.navigate(['/reset-password'], {
             state: { email: this.email?.value },
           });
+        } else if ((error.status === 400 || error.status === 401) && error.error?.errors) {
+          this.errorMessage = 'Incorrect email or password';
         } else {
           this.errorMessage = 'An unknown error occurred. Please try again later.';
         }
-      },
+      }
     });
   }
 
@@ -131,7 +123,6 @@ export class LoginComponent {
     });
   }
 
-  // Navigate to dashboard based on the navbar type (Admin, Instructor, Student)
   private navigateToDashboard(navbarType: 'admin' | 'instructor' | 'student' | 'default') {
     switch (navbarType) {
       case 'admin':
@@ -147,12 +138,5 @@ export class LoginComponent {
         this.router.navigate(['/home']);
         break;
     }
-
   }
 }
-
-
-
-
-
-

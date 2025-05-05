@@ -21,6 +21,5 @@ import { BecomeInstructorComponent } from '../become-instructor/become-instructo
   styleUrl: './homepage.component.css'
 })
 export class HomepageComponent {
-
 }
 

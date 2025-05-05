@@ -52,8 +52,6 @@ export class ChangePasswordComponent {
     get confirmPassword() {
       return this.changePasswordForm.get('ConfirmPassword');
     }
-
-
      
   onSubmit(): void {
     this.changePasswordForm.markAllAsTouched();
@@ -70,9 +68,6 @@ export class ChangePasswordComponent {
       currentPassword: this.changePasswordForm.value.CurrentPassword,
       newPassword: this.changePasswordForm.value.Password,
     };
-
-    console.log('Sending changePassword data:', changePasswordData); // Add this log
-
     this.authService.changePassword(changePasswordData.currentPassword, changePasswordData.newPassword)
     .subscribe({
       next: (response) => {
@@ -89,16 +84,3 @@ export class ChangePasswordComponent {
     });
 }
 }
-  
-
-
-
-
-
-
-
-
-
-
-
-
