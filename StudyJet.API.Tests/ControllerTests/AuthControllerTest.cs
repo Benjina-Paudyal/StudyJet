@@ -15,6 +15,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
+using StudyJet.API.Services.Implementation;
 
 namespace StudyJet.API.Tests.ControllerTests
 {
@@ -395,104 +396,154 @@ namespace StudyJet.API.Tests.ControllerTests
         }
 
 
+
+
+
         [Fact]
-        public async Task EnableTwoFactorAuthentication_ReturnsFileResult_WhenSuccessful()
+        public async Task Initiate2FA_ShouldReturnFile_When2FAInitiationIsSuccessful()
         {
             // Arrange
-            var email = "user@example.com";
-            var user = new User { Email = email };
+            var email = "test@example.com";
+            var user = new User { Email = email };  
+            var qrCodeImage = new byte[] { 0x20, 0x20 };  
 
-            var claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(new List<Claim>
-            {
-                new Claim(ClaimTypes.Email, email)
-            }));
+            var result = new TwoFactorResultDTO { Success = true, QrCodeImage = qrCodeImage };
 
             _controller.ControllerContext = new ControllerContext()
             {
-                HttpContext = new DefaultHttpContext() { User = claimsPrincipal }
+                HttpContext = new DefaultHttpContext()
+                {
+                    User = new ClaimsPrincipal(new ClaimsIdentity(new[]
+                    {
+                new Claim(ClaimTypes.Email, email) 
+            }))
+                }
             };
 
             _userServiceMock.Setup(s => s.GetUserByEmailAsync(email)).ReturnsAsync(user);
-            _authServiceMock.Setup(s => s.Generate2faSecretAsync(user)).ReturnsAsync("secret-key");
-            _authServiceMock.Setup(s => s.Generate2faQrCodeUri(user.Email, "secret-key")).Returns("https://example.com/qrcode");
-            _authServiceMock.Setup(s => s.GenerateQRCodeImage(It.IsAny<string>())).Returns(new byte[] { 1, 2, 3 });
+            _authServiceMock.Setup(s => s.Initiate2faSetupAsync(user)).ReturnsAsync(result);
 
             // Act
-            var result = await _controller.EnableTwoFactorAuthentication();
+            var resultAction = await _controller.Initiate2FA();
 
             // Assert
-            var fileResult = Assert.IsType<FileContentResult>(result);
+            var fileResult = Assert.IsType<FileContentResult>(resultAction);
             Assert.Equal("image/png", fileResult.ContentType);
-            Assert.NotNull(fileResult.FileContents);
+            Assert.Equal(qrCodeImage, fileResult.FileContents);
         }
 
         [Fact]
-        public async Task EnableTwoFactorAuthentication_ReturnsBadRequest_WhenUserNotFound()
+        public async Task Initiate2FA_ShouldReturnBadRequest_When2FAInitiationFails()
         {
             // Arrange
-            var email = "user@example.com";
+            var email = "test@example.com";
+            var user = new User { Email = email };  
 
-            var claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(new List<Claim>
-            {
-                new Claim(ClaimTypes.Email, email)
-            }));
+            var result = new TwoFactorResultDTO { Success = false, ErrorMessage = "Failed to initiate 2FA." };
 
             _controller.ControllerContext = new ControllerContext()
             {
-                HttpContext = new DefaultHttpContext() { User = claimsPrincipal }
-            };
-
-            _userServiceMock.Setup(s => s.GetUserByEmailAsync(email)).ReturnsAsync((User)null); 
-
-            // Act
-            var result = await _controller.EnableTwoFactorAuthentication();
-
-            // Assert
-            var unauthorizedResult = Assert.IsType<UnauthorizedObjectResult>(result);  
-            var errorResponse = Assert.IsType<ErrorResponseDTO>(unauthorizedResult.Value);
-            Assert.Contains("User not found", errorResponse.Errors[0]);
-        }
-
-        [Fact]
-        public async Task EnableTwoFactorAuthentication_ReturnsInternalServerError_WhenExceptionOccurs()
-        {
-            // Arrange
-            var email = "user@example.com";
-            var user = new User { Email = email };
-
-            var claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(new List<Claim>
-            {
-                new Claim(ClaimTypes.Email, email)
-            }));
-
-            _controller.ControllerContext = new ControllerContext()
-            {
-                HttpContext = new DefaultHttpContext() { User = claimsPrincipal }
+                HttpContext = new DefaultHttpContext()
+                {
+                    User = new ClaimsPrincipal(new ClaimsIdentity(new[]
+                    {
+                new Claim(ClaimTypes.Email, email) 
+            }))
+                }
             };
 
             _userServiceMock.Setup(s => s.GetUserByEmailAsync(email)).ReturnsAsync(user);
-            _authServiceMock.Setup(s => s.Generate2faSecretAsync(user)).Throws(new Exception("Internal error"));
+            _authServiceMock.Setup(s => s.Initiate2faSetupAsync(user)).ReturnsAsync(result);
 
             // Act
-            var result = await _controller.EnableTwoFactorAuthentication();
+            var resultAction = await _controller.Initiate2FA();
 
             // Assert
-            var statusCodeResult = Assert.IsType<ObjectResult>(result);
-            Assert.Equal(500, statusCodeResult.StatusCode);
-            var errorResponse = Assert.IsType<ErrorResponseDTO>(statusCodeResult.Value);
-            Assert.Contains("Internal server error", errorResponse.Errors[0]);
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(resultAction);
+            Assert.Equal(400, badRequestResult.StatusCode);
+
+            var errorMessage = JObject.FromObject(badRequestResult.Value)["error"]?.ToString();
+            Assert.Equal("Failed to initiate 2FA.", errorMessage);
         }
 
-
-
         [Fact]
-        public async Task VerifyTwoFactorCode_ReturnsBadRequest_When2FACodeIsMissing()
+        public async Task Confirm2FA_ShouldReturnOk_When2FACodeIsValid()
         {
             // Arrange
-            var model = new Verify2faDTO { Email = "user@example.com", Code = null };
+            var model = new Verify2faDTO { Code = "valid-2fa-code" }; 
+            var email = "test@example.com";
+            var user = new User { Email = email };  
+            var result = new TwoFactorResultDTO { Success = true };
+
+            _controller.ControllerContext = new ControllerContext()
+            {
+                HttpContext = new DefaultHttpContext()
+                {
+                    User = new ClaimsPrincipal(new ClaimsIdentity(new[]
+                    {
+                new Claim(ClaimTypes.Email, email) 
+            }))
+                }
+            };
+
+            _userServiceMock.Setup(s => s.GetUserByEmailAsync(email)).ReturnsAsync(user);
+            _authServiceMock.Setup(s => s.Confirm2faSetupAsync(user, model.Code)).ReturnsAsync(result);
 
             // Act
-            var result = await _controller.VerifyTwoFactorCode(model);
+            var resultAction = await _controller.Confirm2FA(model);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(resultAction);
+            Assert.Equal(200, okResult.StatusCode);
+
+            var responseMessage = JObject.FromObject(okResult.Value)["message"]?.ToString();
+            Assert.Equal("2FA enabled successfully.", responseMessage);
+        }
+
+        [Fact]
+        public async Task Confirm2FA_ShouldReturnBadRequest_When2FACodeIsInvalid()
+        {
+            // Arrange
+            var model = new Verify2faDTO { Code = "invalid-2fa-code" }; 
+            var email = "test@example.com";
+            var user = new User { Email = email };  
+            var result = new TwoFactorResultDTO { Success = false, ErrorMessage = "Invalid 2FA verification code." };
+            
+            _controller.ControllerContext = new ControllerContext()
+            {
+                HttpContext = new DefaultHttpContext()
+                {
+                    User = new ClaimsPrincipal(new ClaimsIdentity(new[]
+                    {
+                new Claim(ClaimTypes.Email, email) 
+            }))
+                }
+            };
+
+            _userServiceMock.Setup(s => s.GetUserByEmailAsync(email)).ReturnsAsync(user);
+            _authServiceMock.Setup(s => s.Confirm2faSetupAsync(user, model.Code)).ReturnsAsync(result);
+
+            // Act
+            var resultAction = await _controller.Confirm2FA(model);
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(resultAction);
+            Assert.Equal(400, badRequestResult.StatusCode);
+
+            var responseMessage = JObject.FromObject(badRequestResult.Value)["error"]?.ToString();
+            Assert.Equal("Invalid 2FA verification code.", responseMessage);
+        }
+
+        [Fact]
+        public async Task VerifyTwoFactorLogin_ReturnsBadRequest_WhenTempTokenIsInvalidOrUserNotFound()
+        {
+            // Arrange
+            var model = new Verify2faLoginDTO { TempToken = "invalid-temp-token", Code = "123456" };
+
+            _authServiceMock.Setup(s => s.ValidateTempTokenAsync(model.TempToken)).ReturnsAsync((User)null);
+
+            // Act
+            var result = await _controller.VerifyTwoFactorLogin(model);
 
             // Assert
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
@@ -500,43 +551,45 @@ namespace StudyJet.API.Tests.ControllerTests
             var errorProperty = badRequestResult.Value.GetType().GetProperty("error");
             var errorValue = errorProperty?.GetValue(badRequestResult.Value)?.ToString();
 
-            Assert.Equal("2FA code is required.", errorValue);
+            Assert.Equal("Invalid or expired temporary token.", errorValue);
         }
 
         [Fact]
-        public async Task VerifyTwoFactorCode_ReturnsUnauthorized_WhenUserNotFound()
+        public async Task VerifyTwoFactorLogin_ReturnsBadRequest_WhenUserNotFound()
         {
             // Arrange
-            var model = new Verify2faDTO { Email = "user@example.com", Code = "123456" };
+            var model = new Verify2faLoginDTO { TempToken = "invalid-temp-token", Code = "123456" };
 
-            _userServiceMock.Setup(s => s.GetUserByEmailAsync(model.Email)).ReturnsAsync((User)null);
+            _authServiceMock.Setup(s => s.ValidateTempTokenAsync(model.TempToken))
+                .ReturnsAsync((User)null); 
 
             // Act
-            var result = await _controller.VerifyTwoFactorCode(model);
+            var result = await _controller.VerifyTwoFactorLogin(model);
 
             // Assert
-            var unauthorizedResult = Assert.IsType<UnauthorizedObjectResult>(result);
-            var errorResponse = Assert.IsType<ErrorResponseDTO>(unauthorizedResult.Value);
-            Assert.Contains("User not found", errorResponse.Errors[0]);
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var errorProperty = badRequestResult.Value.GetType().GetProperty("error");
+            var errorMessage = errorProperty?.GetValue(badRequestResult.Value)?.ToString();
+
+            Assert.Equal("Invalid or expired temporary token.", errorMessage);
         }
 
         [Fact]
-        public async Task VerifyTwoFactorCode_ReturnsUnauthorized_When2FACodeIsInvalid()
+        public async Task VerifyTwoFactorLogin_ReturnsUnauthorized_When2FACodeIsInvalid()
         {
             // Arrange
-            var model = new Verify2faDTO { Email = "user@example.com", Code = "invalid-code" };
-            var user = new User { Email = "user@example.com" };
+            var model = new Verify2faLoginDTO { TempToken = "valid-temp-token", Code = "invalid-code" };
+            var user = new User { UserName = "testuser" };
 
-            _userServiceMock.Setup(s => s.GetUserByEmailAsync(model.Email)).ReturnsAsync(user);
+            _authServiceMock.Setup(s => s.ValidateTempTokenAsync(model.TempToken)).ReturnsAsync(user);
             _authServiceMock.Setup(s => s.Verify2faCodeAsync(user, model.Code)).ReturnsAsync(false);
 
             // Act
-            var result = await _controller.VerifyTwoFactorCode(model);
+            var result = await _controller.VerifyTwoFactorLogin(model);
 
             // Assert
             var unauthorizedResult = Assert.IsType<UnauthorizedObjectResult>(result);
 
-            // reflection 
             var errorProperty = unauthorizedResult.Value.GetType().GetProperty("error");
             var errorValue = errorProperty?.GetValue(unauthorizedResult.Value)?.ToString();
 
@@ -544,53 +597,21 @@ namespace StudyJet.API.Tests.ControllerTests
         }
 
         [Fact]
-        public async Task VerifyTwoFactorCode_ReturnsOk_When2FACodeIsValid()
+        public async Task VerifyTwoFactorLogin_ReturnsInternalServerError_WhenExceptionOccurs()
         {
             // Arrange
-            var model = new Verify2faDTO { Email = "user@example.com", Code = "valid-code" };
-            var user = new User { Email = "user@example.com" };
-            var roles = new List<string> { "User", "Admin" };
-            var token = "jwt-token";
+            var model = new Verify2faLoginDTO { Code = "valid-code", TempToken = "some-token" };
 
-            _userServiceMock.Setup(s => s.GetUserByEmailAsync(model.Email)).ReturnsAsync(user);
-            _authServiceMock.Setup(s => s.Verify2faCodeAsync(user, model.Code)).ReturnsAsync(true);
-            _authServiceMock.Setup(s => s.GenerateJwtTokenAsync(user)).ReturnsAsync(token);
-            _userServiceMock.Setup(s => s.GetUserRolesAsync(user)).ReturnsAsync(roles);
-
-            // Act
-            var result = await _controller.VerifyTwoFactorCode(model);
-
-            // Assert
-            var okResult = Assert.IsType<OkObjectResult>(result);
-
-            // Use reflection to access properties
-            var value = okResult.Value;
-            var tokenProp = value.GetType().GetProperty("Token");
-            var rolesProp = value.GetType().GetProperty("Roles");
-
-            var tokenValue = tokenProp?.GetValue(value)?.ToString();
-            var rolesValue = rolesProp?.GetValue(value) as IEnumerable<string>;
-
-            Assert.Equal(token, tokenValue);
-            Assert.Equal(roles, rolesValue);
-        }
-
-        [Fact]
-        public async Task VerifyTwoFactorCode_ReturnsInternalServerError_WhenExceptionOccurs()
-        {
-            // Arrange
-            var model = new Verify2faDTO { Email = "user@example.com", Code = "valid-code" };
-            _userServiceMock.Setup(s => s.GetUserByEmailAsync(model.Email))
+            _authServiceMock.Setup(s => s.ValidateTempTokenAsync(model.TempToken))
                 .ThrowsAsync(new Exception("Database error"));
 
             // Act
-            var result = await _controller.VerifyTwoFactorCode(model);
+            var result = await _controller.VerifyTwoFactorLogin(model);
 
             // Assert
             var objectResult = Assert.IsType<ObjectResult>(result);
             Assert.Equal(500, objectResult.StatusCode);
 
-            // reflection 
             var value = objectResult.Value;
             var errorProp = value.GetType().GetProperty("error");
             var errorMessage = errorProp?.GetValue(value)?.ToString();
@@ -598,8 +619,6 @@ namespace StudyJet.API.Tests.ControllerTests
             Assert.Contains("Internal server error", errorMessage);
             Assert.Contains("Database error", errorMessage);
         }
-
-
 
         [Fact]
         public async Task VerifyTwoFactorLogin_ShouldReturnBadRequest_WhenInvalidModel()
@@ -662,33 +681,43 @@ namespace StudyJet.API.Tests.ControllerTests
         }
 
         [Fact]
-        public async Task VerifyTwoFactorLogin_ReturnsOk_When2FAIsValid()
+        public async Task VerifyTwoFactorLogin_ReturnsOk_When2FACodeIsValid()
         {
             // Arrange
-            var user = new User { UserName = "user", ProfilePictureUrl = null };
-            var token = "jwt-token";
-            var roles = new List<string> { "Student" };
-            var dto = new Verify2faLoginDTO { Code = "valid-code", TempToken = "valid-temp-token" };
+            var model = new Verify2faLoginDTO { Code = "valid-code", TempToken = "temp-token" };
+            var user = new User
+            {
+                Id = Guid.NewGuid().ToString(),
+                Email = "user@example.com",
+                UserName = "user123",
+                FullName = "User Name",
+                ProfilePictureUrl = null
+            };
 
-            _authServiceMock.Setup(x => x.ValidateTempTokenAsync(dto.TempToken)).ReturnsAsync(user);
-            _authServiceMock.Setup(x => x.Verify2faCodeAsync(user, dto.Code)).ReturnsAsync(true);
-            _authServiceMock.Setup(x => x.GenerateJwtTokenAsync(user)).ReturnsAsync(token);
-            _userServiceMock.Setup(x => x.GetUserRolesAsync(user)).ReturnsAsync(roles);
-            _configurationMock.Setup(x => x["DefaultProfilePicPaths:ProfilePicture"]).Returns("default.png");
+            var roles = new List<string> { "User", "Admin" };
+            var token = "jwt-token";
+
+            _authServiceMock.Setup(s => s.ValidateTempTokenAsync(model.TempToken)).ReturnsAsync(user);
+            _authServiceMock.Setup(s => s.Verify2faCodeAsync(user, model.Code)).ReturnsAsync(true);
+            _authServiceMock.Setup(s => s.GenerateJwtTokenAsync(user)).ReturnsAsync(token);
+            _userServiceMock.Setup(s => s.GetUserRolesAsync(user)).ReturnsAsync(roles);
+            _configurationMock.Setup(c => c["DefaultProfilePicPaths:ProfilePicture"]).Returns("default-pic-url");
 
             // Act
-            var result = await _controller.VerifyTwoFactorLogin(dto);
+            var result = await _controller.VerifyTwoFactorLogin(model);
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
-            dynamic response = okResult.Value; 
+            var response = Assert.IsType<Verify2faLoginResponse>(okResult.Value);
 
             Assert.Equal(token, response.Token);
-            Assert.Equal("user", response.Username);
-            Assert.Equal("default.png", response.ProfilePictureUrl);
+            Assert.Equal(roles, response.Roles);
+            Assert.Equal(user.UserName, response.UserName);
+            Assert.Equal(user.FullName, response.FullName);
+            Assert.Equal(user.Email, response.Email);
+            Assert.Equal(user.Id, response.UserID);
+            Assert.Equal("default-pic-url", response.ProfilePictureUrl); // since user.ProfilePictureUrl is null
         }
-
-
 
         [Fact]
         public async Task Check2FAStatus_ShouldReturnBadRequest_WhenUsernameNotFound()
@@ -758,8 +787,6 @@ namespace StudyJet.API.Tests.ControllerTests
             Assert.Equal("Internal server error.", jObject["message"]?.ToString());
         }
 
-
-
         [Fact]
         public async Task Disable2FA_ShouldReturnUnauthorized_WhenUsernameNotFoundInClaims()
         {
@@ -786,7 +813,7 @@ namespace StudyJet.API.Tests.ControllerTests
         public async Task ForgotPassword_ShouldReturnBadRequest_WhenModelStateIsInvalid()
         {
             // Arrange
-            var forgotPasswordDto = new ForgotPasswordDTO { Email = "invalid-email" }; // Assuming validation will fail for this email format
+            var forgotPasswordDto = new ForgotPasswordDTO { Email = "invalid-email" }; 
             _controller.ModelState.AddModelError("Email", "Invalid email format");
 
             // Act
@@ -804,7 +831,7 @@ namespace StudyJet.API.Tests.ControllerTests
         {
             // Arrange
             var request = new VerifyPasswordRequestDTO { Email = "testuser@example.com", Password = "wrongpassword" };
-            _authServiceMock.Setup(s => s.VerifyPasswordAsync(request.Email, request.Password)).ReturnsAsync(false); // Simulate invalid password
+            _authServiceMock.Setup(s => s.VerifyPasswordAsync(request.Email, request.Password)).ReturnsAsync(false); 
 
             // Act
             var result = await _controller.VerifyPassword(request);
@@ -822,7 +849,7 @@ namespace StudyJet.API.Tests.ControllerTests
         {
             // Arrange
             var request = new VerifyPasswordRequestDTO { Email = "testuser@example.com", Password = "correctpassword" };
-            _authServiceMock.Setup(s => s.VerifyPasswordAsync(request.Email, request.Password)).ReturnsAsync(true); // Simulate valid password
+            _authServiceMock.Setup(s => s.VerifyPasswordAsync(request.Email, request.Password)).ReturnsAsync(true); 
 
             // Act
             var result = await _controller.VerifyPassword(request);
@@ -856,13 +883,13 @@ namespace StudyJet.API.Tests.ControllerTests
 
 
         [Fact]
-        public async Task ChangePassword_ShouldReturnBadRequest_WhenUsernameNotFoundInToken()
+        public async Task ChangePassword_ShouldReturnBadRequest_WhenUserIdNotFoundInToken()
         {
             // Arrange
             var model = new ChangePasswordDTO { CurrentPassword = "oldPassword", NewPassword = "newPassword" };
             _controller.ControllerContext = new ControllerContext()
             {
-                HttpContext = new DefaultHttpContext() { User = new ClaimsPrincipal(new ClaimsIdentity()) } // No username in claims
+                HttpContext = new DefaultHttpContext() { User = new ClaimsPrincipal(new ClaimsIdentity()) } 
             };
 
             // Act
@@ -873,7 +900,7 @@ namespace StudyJet.API.Tests.ControllerTests
             Assert.Equal(400, badRequestResult.StatusCode);
 
             var jObject = JObject.FromObject(badRequestResult.Value);
-            Assert.Equal("Username not found in token.", jObject["message"]?.ToString());
+            Assert.Equal("User ID not found in token.", jObject["message"]?.ToString());
         }
 
         [Fact]
@@ -881,12 +908,15 @@ namespace StudyJet.API.Tests.ControllerTests
         {
             // Arrange
             var model = new ChangePasswordDTO { CurrentPassword = "oldPassword", NewPassword = "newPassword" };
-            var username = "testuser";
+            var userId = "testuserId"; 
             _controller.ControllerContext = new ControllerContext()
             {
-                HttpContext = new DefaultHttpContext() { User = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim(ClaimTypes.Name, username) })) } // Username present in claims
+                HttpContext = new DefaultHttpContext()
+                {
+                    User = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim("userId", userId) })) 
+                }
             };
-            _authServiceMock.Setup(s => s.ChangePasswordAsync(username, model)).ReturnsAsync(true); 
+            _authServiceMock.Setup(s => s.ChangePasswordAsync(userId, model)).ReturnsAsync(true);
 
             // Act
             var result = await _controller.ChangePassword(model);
@@ -904,12 +934,15 @@ namespace StudyJet.API.Tests.ControllerTests
         {
             // Arrange
             var model = new ChangePasswordDTO { CurrentPassword = "oldPassword", NewPassword = "newPassword" };
-            var username = "testuser";
+            var userId = "testuserId"; 
             _controller.ControllerContext = new ControllerContext()
             {
-                HttpContext = new DefaultHttpContext() { User = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim(ClaimTypes.Name, username) })) } // Username present in claims
+                HttpContext = new DefaultHttpContext()
+                {
+                    User = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim("userId", userId) })) 
+                }
             };
-            _authServiceMock.Setup(s => s.ChangePasswordAsync(username, model)).ReturnsAsync(false); 
+            _authServiceMock.Setup(s => s.ChangePasswordAsync(userId, model)).ReturnsAsync(false); 
 
             // Act
             var result = await _controller.ChangePassword(model);
@@ -928,7 +961,7 @@ namespace StudyJet.API.Tests.ControllerTests
         public async Task ResetPassword_ShouldReturnBadRequest_WhenModelStateIsInvalid()
         {
             // Arrange
-            var model = new ResetPasswordDTO { Email = "testuser@example.com", Token = "valid-token", NewPassword = "" };  // Simulating invalid model state with empty password
+            var model = new ResetPasswordDTO { Email = "testuser@example.com", Token = "valid-token", NewPassword = "" }; 
             _controller.ModelState.AddModelError("Password", "Password is required.");
 
             // Act

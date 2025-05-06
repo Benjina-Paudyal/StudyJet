@@ -34,7 +34,10 @@ namespace StudyJet.API.Tests.ServiceTests
             var store = new Mock<IUserStore<User>>();
             var roleStore = new Mock<IRoleStore<IdentityRole>>();
 
-            _userManagerMock = new Mock<UserManager<User>>(store.Object, null, null, null, null, null, null, null, null);
+            _userManagerMock = new Mock<UserManager<User>>(
+                store.Object, null, null, null, null, null, null, null, null);
+
+
             _signInManagerMock = new Mock<SignInManager<User>>(
                 _userManagerMock.Object,
                 new Mock<IHttpContextAccessor>().Object,
@@ -194,6 +197,9 @@ namespace StudyJet.API.Tests.ServiceTests
                 Password = "Passw0rd!",
                 ConfirmPassword = "Passw0rd!"
             };
+
+            _configurationMock.Setup(c => c["Backend:BaseUrl"]).Returns("https://localhost:7248");
+
             _userServiceMock.Setup(x => x.CheckIfEmailExistsAsync(It.IsAny<string>())).ReturnsAsync(false);
             _userServiceMock.Setup(x => x.CheckUsernameExistsAsync(It.IsAny<string>())).ReturnsAsync(false);
             _userServiceMock.Setup(x => x.ValidatePassword(It.IsAny<string>(), It.IsAny<string>())).Returns(true);
@@ -223,6 +229,8 @@ namespace StudyJet.API.Tests.ServiceTests
                 Password = "Passw0rd!",
                 ConfirmPassword = "Passw0rd!"
             };
+            _configurationMock.Setup(c => c["Backend:BaseUrl"]).Returns("https://localhost:7248");
+
             _userServiceMock.Setup(x => x.CheckIfEmailExistsAsync(It.IsAny<string>())).ReturnsAsync(false);
             _userServiceMock.Setup(x => x.CheckUsernameExistsAsync(It.IsAny<string>())).ReturnsAsync(false);
             _userServiceMock.Setup(x => x.ValidatePassword(It.IsAny<string>(), It.IsAny<string>())).Returns(true);
@@ -231,6 +239,52 @@ namespace StudyJet.API.Tests.ServiceTests
             _userServiceMock.Setup(x => x.AssignUserRoleAsync(It.IsAny<User>(), "Student")).ReturnsAsync(IdentityResult.Success);
             _emailServiceMock.Setup(x => x.SendEmailAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
                              .ReturnsAsync(IdentityResult.Success);
+
+            // Act
+            var result = await _authService.RegisterUserAsync(registrationDto);
+
+            // Assert
+            Assert.True(result.Succeeded);
+        }
+
+        [Fact]
+        public async Task RegisterUserAsync_AllValid_ReturnsSuccess()
+        {
+            // Arrange
+            var registrationDto = new UserRegistrationDTO
+            {
+                Email = "newuser@example.com",
+                Password = "Password123!",
+                ConfirmPassword = "Password123!",
+                FullName = "New User",
+                UserName = "newuser"
+            };
+
+            _configurationMock.Setup(c => c["Backend:BaseUrl"]).Returns("https://localhost:7248");
+
+            // Mock behaviors
+            _userServiceMock.Setup(x => x.CheckIfEmailExistsAsync(registrationDto.Email)).ReturnsAsync(false);
+            _userServiceMock.Setup(x => x.CheckUsernameExistsAsync(registrationDto.UserName)).ReturnsAsync(false);
+            _userServiceMock.Setup(x => x.ValidatePassword(registrationDto.Password, registrationDto.ConfirmPassword)).Returns(true);
+
+            _userManagerMock
+                .Setup(x => x.CreateAsync(It.IsAny<User>(), registrationDto.Password))
+                .ReturnsAsync(IdentityResult.Success);
+
+            _userServiceMock
+                .Setup(x => x.EnsureDefaultRoleExistsAsync())
+                .Returns(Task.CompletedTask);
+
+            _userServiceMock
+                .Setup(x => x.AssignUserRoleAsync(It.IsAny<User>(), "Student"))
+                .ReturnsAsync(IdentityResult.Success);
+
+            _emailServiceMock
+                .Setup(x => x.SendEmailAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string>()))
+                .ReturnsAsync(IdentityResult.Success);
 
             // Act
             var result = await _authService.RegisterUserAsync(registrationDto);
@@ -377,53 +431,6 @@ namespace StudyJet.API.Tests.ServiceTests
 
 
 
-
-        [Fact]
-        public async Task RegisterUserAsync_AllValid_ReturnsSuccess()
-        {
-            // Arrange
-            var registrationDto = new UserRegistrationDTO
-            {
-                Email = "newuser@example.com",
-                Password = "Password123!",
-                ConfirmPassword = "Password123!",
-                FullName = "New User",
-                UserName = "newuser"
-            };
-
-            // Mock behaviors
-            _userServiceMock.Setup(x => x.CheckIfEmailExistsAsync(registrationDto.Email)).ReturnsAsync(false);
-            _userServiceMock.Setup(x => x.CheckUsernameExistsAsync(registrationDto.UserName)).ReturnsAsync(false);
-            _userServiceMock.Setup(x => x.ValidatePassword(registrationDto.Password, registrationDto.ConfirmPassword)).Returns(true);
-
-            _userManagerMock
-                .Setup(x => x.CreateAsync(It.IsAny<User>(), registrationDto.Password))
-                .ReturnsAsync(IdentityResult.Success);
-
-            _userServiceMock
-                .Setup(x => x.EnsureDefaultRoleExistsAsync())
-                .Returns(Task.CompletedTask);
-
-            _userServiceMock
-                .Setup(x => x.AssignUserRoleAsync(It.IsAny<User>(), "Student"))
-                .ReturnsAsync(IdentityResult.Success);
-
-            _emailServiceMock
-                .Setup(x => x.SendEmailAsync(
-                    It.IsAny<string>(),
-                    It.IsAny<string>(),
-                    It.IsAny<string>()))
-                .ReturnsAsync(IdentityResult.Success);
-
-            // Act
-            var result = await _authService.RegisterUserAsync(registrationDto);
-
-            // Assert
-            Assert.True(result.Succeeded);
-        }
-
-
-
         [Fact]
         public async Task GenerateEmailConfirmationLinkAsync_GeneratesValidLink()
         {
@@ -434,32 +441,12 @@ namespace StudyJet.API.Tests.ServiceTests
                 UserName = "testuser"
             };
 
-            var token = "sampleToken"; 
-            var expectedUrl = $"https://localhost:7017/api/auth/confirm-email?token={HttpUtility.UrlEncode(token)}&email={user.Email}";
-
-            
-            _userManagerMock.Setup(x => x.GenerateEmailConfirmationTokenAsync(user))
-                .ReturnsAsync(token);
-
-            // Act
-            var result = await _authService.GenerateEmailConfirmationLinkAsync(user);
-
-            // Assert
-            Assert.Equal(expectedUrl, result); 
-        }
-
-        [Fact]
-        public async Task GenerateEmailConfirmationLinkAsync_GeneratesCorrectLink()
-        {
-            // Arrange
-            var user = new User
-            {
-                Email = "testuser@example.com",
-                UserName = "testuser"
-            };
-
             var token = "sampleToken";
-            var expectedUrl = $"https://localhost:7017/api/auth/confirm-email?token={HttpUtility.UrlEncode(token)}&email={user.Email}";
+            var baseUrl = "https://localhost:7248"; 
+            var encodedEmail = HttpUtility.UrlEncode(user.Email); 
+            var expectedUrl = $"{baseUrl}/api/auth/confirm-email?token={HttpUtility.UrlEncode(token)}&email={encodedEmail}"; 
+
+            _configurationMock.Setup(c => c["Backend:BaseUrl"]).Returns(baseUrl);
 
             _userManagerMock.Setup(x => x.GenerateEmailConfirmationTokenAsync(user))
                 .ReturnsAsync(token);
@@ -471,7 +458,29 @@ namespace StudyJet.API.Tests.ServiceTests
             Assert.Equal(expectedUrl, result);
         }
 
+        [Fact]
+        public async Task GenerateEmailConfirmationLinkAsync_ShouldReturnError_WhenTokenIsInvalid()
+        {
+            // Arrange
+            var user = new User
+            {
+                Email = "testuser@example.com",
+                UserName = "testuser"
+            };
 
+            var invalidToken = "invalidToken";
+            var baseUrl = "https://localhost:7248";
+            var encodedEmail = HttpUtility.UrlEncode(user.Email);
+
+            _configurationMock.Setup(c => c["Backend:BaseUrl"]).Returns(baseUrl);
+
+            // Act
+            var result = await _authService.GenerateEmailConfirmationLinkAsync(user);
+
+            // Assert
+            Assert.NotEqual($"{baseUrl}/api/auth/confirm-email?token={HttpUtility.UrlEncode(invalidToken)}&email={encodedEmail}", result);
+
+        }
 
         [Fact]
         public async Task SendConfirmationEmailAsync_SuccessfulEmailSend_ReturnsSuccess()
@@ -579,8 +588,6 @@ namespace StudyJet.API.Tests.ServiceTests
             Assert.Equal(existingKey, result); 
         }
 
-
-
         [Fact]
         public void Generate2FAQrCodeUri_ValidInputs_ReturnsCorrectUri()
         {
@@ -610,8 +617,6 @@ namespace StudyJet.API.Tests.ServiceTests
             // Assert
             Assert.Equal(expectedUri, result);
         }
-
-
 
         [Fact]
         public void GenerateQRCodeImage_ValidInput_ReturnsQRCodeImage()
@@ -667,7 +672,79 @@ namespace StudyJet.API.Tests.ServiceTests
             Assert.NotEmpty(result); 
         }
 
+        [Fact]
+        public async Task Initiate2faSetupAsync_ReturnsSuccess_WithValidKeyAndQrCodeImage()
+        {
+            // Arrange
+            var user = new User { Email = "test@example.com" };
+            var key = "mock-key";
 
+            _userManagerMock.Setup(x => x.GetAuthenticatorKeyAsync(user)).ReturnsAsync(key);
+
+            // Act
+            var result = await _authService.Initiate2faSetupAsync(user);
+
+            // Assert
+            Assert.True(result.Success);
+            Assert.Equal(key, result.Key);
+            Assert.NotNull(result.QrCodeImage);
+            Assert.True(result.QrCodeImage.Length > 0);
+        }
+
+        [Fact]
+        public async Task Initiate2faSetupAsync_ThrowsArgumentNullException_WhenUserIsNull()
+        {
+            // Act & Assert
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _authService.Initiate2faSetupAsync(null));
+        }
+
+        [Fact]
+        public async Task Confirm2faSetupAsync_ThrowsArgumentNullException_WhenUserIsNull()
+        {
+            // Act & Assert
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _authService.Confirm2faSetupAsync(null, "somecode"));
+        }
+
+        [Fact]
+        public async Task Confirm2faSetupAsync_ReturnsFailure_WhenInvalidCodeIsProvided()
+        {
+            // Arrange
+            var user = new User { Email = "test@example.com" };
+            var invalidCode = "invalid-code";
+
+            _userManagerMock.Setup(x => x.VerifyTwoFactorTokenAsync(user, TokenOptions.DefaultAuthenticatorProvider, invalidCode))
+                            .ReturnsAsync(false); 
+
+            _userManagerMock.Setup(x => x.SetTwoFactorEnabledAsync(user, true))
+                            .ReturnsAsync(IdentityResult.Success);
+
+            // Act
+            var result = await _authService.Confirm2faSetupAsync(user, invalidCode);
+
+            // Assert: 
+            Assert.False(result.Success);
+            Assert.Equal("Invalid 2FA verification code.", result.ErrorMessage); 
+        }
+
+        [Fact]
+        public async Task Confirm2faSetupAsync_ReturnsSuccess_WhenValidCodeIsProvided()
+        {
+            // Arrange
+            var user = new User { Email = "test@example.com" };
+            var validCode = "123456"; 
+
+            _userManagerMock.Setup(x => x.VerifyTwoFactorTokenAsync(user, TokenOptions.DefaultAuthenticatorProvider, validCode))
+                            .ReturnsAsync(true);
+            
+            _userManagerMock.Setup(x => x.SetTwoFactorEnabledAsync(user, true))
+                            .ReturnsAsync(IdentityResult.Success);
+            // Act
+            var result = await _authService.Confirm2faSetupAsync(user, validCode);
+
+            // Assert
+            Assert.True(result.Success); 
+            Assert.Null(result.ErrorMessage);
+        }
 
         [Fact]
         public async Task Verify2FACodeAsync_ValidCode_ReturnsTrue()
@@ -703,6 +780,240 @@ namespace StudyJet.API.Tests.ServiceTests
             Assert.False(result); 
         }
 
+        [Fact]
+        public async Task Is2faEnabledAsync_ReturnsTrue_When2faIsEnabled()
+        {
+            // Arrange
+            var userId = "user123"; 
+            var user = new User { Id = userId, Email = "test@example.com" };
+
+            _userManagerMock.Setup(x => x.FindByIdAsync(userId)).ReturnsAsync(user);
+
+            _userManagerMock.Setup(x => x.GetTwoFactorEnabledAsync(user)).ReturnsAsync(true);
+
+            // Act
+            var result = await _authService.Is2faEnabledAsync(userId);
+
+            // Assert
+            Assert.True(result); 
+        }
+
+        [Fact]
+        public async Task Is2faEnabledAsync_ReturnsFalse_WhenUserDoesNotExist()
+        {
+            // Arrange
+            var userId = "nonexistentUser"; 
+
+            _userManagerMock.Setup(x => x.FindByIdAsync(userId)).ReturnsAsync((User)null);
+
+            // Act
+            var result = await _authService.Is2faEnabledAsync(userId);
+
+            // Assert
+            Assert.False(result); 
+        }
+
+        [Fact]
+        public async Task Is2faEnabledAsync_ReturnsFalse_When2faIsNotEnabled()
+        {
+            // Arrange
+            var userId = "user123"; 
+            var user = new User { Id = userId, Email = "test@example.com" };
+
+            _userManagerMock.Setup(x => x.FindByIdAsync(userId)).ReturnsAsync(user);
+
+            _userManagerMock.Setup(x => x.GetTwoFactorEnabledAsync(user)).ReturnsAsync(false);
+
+            // Act
+            var result = await _authService.Is2faEnabledAsync(userId);
+
+            // Assert
+            Assert.False(result);
+        }
+
+        [Fact]
+        public async Task Disable2faAsync_ReturnsTrue_WhenUserExistsAndUpdateSucceeds()
+        {
+            // Arrange
+            var userId = "user123"; 
+            var user = new User { Id = userId, Email = "test@example.com", TwoFactorEnabled = true };
+
+            _userManagerMock.Setup(x => x.FindByIdAsync(userId)).ReturnsAsync(user);
+
+            _userManagerMock.Setup(x => x.UpdateAsync(user)).ReturnsAsync(IdentityResult.Success);
+
+            // Act
+            var result = await _authService.Disable2faAsync(userId);
+
+            // Assert
+            Assert.True(result); 
+        }
+
+        [Fact]
+        public async Task Disable2faAsync_ReturnsFalse_WhenUserDoesNotExist()
+        {
+            // Arrange
+            var userId = "nonexistentUser"; 
+
+            _userManagerMock.Setup(x => x.FindByIdAsync(userId)).ReturnsAsync((User)null);
+
+            // Act
+            var result = await _authService.Disable2faAsync(userId);
+
+            // Assert
+            Assert.False(result);
+        }
+
+        [Fact]
+        public async Task Disable2faAsync_ReturnsFalse_WhenUpdateFails()
+        {
+            // Arrange
+            var userId = "user123"; // Simulate a user ID
+            var user = new User { Id = userId, Email = "test@example.com", TwoFactorEnabled = true };
+
+            _userManagerMock.Setup(x => x.FindByIdAsync(userId)).ReturnsAsync(user);
+
+            _userManagerMock.Setup(x => x.UpdateAsync(user)).ReturnsAsync(IdentityResult.Failed(new IdentityError { Description = "Failed to update" }));
+
+            // Act
+            var result = await _authService.Disable2faAsync(userId);
+
+            // Assert
+            Assert.False(result); 
+        }
+
+
+
+
+        [Fact]
+        public async Task ForgotPasswordAsync_ReturnsTrue_WhenEmailExistsAndEmailIsSent()
+        {
+            // Arrange
+            var email = "test@example.com";
+            var user = new User { Email = email };
+            var resetToken = "mock-reset-token";
+            var appUrl = "http://example.com";
+
+            _userManagerMock.Setup(x => x.FindByEmailAsync(email)).ReturnsAsync(user);
+            _userManagerMock.Setup(x => x.GeneratePasswordResetTokenAsync(user)).ReturnsAsync(resetToken);
+
+            _configurationMock.Setup(x => x["AppUrl"]).Returns(appUrl);
+
+            _emailServiceMock.Setup(x => x.SendEmailAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                             .ReturnsAsync(IdentityResult.Success);
+
+            // Act
+            var result = await _authService.ForgotPasswordAsync(email);
+
+            // Assert
+            Assert.True(result); 
+        }
+
+        [Fact]
+        public async Task ForgotPasswordAsync_ReturnsFalse_WhenUserDoesNotExist()
+        {
+            // Arrange
+            var email = "nonexistent@example.com";
+
+            _userManagerMock.Setup(x => x.FindByEmailAsync(email)).ReturnsAsync((User)null);
+
+            // Act
+            var result = await _authService.ForgotPasswordAsync(email);
+
+            // Assert
+            Assert.False(result); 
+        }
+
+        [Fact]
+        public async Task ResetPasswordAsync_ReturnsFailure_WhenUserNotFound()
+        {
+            // Arrange
+            var email = "nonexistent@example.com";
+            var token = "mock-token";
+            var newPassword = "newpassword123";
+
+            _userManagerMock.Setup(x => x.FindByEmailAsync(email)).ReturnsAsync((User)null);
+
+            // Act
+            var result = await _authService.ResetPasswordAsync(email, token, newPassword);
+
+            // Assert
+            Assert.False(result.Succeeded); 
+            Assert.Equal("User not found.", result.Errors.First().Description);
+        }
+
+        [Fact]
+        public async Task ResetPasswordAsync_ReturnsFailure_WhenNewPasswordIsSameAsCurrent()
+        {
+            // Arrange
+            var email = "test@example.com";
+            var token = "mock-token";
+            var newPassword = "currentpassword"; 
+
+            var user = new User { Email = email, PasswordHash = newPassword };
+
+            _userManagerMock.Setup(x => x.FindByEmailAsync(email)).ReturnsAsync(user);
+
+            _userManagerMock.Setup(x => x.CheckPasswordAsync(user, newPassword)).ReturnsAsync(true);
+
+            // Act
+            var result = await _authService.ResetPasswordAsync(email, token, newPassword);
+
+            // Assert
+            Assert.False(result.Succeeded); 
+            Assert.Equal("New password cannot be the same as the current password.", result.Errors.First().Description);
+        }
+
+        [Fact]
+        public async Task ResetPasswordAsync_ReturnsSuccess_WhenPasswordResetIsSuccessful()
+        {
+            // Arrange
+            var email = "test@example.com";
+            var token = "mock-token";
+            var newPassword = "newpassword123";
+
+            var user = new User { Email = email, PasswordHash = "oldpassword" };
+
+            _userManagerMock.Setup(x => x.FindByEmailAsync(email)).ReturnsAsync(user);
+
+            _userManagerMock.Setup(x => x.CheckPasswordAsync(user, newPassword)).ReturnsAsync(false);
+
+            _userManagerMock.Setup(x => x.ResetPasswordAsync(user, token, newPassword))
+                            .ReturnsAsync(IdentityResult.Success);
+
+            _userManagerMock.Setup(x => x.UpdateAsync(user)).ReturnsAsync(IdentityResult.Success);
+
+            // Act
+            var result = await _authService.ResetPasswordAsync(email, token, newPassword);
+
+            // Assert
+            Assert.True(result.Succeeded); 
+        }
+
+        [Fact]
+        public async Task ResetPasswordAsync_ReturnsFailure_WhenPasswordResetFails()
+        {
+            // Arrange
+            var email = "test@example.com";
+            var token = "mock-token";
+            var newPassword = "newpassword123";
+
+            var user = new User { Email = email, PasswordHash = "oldpassword" };
+
+            _userManagerMock.Setup(x => x.FindByEmailAsync(email)).ReturnsAsync(user);
+
+            _userManagerMock.Setup(x => x.CheckPasswordAsync(user, newPassword)).ReturnsAsync(false);
+
+            _userManagerMock.Setup(x => x.ResetPasswordAsync(user, token, newPassword))
+                            .ReturnsAsync(IdentityResult.Failed(new IdentityError { Description = "Failed to reset password." }));
+
+            // Act
+            var result = await _authService.ResetPasswordAsync(email, token, newPassword);
+
+            // Assert
+            Assert.False(result.Succeeded); 
+            Assert.Equal("Failed to reset password.", result.Errors.First().Description);
+        }
 
 
         [Fact]
@@ -737,6 +1048,146 @@ namespace StudyJet.API.Tests.ServiceTests
 
             // Assert
             Assert.Equal(SignInResult.Failed, result); 
+        }
+
+        [Fact]
+        public async Task ChangePasswordAsync_ReturnsFalse_WhenUserIdIsNullOrEmpty()
+        {
+            // Arrange
+            var model = new ChangePasswordDTO
+            {
+                CurrentPassword = "oldPassword123",
+                NewPassword = "newPassword123"
+            };
+
+            // Act
+            var result = await _authService.ChangePasswordAsync(string.Empty, model);
+
+            // Assert
+            Assert.False(result); 
+        }
+
+        [Fact]
+        public async Task ChangePasswordAsync_ReturnsFalse_WhenUserNotFound()
+        {
+            // Arrange
+            var userId = "nonexistent-user-id";
+            var model = new ChangePasswordDTO
+            {
+                CurrentPassword = "oldPassword123",
+                NewPassword = "newPassword123"
+            };
+
+            _userManagerMock.Setup(x => x.FindByIdAsync(userId)).ReturnsAsync((User)null);
+
+            // Act
+            var result = await _authService.ChangePasswordAsync(userId, model);
+
+            // Assert
+            Assert.False(result);
+        }
+
+        [Fact]
+        public async Task ChangePasswordAsync_ReturnsTrue_WhenPasswordChangeIsSuccessful()
+        {
+            // Arrange
+            var userId = "test-user-id";
+            var model = new ChangePasswordDTO
+            {
+                CurrentPassword = "oldPassword123",
+                NewPassword = "newPassword123"
+            };
+
+            var user = new User { Id = userId };
+
+            _userManagerMock.Setup(x => x.FindByIdAsync(userId)).ReturnsAsync(user);
+
+            _userManagerMock.Setup(x => x.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword))
+                            .ReturnsAsync(IdentityResult.Success);
+
+            // Act
+            var result = await _authService.ChangePasswordAsync(userId, model);
+
+            // Assert
+            Assert.True(result); 
+        }
+
+        [Fact]
+        public async Task ChangePasswordAsync_ReturnsFalse_WhenPasswordChangeFails()
+        {
+            // Arrange
+            var userId = "test-user-id";
+            var model = new ChangePasswordDTO
+            {
+                CurrentPassword = "oldPassword123",
+                NewPassword = "newPassword123"
+            };
+
+            var user = new User { Id = userId };
+
+            _userManagerMock.Setup(x => x.FindByIdAsync(userId)).ReturnsAsync(user);
+
+            _userManagerMock.Setup(x => x.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword))
+                            .ReturnsAsync(IdentityResult.Failed(new IdentityError { Description = "Current password is incorrect." }));
+
+            // Act
+            var result = await _authService.ChangePasswordAsync(userId, model);
+
+            // Assert
+            Assert.False(result); 
+        }
+
+
+        [Fact]
+        public async Task GetOrCreateAuthenticatorKeyAsync_ReturnsExistingKey_WhenKeyAlreadyExists()
+        {
+            // Arrange
+            var user = new User { Email = "test@example.com" };
+            var existingKey = "existing-auth-key";
+
+            _userManagerMock.Setup(x => x.GetAuthenticatorKeyAsync(user))
+                            .ReturnsAsync(existingKey);
+
+            // Act
+            var result = await _authService.GetOrCreateAuthenticatorKeyAsync(user);
+
+            // Assert
+            Assert.Equal(existingKey, result);
+        }
+
+        [Fact]
+        public async Task GetOrCreateAuthenticatorKeyAsync_ResetsKey_WhenKeyIsNullOrEmpty()
+        {
+            // Arrange
+            var user = new User { Email = "test@example.com" };
+            var newKey = "new-generated-key";
+
+            _userManagerMock.SetupSequence(x => x.GetAuthenticatorKeyAsync(user))
+                            .ReturnsAsync("") 
+                            .ReturnsAsync(newKey); 
+
+            _userManagerMock.Setup(x => x.ResetAuthenticatorKeyAsync(user))
+                            .ReturnsAsync(IdentityResult.Success);
+
+            // Act
+            var result = await _authService.GetOrCreateAuthenticatorKeyAsync(user);
+
+            // Assert
+            Assert.Equal(newKey, result);
+        }
+
+        [Fact]
+        public async Task GetOrCreateAuthenticatorKeyAsync_Throws_WhenResetFails()
+        {
+            // Arrange
+            var user = new User { Email = "test@example.com" };
+
+            _userManagerMock.Setup(x => x.GetAuthenticatorKeyAsync(user)).ReturnsAsync(string.Empty);
+            _userManagerMock.Setup(x => x.ResetAuthenticatorKeyAsync(user))
+                            .ReturnsAsync(IdentityResult.Failed(new IdentityError { Description = "Reset failed." }));
+
+            // Act & Assert
+            await Assert.ThrowsAsync<InvalidOperationException>(() => _authService.GetOrCreateAuthenticatorKeyAsync(user));
         }
 
     }
