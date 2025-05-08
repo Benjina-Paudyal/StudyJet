@@ -14,7 +14,7 @@ namespace StudyJet.API.Services.Implementation
         private readonly UserManager<User> _userManager;
         private readonly ICourseRepo _courseRepo;
 
-        public NotificationService(ApplicationDbContext context, INotificationRepo notificationRepository, UserManager<User> userManager, ICourseRepo courseRepo)
+        public NotificationService(INotificationRepo notificationRepository, UserManager<User> userManager, ICourseRepo courseRepo)
         {
             _notificationRepo = notificationRepository;
             _userManager = userManager;

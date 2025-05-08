@@ -11,7 +11,5 @@ namespace StudyJet.API.Utilities
         public const string Jti = JwtRegisteredClaimNames.Jti;
         public const string Iat = JwtRegisteredClaimNames.Iat;
         public const string Role = "role";
-
-
     }
 }

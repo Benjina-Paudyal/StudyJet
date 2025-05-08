@@ -14,7 +14,7 @@ namespace StudyJet.API.Services.Implementation
             _configuration = configuration;
         }
 
-         public async Task<IdentityResult> SendConfirmationEmailAsync(string recipientEmail, string confirmationLink)
+        public async Task<IdentityResult> SendConfirmationEmailAsync(string recipientEmail, string confirmationLink)
         {
             // Check for null or empty values
             if (string.IsNullOrEmpty(recipientEmail) || string.IsNullOrEmpty(confirmationLink))
@@ -34,7 +34,7 @@ namespace StudyJet.API.Services.Implementation
             {
                 var smtpClient = new SmtpClient(_configuration["Smtp:Host"])
                 {
-                    Port = int.Parse(_configuration["Smtp:Port"]),  // Make sure this matches
+                    Port = int.Parse(_configuration["Smtp:Port"]),  
                     Credentials = new NetworkCredential(
                         _configuration["Smtp:Username"],
                         _configuration["Smtp:Password"]),

@@ -12,14 +12,12 @@ namespace StudyJet.API.Services.Implementation
     public class CourseService : ICourseService
     {
         private readonly ICourseRepo _courseRepo;
-        private readonly IFileStorageService _fileService;
         private readonly INotificationService _notificationService;
         private readonly IFileStorageService _fileStorageService;
 
-        public CourseService(ICourseRepo courseRepo, IFileStorageService fileService, INotificationService notificationService, IFileStorageService fileStorageService)
+        public CourseService(ICourseRepo courseRepo, INotificationService notificationService, IFileStorageService fileStorageService)
         {
             _courseRepo = courseRepo;
-            _fileService = fileService;
             _notificationService = notificationService;
             _fileStorageService = fileStorageService;
         }

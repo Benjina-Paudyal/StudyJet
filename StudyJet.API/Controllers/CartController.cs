@@ -15,6 +15,7 @@ namespace StudyJet.API.Controllers
         private readonly ICartService _cartService;
         private readonly IWishlistService _wishlistService;
         private readonly ICourseService _courseService;
+     
 
         public CartController(ICartService cartService, IWishlistService wishlistService, ICourseService courseService)
         {
@@ -41,7 +42,7 @@ namespace StudyJet.API.Controllers
                 {
                     await _wishlistService.RemoveCourseFromWishlistAsync(userId, courseId);
                 }
-               
+
                 await _cartService.AddToCartAsync(userId, courseId);
 
                 return Ok(new { message = "Course added to cart successfully" });

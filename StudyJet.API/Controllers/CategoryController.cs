@@ -20,8 +20,15 @@ namespace StudyJet.API.Controllers
         [HttpGet]
         public async Task<ActionResult<List<CategoryResponseDTO>>> GetAllCategories()
         {
-            var categories = await _categoryService.GetAllAsync();
-            return Ok(categories);
+            try
+            {
+                var categories = await _categoryService.GetAllAsync();
+                return Ok(categories);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
 
 
@@ -40,9 +47,16 @@ namespace StudyJet.API.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<int>> AddCategory(CategoryRequestDTO categoryDto)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);  
+            }
+
             var categoryId = await _categoryService.AddAsync(categoryDto);
             return CreatedAtAction(nameof(GetCategoryById), new { id = categoryId }, categoryId);
         }
+
+
 
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]

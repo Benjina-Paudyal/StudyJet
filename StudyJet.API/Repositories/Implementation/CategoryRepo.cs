@@ -56,8 +56,8 @@ namespace StudyJet.API.Repositories.Implementation
         public async Task<Category> SelectByIdAsync(int categoryId)
         {
             var category = await _context.Categories
-                .Include(c => c.Courses.Where(course => course.Status == CourseStatus.Approved)) // Filter by Approved status
-                .ThenInclude(course => course.Instructor) // Include Instructor for the approved courses
+                .Include(c => c.Courses.Where(course => course.Status == CourseStatus.Approved)) 
+                .ThenInclude(course => course.Instructor) 
                 .FirstOrDefaultAsync(c => c.CategoryID == categoryId);
 
             if (category == null)

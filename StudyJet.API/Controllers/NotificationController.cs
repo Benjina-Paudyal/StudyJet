@@ -48,6 +48,7 @@ namespace StudyJet.API.Controllers
             }
         }
 
+
         [HttpPost("notify-instructor-on-course-status")]
         public async Task<IActionResult> NotifyInstructorOnCourseStatus([FromBody] CourseApprovalRequestDTO request)
         {
@@ -81,6 +82,7 @@ namespace StudyJet.API.Controllers
                 return StatusCode(500, new { message = "An error occurred while notifying the instructor." });
             }
         }
+
 
 
         [HttpPut("mark-read/{notificationId}")]

@@ -94,7 +94,6 @@ namespace StudyJet.API.Controllers
             return BadRequest(errorResponse);
         }
 
-
         [Authorize(Roles = "Admin")]
         [HttpPost("register-instructor")]
         public async Task<IActionResult> RegisterInstructor([FromForm] InstructorRegistrationDTO instructorRegistrationDTO)
@@ -107,6 +106,7 @@ namespace StudyJet.API.Controllers
             }
             return Ok(new { message = "Instructor registered successfully." });
         }
+
 
 
         [HttpPost("login")]
@@ -194,6 +194,7 @@ namespace StudyJet.API.Controllers
         }
 
 
+
         [HttpGet("confirm-email")]
         public async Task<IActionResult> ConfirmationEmail(string token, string email)
         {
@@ -229,71 +230,51 @@ namespace StudyJet.API.Controllers
         }
 
 
-      /*  [Authorize]
-        [HttpPost("enable-2fa")]
-        public async Task<IActionResult> EnableTwoFactorAuthentication()
+
+
+        [HttpPost("initiate-2fa")]
+        [Authorize]
+        public async Task<IActionResult> Initiate2FA()
         {
-            try
-            {
-                var emailClaim = User.Claims.FirstOrDefault(c => c.Type == "email" || c.Type == ClaimTypes.Email);
-                if (emailClaim == null)
-                {
-                    return BadRequest(new ErrorResponseDTO { Errors = new List<string> { "Email claim is missing." } });
-                }
+            var email = User.FindFirstValue(ClaimTypes.Email);
+            var user = await _userService.GetUserByEmailAsync(email);
 
-                var email = emailClaim.Value;
+            var result = await _authService.Initiate2faSetupAsync(user);
+            if (!result.Success)
+                return BadRequest(new { error = result.ErrorMessage });
 
-                var user = await _userService.GetUserByEmailAsync(email);
-                if (user == null)
-                {
-                    return Unauthorized(new ErrorResponseDTO { Errors = new List<string> { "User not found." } });
-                }
-
-                if (string.IsNullOrEmpty(user.Email))
-                {
-                    return BadRequest(new ErrorResponseDTO { Errors = new List<string> { "User email is required." } });
-                }
-
-                var key = await _authService.Generate2faSecretAsync(user);
-                if (string.IsNullOrEmpty(key))
-                {
-                    return BadRequest(new ErrorResponseDTO { Errors = new List<string> { "Failed to generate 2FA secret key." } });
-                }
-
-                user.TwoFactorEnabled = true;
-                await _userService.UpdateUserAsync(user);
-
-                var qrCodeUri = _authService.Generate2faQrCodeUri(user.Email, key);
-                byte[] qrCodeImage = _authService.GenerateQRCodeImage(qrCodeUri);
-
-                return File(qrCodeImage, "image/png");
-            }
-            catch (Exception ex)
-            {
-                var errorResponse = new ErrorResponseDTO
-                {
-                    Errors = new List<string> { "Internal server error.", ex.Message }
-                };
-
-                return StatusCode(500, errorResponse);
-            }
+            return File(result.QrCodeImage, "image/png");
         }
 
-
-        [HttpPost("verify-2fa")]
-        public async Task<IActionResult> VerifyTwoFactorCode([FromBody] Verify2faDTO model)
+        [HttpPost("confirm-2fa")]
+        [Authorize]
+        public async Task<IActionResult> Confirm2FA([FromBody] Verify2faDTO model)
         {
-            if (model == null || string.IsNullOrEmpty(model.Code))
+            var email = User.FindFirstValue(ClaimTypes.Email);
+            var user = await _userService.GetUserByEmailAsync(email);
+
+            var result = await _authService.Confirm2faSetupAsync(user, model.Code);
+            if (!result.Success)
+                return BadRequest(new { error = result.ErrorMessage });
+
+            return Ok(new { message = "2FA enabled successfully." });
+        }
+
+        [HttpPost("verify-2fa-login")]
+        [AllowAnonymous]
+        public async Task<IActionResult> VerifyTwoFactorLogin([FromBody] Verify2faLoginDTO model)
+        {
+            if (model == null || string.IsNullOrEmpty(model.Code) || string.IsNullOrEmpty(model.TempToken))
             {
-                return BadRequest(new { error = "2FA code is required." });
+                return BadRequest(new { error = "2FA code and tempToken are required." });
             }
 
             try
             {
-                var user = await _userService.GetUserByEmailAsync(model.Email);
+                var user = await _authService.ValidateTempTokenAsync(model.TempToken);
                 if (user == null)
                 {
-                    return Unauthorized(new ErrorResponseDTO { Errors = new List<string> { "User not found." } });
+                    return BadRequest(new { error = "Invalid or expired temporary token." });
                 }
 
                 var isValid = await _authService.Verify2faCodeAsync(user, model.Code);
@@ -302,42 +283,7 @@ namespace StudyJet.API.Controllers
                     return Unauthorized(new { error = "Invalid 2FA code." });
                 }
 
-                var token = await _authService.GenerateJwtTokenAsync(user);
-                var roles = await _userService.GetUserRolesAsync(user);
-
-                return Ok(new { Token = token, Roles = roles });
-            }
-
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { error = "Internal server error: " + ex.Message });
-            }
-        }
-
-
-        [HttpPost("verify-2fa-login")]
-        public async Task<IActionResult> VerifyTwoFactorLogin([FromBody] Verify2faLoginDTO verify2faLoginDTO)
-        {
-            if (verify2faLoginDTO == null || string.IsNullOrEmpty(verify2faLoginDTO.Code) || string.IsNullOrEmpty(verify2faLoginDTO.TempToken))
-            {
-                return BadRequest(new { error = "2FA code and tempToken are required." });
-            }
-
-            try
-            {
-                var user = await _authService.ValidateTempTokenAsync(verify2faLoginDTO.TempToken);
-                if (user == null)
-                {
-                    return BadRequest(new { error = "Invalid or expired temporary token." });
-                }
-
-                var isValid = await _authService.Verify2faCodeAsync(user, verify2faLoginDTO.Code);
-                if (!isValid)
-                {
-                    return Unauthorized(new { error = "Invalid 2FA code." });
-                }
-
-                // Generate JWT token
+                // Generate JWT token if the code is valid
                 var token = await _authService.GenerateJwtTokenAsync(user);
                 var roles = await _userService.GetUserRolesAsync(user);
                 var defaultProfilePicUrl = _configuration["DefaultProfilePicPaths:ProfilePicture"];
@@ -346,30 +292,33 @@ namespace StudyJet.API.Controllers
                 {
                     Token = token,
                     Roles = roles,
-                    Username = user.UserName,
+                    UserName = user.UserName,
+                    FullName = user.FullName,
+                    Email = user.Email,
+                    UserID = user.Id,
                     ProfilePictureUrl = user.ProfilePictureUrl ?? defaultProfilePicUrl,
                 });
+
             }
             catch (Exception ex)
             {
                 return StatusCode(500, new { error = "Internal server error: " + ex.Message });
             }
-        }*/
-
+        }
 
         [HttpGet("check-2fa-status")]
         public async Task<IActionResult> Check2FAStatus()
         {
-            var username = User.Identity.Name;
+            var userId = User.FindFirst("userId")?.Value;
 
-            if (string.IsNullOrEmpty(username))
+            if (string.IsNullOrEmpty(userId))
             {
-                return BadRequest(new { message = "Username not found." });
+                return BadRequest(new { message = "UserId not found." });
             }
 
             try
             {
-                var is2FAEnabled = await _authService.Is2faEnabledAsync(username);
+                var is2FAEnabled = await _authService.Is2faEnabledAsync(userId);
 
                 return Ok(new { isEnabled = is2FAEnabled });
             }
@@ -380,25 +329,24 @@ namespace StudyJet.API.Controllers
             }
         }
 
-
         [HttpPost("disable-2fa")]
         public async Task<IActionResult> Disable2FA()
         {
-            var username = User.Identity.Name;
+            var userId = User.FindFirst("userId")?.Value;
 
-            if (string.IsNullOrEmpty(username))
+            if (string.IsNullOrEmpty(userId))
             {
-                return Unauthorized(new { message = "Username not found in claims." });
+                return Unauthorized(new { message = "UserId not found in claims." });
             }
 
             // Check current 2FA status
-            var is2FAEnabled = await _authService.Is2faEnabledAsync(username);
+            var is2FAEnabled = await _authService.Is2faEnabledAsync(userId);
             if (!is2FAEnabled)
             {
                 return BadRequest(new { message = "2FA is already disabled." });
             }
 
-            var result = await _authService.Disable2faAsync(username);
+            var result = await _authService.Disable2faAsync(userId);
             if (!result)
             {
                 return BadRequest(new { message = "Failed to disable 2FA." });
@@ -406,6 +354,9 @@ namespace StudyJet.API.Controllers
 
             return Ok(new { message = "2FA has been disabled successfully." });
         }
+
+
+
 
 
         [HttpPost("forgot-password")]
@@ -512,90 +463,7 @@ namespace StudyJet.API.Controllers
 
 
 
-
-
-
-
-        [HttpPost("initiate-2fa")]
-        [Authorize]
-        public async Task<IActionResult> Initiate2FA()
-        {
-            var email = User.FindFirstValue(ClaimTypes.Email);
-            var user = await _userService.GetUserByEmailAsync(email);
-
-            var result = await _authService.Initiate2faSetupAsync(user);
-            if (!result.Success)
-                return BadRequest(new { error = result.ErrorMessage });
-
-            return File(result.QrCodeImage, "image/png");
-        }
-
-
-
-
-        [HttpPost("confirm-2fa")]
-        [Authorize]
-        public async Task<IActionResult> Confirm2FA([FromBody] Verify2faDTO model)
-        {
-            var email = User.FindFirstValue(ClaimTypes.Email);
-            var user = await _userService.GetUserByEmailAsync(email);
-
-            var result = await _authService.Confirm2faSetupAsync(user, model.Code);
-            if (!result.Success)
-                return BadRequest(new { error = result.ErrorMessage });
-
-            return Ok(new { message = "2FA enabled successfully." });
-        }
-
-
-
-
-
-        [HttpPost("verify-2fa-login")]
-        [AllowAnonymous]  
-        public async Task<IActionResult> VerifyTwoFactorLogin([FromBody] Verify2faLoginDTO model)
-        {
-            if (model == null || string.IsNullOrEmpty(model.Code) || string.IsNullOrEmpty(model.TempToken))
-            {
-                return BadRequest(new { error = "2FA code and tempToken are required." });
-            }
-
-            try
-            {
-                var user = await _authService.ValidateTempTokenAsync(model.TempToken);
-                if (user == null)
-                {
-                    return BadRequest(new { error = "Invalid or expired temporary token." });
-                }
-
-                var isValid = await _authService.Verify2faCodeAsync(user, model.Code);
-                if (!isValid)
-                {
-                    return Unauthorized(new { error = "Invalid 2FA code." });
-                }
-
-                // Generate JWT token if the code is valid
-                var token = await _authService.GenerateJwtTokenAsync(user);
-                var roles = await _userService.GetUserRolesAsync(user);
-                var defaultProfilePicUrl = _configuration["DefaultProfilePicPaths:ProfilePicture"];
-
-                return Ok(new Verify2faLoginResponse
-                {
-                    Token = token,
-                    Roles = roles,
-                    UserName = user.UserName,
-                    FullName = user.FullName,
-                    Email = user.Email,
-                    UserID = user.Id,
-                    ProfilePictureUrl = user.ProfilePictureUrl ?? defaultProfilePicUrl,
-                });
-
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { error = "Internal server error: " + ex.Message });
-            }
-        }
+       
 
 
 
