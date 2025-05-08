@@ -164,7 +164,16 @@ namespace StudyJet.API.Tests.ServiceTests
 
 
 
-        
+        [Fact(Skip = "Skipping test for CreateCheckoutSession due to Stripe external dependency.")]
+        public async Task CreateCheckoutSession_ShouldReturnSessionUrl_WhenValidDataProvided()
+        {
+            // This test will be skipped during execution
+        }
+
+
+
+
+
 
 
 
