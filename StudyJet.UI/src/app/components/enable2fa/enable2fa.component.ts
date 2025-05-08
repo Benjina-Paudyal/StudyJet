@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
@@ -11,7 +11,7 @@ import { AuthService } from '../../services/auth.service';
   templateUrl: './enable2fa.component.html',
   styleUrl: './enable2fa.component.css'
 })
-export class Enable2faComponent {
+export class Enable2faComponent implements OnInit{
 
   qrCode: string | null = null;
   twoFACode: string | null = null;
@@ -43,6 +43,7 @@ export class Enable2faComponent {
   checkTwoFAStatus(): void {
     this.authService.check2FAStatus().subscribe({
       next: (response) => {
+        console.log('2FA Status Response:', response); 
         this.is2FAEnabled = response.isEnabled;
         this.errorMessage = null;
       },
