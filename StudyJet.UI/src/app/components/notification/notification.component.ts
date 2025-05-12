@@ -13,7 +13,6 @@ import { Notification } from '../../models';
   styleUrl: './notification.component.css'
 })
 export class NotificationComponent implements OnInit {
-
   notifications: Notification[] = [];
   unreadNotificationsCount = 0;
   loading = false;
@@ -33,14 +32,14 @@ loadNotifications(): void {
 
   this.notificationService.getNotifications().subscribe({
     next: (notifications: Notification[]) => {
-      console.log('Notifications:', notifications);
       this.notifications = notifications.map(notification => ({
         ...notification,
         dateCreated: new Date(notification.dateCreated)
       }));
-       // Update unread notifications count in the service
+       // Update unread notifications count 
+       this.unreadNotificationsCount = this.notifications.filter(n => !n.isRead).length;
        this.notificationService.updateUnreadNotificationsCount(this.notifications);
-      this.unreadNotificationsCount = this.notifications.filter(n => !n.isRead).length;
+      
       this.loading = false;
     },
     error: (err) => {
@@ -70,7 +69,6 @@ markAsRead(): void {
 
 
 handleNotificationClick(notification: Notification): void {
-  console.log('Notification clicked:', notification);
   const courseId = notification.courseID;  
 
   if (courseId) {
@@ -83,6 +81,7 @@ handleNotificationClick(notification: Notification): void {
     this.notificationService.markAsRead(notification.id).subscribe(() => {
       notification.isRead = true;
       this.unreadNotificationsCount--;
+       this.notificationService.updateUnreadNotificationsCount(this.notifications);
     });
   }
 }

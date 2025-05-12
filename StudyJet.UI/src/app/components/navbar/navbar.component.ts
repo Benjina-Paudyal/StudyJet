@@ -1,13 +1,15 @@
+
 import { CommonModule } from '@angular/common';
 import { Component, HostListener, OnInit } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { filter, map, Observable, Subscription } from 'rxjs';
+import { ChangeDetectorRef } from '@angular/core';
 import { CartItem, Category, Course, WishlistItem } from '../../models';
 import { CategoryService } from '../../services/category.service';
 import { CourseService } from '../../services/course.service';
 import { AuthService } from '../../services/auth.service';
 import { UserService } from '../../services/user.service';
-import { FormsModule } from '@angular/forms';
-import { Observable, Subscription } from 'rxjs';
 import { NavbarService } from '../../services/navbar.service';
 import { PurchaseCourseService } from '../../services/purchase-course.service';
 import { WishlistService } from '../../services/wishlist.service';
@@ -15,7 +17,6 @@ import { CartService } from '../../services/cart.service';
 import { InactivityService } from '../../services/inactivity.service';
 import { ImageService } from '../../services/image.service';
 import { CookieService } from 'ngx-cookie-service';
-import { ChangeDetectorRef } from '@angular/core';
 import { NotificationService } from '../../services/notification.service';
 
 
@@ -28,35 +29,31 @@ import { NotificationService } from '../../services/notification.service';
 })
 export class NavbarComponent implements OnInit {
   categories: Category[] = [];
+  wishlist: WishlistItem[] = [];
+  cartItems: CartItem[] = [];
+  suggestions: Course[] = [];
+  purchasedCourses: Course[] = [];
   isNavbarCollapsed = true;
   isDropdownOpen = false;
+  showWishlistDropdown = false;
+  showCartDropdown = false;
+  dropdownVisible = false;
   searchPlaceholder = 'What do you want to learn?';
   searchQuery = '';
-  suggestions: Course[] = [];
-  dropdownVisible: boolean = false; 
-  wishlist: WishlistItem[] = [];
-  showWishlistDropdown = false;
-  cartItems: CartItem[] = [];
-  showCartDropdown = false;
-  cartItemCount = 0;
-  isLoading = false;
-  profileImageUrl: string | null = null;
-  isLoggingIn = true;
+  errorMessage = '';
   loggingOutText = 'Logging out, please wait...';
   dotCount = 0;
-  purchasedCourses: Course[] = [];
-  isAuthenticated = false;
-  subscriptions: Subscription[] = [];
+  cartItemCount = 0;
   unreadNotificationsCount = 0;
-  errorMessage = '';
-  cartCount: number = 0;
-  // Default value for navbarType
-  navbarType: 'admin' | 'instructor' | 'student' | 'default' | 'hidden' = 'default'; 
-
-  // Initialize navbarType$ inside the constructor
+  isLoading = false;
+  cartCount = 0;
+  navbarType: 'admin' | 'instructor' | 'student' | 'default' | 'hidden' = 'default';
   navbarType$: Observable<'admin' | 'instructor' | 'student' | 'default' | 'hidden'>;
+  subscriptions: Subscription[] = [];
+  profileImageUrl: string | null = null;
+  isLoggingIn = true;
+  isAuthenticated = false;
 
-  
   constructor(
     private categoryService: CategoryService,
     private router: Router,
@@ -72,7 +69,7 @@ export class NavbarComponent implements OnInit {
     private inactivityService: InactivityService,
     private notificationService: NotificationService,
     private cdr: ChangeDetectorRef,
-  ) { 
+  ) {
     this.navbarType$ = this.navbarService.navbarType$;
   }
 
@@ -81,19 +78,20 @@ export class NavbarComponent implements OnInit {
     this.navbarType = 'hidden';
     this.loadCategories();
 
-  // Subscribe to navbar type changes
-  this.subscriptions.push(
-    this.navbarService.navbarType$.subscribe((type) => {
-      this.navbarType = type;
-       this.cdr.detectChanges();
-    })
-  );
+    // Subscribe to navbar type changes
+    this.subscriptions.push(
+      this.navbarService.navbarType$.subscribe((type) => {
+        this.navbarType = type;
+        this.cdr.detectChanges();
+      })
+    );
 
     // Subscribe to cart updates
     this.subscriptions.push(
       this.cartService.cart$.subscribe(cart => {
         this.cartItems = cart;
         this.cartItemCount = cart.length;
+        this.cdr.detectChanges();
       })
     );
 
@@ -101,34 +99,40 @@ export class NavbarComponent implements OnInit {
     this.subscriptions.push(
       this.wishlistService.wishlist$.subscribe((wishlist) => {
         this.wishlist = wishlist;
+        this.cdr.detectChanges();
       })
     );
 
-      // Subscribe to authentication and load user-specific data
+    // Subscribe to authentication and load user-specific data
     this.subscriptions.push(
       this.authService.isAuthenticated$.subscribe((isAuthenticated) => {
         this.isAuthenticated = isAuthenticated;
-
         if (isAuthenticated) {
-          // Load notifications only when logged in
           this.notificationService.getNotifications().subscribe(notifications => {
             this.notificationService.updateUnreadNotificationsCount(notifications);
           });
-    
-          
-        //  Track unread count
-        const unreadSub = this.notificationService.unreadCount$.subscribe(count => {
+
+          const unreadSub = this.notificationService.unreadCount$.subscribe(count => {
             this.unreadNotificationsCount = count;
-            this.cdr.detectChanges(); 
+            this.cdr.detectChanges();
           });
           this.subscriptions.push(unreadSub);
 
-            // Load profile image
-          const rawProfileImage = this.authService.getProfileImage();
-          this.profileImageUrl = `${this.imageService.getProfileImageUrl(rawProfileImage)}?t=${new Date().getTime()}`;
-          this.cdr.detectChanges();
+          // subscribe to profile Image
+          this.subscriptions.push(
+            this.authService.profileImage$
+              .pipe(
+                filter((url): url is string => !!url),
+                map(url => this.imageService.getProfileImageUrl(url)),
+                map(fullUrl => `${fullUrl}?t=${Date.now()}`)
+              )
+              .subscribe(url => {
+                this.profileImageUrl = url;
+                this.cdr.detectChanges();
+              })
+          );
 
-           // Load user-related data
+          // Load user-related data
           this.cartService.updateCartForUser();
           this.loadWishlist();
           this.loadPurchasedCourses();
@@ -211,29 +215,17 @@ export class NavbarComponent implements OnInit {
   }
 
 
- 
-
-  logout(): void {
-    this.authService.logout().then(() => {
-      // Clear the profile image and other states
-      this.clearState();
-      this.clearProfileImage();
-
-      // Redirect to home page
-      this.router.navigate(['/home']);
-    }).catch(error => {
-      console.error('Logout failed:', error);
-    });
-  }
-
-  // Clear profile image and reset UI
-  clearProfileImage(): void {
-    // Delete the profile image cookie
+ logout(): void {
+  this.authService.logout().then(() => {
     this.cookieService.delete('profilePictureUrl');
-  
-    // Manually trigger change detection to update the UI
     this.cdr.detectChanges();
-  }
+    this.clearState();
+    this.router.navigate(['/home']);
+  }).catch(error => {
+    console.error('Logout failed:', error);
+  });
+}
+
 
 
   private clearState() {
@@ -270,11 +262,6 @@ export class NavbarComponent implements OnInit {
       }
     });
   }
-  
-  
-  
-  
-  
 
   openDropdown() {
     this.isDropdownOpen = true;
@@ -338,9 +325,6 @@ export class NavbarComponent implements OnInit {
     return this.imageService.getCourseImageUrl(course.imageUrl);
   }
 
-
-  
-
   onSearchInput(): void {
     if (this.searchQuery.length > 2) {
       this.courseService.searchCourses(this.searchQuery).subscribe({
@@ -372,16 +356,14 @@ export class NavbarComponent implements OnInit {
 
   clearSearch() {
     this.searchQuery = '';
-    this.suggestions = []; 
+    this.suggestions = [];
     this.dropdownVisible = false;
   }
 
   isOnCourseDetailPage(): boolean {
     return this.router.url.includes('/courses/');
   }
-  
-  
+
+
 }
-
-
 

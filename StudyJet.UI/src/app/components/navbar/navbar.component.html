@@ -110,8 +110,6 @@
           <input class="form-control search-bar-input" type="text" [(ngModel)]="searchQuery" name="searchQuery"
             [placeholder]="searchPlaceholder" aria-label="Search" id="search-bar" autocomplete="off"
             (input)="onSearchInput()" />
-
-          <!-- Suggestions dropdown -->
           <ul *ngIf="suggestions.length > 0 && !isOnCourseDetailPage()" class="dropdown-menu search-dropdown list-group"
             style="position: absolute; z-index: 1000; margin-top: 5px; display: block; opacity: 1; visibility: visible;">
             <li *ngFor="let suggestion of suggestions" (click)="goToCourse(suggestion.courseID); clearSearch()"
@@ -122,221 +120,153 @@
           </ul>
         </div>
       </form>
- 
 
-    <!-- Right side content -->
-    <div class="ms-auto order-lg-last" id="nav-right">
-      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-        <!-- Courses dropdown -->
-        <li class="nav-item dropdown me-3">
-          <a class="nav-link dropdown-toggle fw-semibold" href="#" id="navbarDropdown" role="button"
-            data-bs-toggle="dropdown" aria-expanded="false">Courses</a>
-          <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-            <li *ngFor="let category of categories">
-              <a class="dropdown-item fw-semibold" [routerLink]="['/courses/category', category.categoryID]"
-                (click)="toggleNavbar()">{{ category.name }}</a>
-            </li>
-            <li>
-              <a class="dropdown-item fw-semibold" [routerLink]="'/courses'" (click)="toggleNavbar()">All Courses</a>
-            </li>
-          </ul>
-        </li>
+      <!-- Right side content -->
+      <div class="ms-auto order-lg-last" id="nav-right">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
 
-        <!-- My Learning Dropdown -->
-        <li class="nav-item dropdown me-3 my-learning-container">
-          <a class="nav-link dropdown-toggle fw-semibold" href="#" id="myLearningDropdown" role="button"
-            data-bs-toggle="dropdown" aria-expanded="false">
-            My Learning
-          </a>
+          <!-- Courses Dropdown -->
+          <li class="nav-item dropdown me-3">
+            <a class="nav-link dropdown-toggle fw-semibold" href="#" id="navbarDropdown" role="button"
+              data-bs-toggle="dropdown" aria-expanded="false">Courses</a>
+            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+              <li *ngFor="let category of categories">
+                <a class="dropdown-item fw-semibold" [routerLink]="['/courses/category', category.categoryID]"
+                  (click)="toggleNavbar()">{{ category.name }}</a>
+              </li>
+              <li>
+                <a class="dropdown-item fw-semibold" [routerLink]="'/courses'" (click)="toggleNavbar()">All Courses</a>
+              </li>
+            </ul>
+          </li>
 
-          <ul class="dropdown-menu my-learning-dropdown" aria-labelledby="myLearningDropdown">
-            <div *ngIf="purchasedCourses.length > 0; else noCourses">
-              <li *ngFor="let course of purchasedCourses; trackBy: trackByCourseId" class="dropdown-item py-2">
-                <!-- Course Image and Details -->
-                <div class="d-flex align-items-center">
-                  <!-- Course Image -->
-                  <img [src]="getCourseImageUrl(course)" alt="Course Image" class="img-thumbnail"
-                    style="width: 50px; height: 50px; object-fit: cover;" />
-
-                  <!-- Course Details -->
-                  <div class="d-flex flex-column ms-3" style="flex-grow: 1; margin: 0; padding: 0;">
-                    <!-- Course Title -->
-                    <a [routerLink]="['/courses', course.courseID]" (click)="closeDropdown()"
-                      class="nav-link mb-0 text-truncate"
-                      style="font-size: 16px; font-weight: bold; margin: 0; padding: 0;">
-                      {{ course.title }}
-                    </a>
-
-                    <!-- Instructor Name -->
-                    <p class="mb-0 card-text text-muted" style="font-size: 12px; margin: 0; padding: 0;">
-                      {{ course.instructorName }}
-                    </p>
+          <!-- My Learning Dropdown -->
+          <li class="nav-item dropdown me-3 my-learning-container">
+            <a class="nav-link dropdown-toggle fw-semibold" href="#" id="myLearningDropdown" role="button"
+              data-bs-toggle="dropdown" aria-expanded="false">
+              My Learning
+            </a>
+            <ul class="dropdown-menu my-learning-dropdown" aria-labelledby="myLearningDropdown">
+              <ng-container *ngIf="purchasedCourses.length > 0; else noCourses">
+                <li *ngFor="let course of purchasedCourses; trackBy: trackByCourseId" class="dropdown-item py-2">
+                  <div class="d-flex align-items-center">
+                    <img [src]="getCourseImageUrl(course)" alt="Course Image" class="img-thumbnail"
+                      style="width: 50px; height: 50px; object-fit: cover;" />
+                    <div class="d-flex flex-column ms-3" style="flex-grow: 1;">
+                      <a [routerLink]="['/courses', course.courseID]" (click)="closeDropdown()"
+                        class="nav-link mb-0 text-truncate fw-bold" style="font-size: 16px;">
+                        {{ course.title }}
+                      </a>
+                      <p class="mb-0 card-text text-muted" style="font-size: 12px;">
+                        {{ course.instructorName }}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              </li>
+                </li>
+                <li class="dropdown-item text-center pt-2">
+                  <button class="btn btn-sm btn-success w-100" [routerLink]="['/my-learning']">Go to My Learning</button>
+                </li>
+              </ng-container>
+              <ng-template #noCourses>
+                <li class="dropdown-item text-muted text-center">
+                  No purchased courses yet.
+                </li>
+              </ng-template>
+            </ul>
+          </li>
 
-              <!-- Go to My Learning Button -->
-              <div class="text-center pt-2">
-                <button class="btn btn-sm btn-success w-100" [routerLink]="['/my-learning']">
-                  Go to My Learning
-                </button>
-              </div>
-            </div>
+          <!-- Profile Dropdown -->
+          <li class="nav-item dropdown me-3">
+            <a class="nav-link dropdown-toggle" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown"
+              aria-expanded="false">
+              <img *ngIf="profileImageUrl" [src]="profileImageUrl" alt="Profile" class="profile-image" />
+            </a>
+            <ul class="dropdown-menu dropdown-menu-start" aria-labelledby="profileDropdown">
+              <li><a class="dropdown-item fw-semibold" [routerLink]="['/security-settings']">Security Settings</a></li>
+              <li><a class="dropdown-item fw-semibold" [routerLink]="['/purchase-history']">Purchase History</a></li>
+              <li><a class="dropdown-item fw-semibold" href="#" (click)="logout()">Logout</a></li>
+            </ul>
+          </li>
 
-            <!-- Fallback Message if No Courses Purchased -->
-            <ng-template #noCourses>
-              <li class="dropdown-item text-muted text-center">
-                No purchased courses yet.
-              </li>
-            </ng-template>
-          </ul>
-        </li>
-
-        <!-- Profile Icon with Dropdown -->
-        <li class="nav-item dropdown me-3">
-          <a class="nav-link dropdown-toggle" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown"
-            aria-expanded="false">
-            <!-- Displaying the profile image  -->
-            <img *ngIf="profileImageUrl" [src]="profileImageUrl" alt="Profile" class="profile-image" />
-            <span *ngIf="!profileImageUrl">Profile</span>
-          </a>
-
-          <ul class="dropdown-menu dropdown-menu-start" aria-labelledby="profileDropdown">
-            <li>
-              <a class="dropdown-item fw-semibold" [routerLink]="['/security-settings']" role="button">Security
-                Settings</a>
-            </li>
-            <li>
-              <a class="dropdown-item fw-semibold" [routerLink]="['/purchase-history']" role="button">Purchase
-                History</a>
-            </li>
-            <li>
-              <a class="dropdown-item fw-semibold" href="#" (click)="logout()" role="button">Logout</a>
-            </li>
-          </ul>
-        </li>
-
-        <!-- Wishlist Dropdown -->
-        <li class="nav-item dropdown me-3 wishlist-container" (click)="toggleWishlistDropdown()">
-          <a class="nav-link dropdown-toggle fw-semibold" href="#" id="wishlistDropdown" role="button"
-            data-bs-toggle="dropdown" aria-expanded="false">
-            <img src="assets/images/wishlist.svg" alt="Wishlist" width="30" height="30" />
-          </a>
-          <ul class="dropdown-menu wishlist-dropdown" aria-labelledby="wishlistDropdown">
-            <!-- Wishlist Items -->
-            <div *ngIf="wishlist.length > 0; else noItems">
-              <li *ngFor="let item of wishlist; trackBy: trackByCourseId" class="dropdown-item py-2">
-                <!-- Course Image and Details -->
-                <div class="d-flex align-items-center">
-                  <!-- Course Image -->
-                  <img [src]="getCourseImageUrl(item)" alt="Course Image" class="img-thumbnail"
-                    style="width: 50px; height: 50px; object-fit: cover;" />
-
-                  <!-- Course Details -->
-                  <div class="d-flex flex-column ms-3" style="flex-grow: 1; margin: 0; padding: 0;">
-                    <!-- Course Title -->
-                    <a [routerLink]="['/courses', item.courseID]" (click)="closeDropdown()"
-                      class="nav-link mb-0 text-truncate"
-                      style="font-size: 16px; font-weight: semibold; margin: 0; padding: 0;">
-                      {{ item.title }}
-                    </a>
-                    <!-- Course Price -->
-                    <p class="mb-0 text-muted" style="font-size: 14px; margin: 0; padding: 0;">
-                      {{ item.price }} DKK
-                    </p>
+          <!-- Wishlist Dropdown -->
+          <li class="nav-item dropdown me-3 wishlist-container" (click)="toggleWishlistDropdown()">
+            <a class="nav-link dropdown-toggle fw-semibold" href="#" id="wishlistDropdown" role="button"
+              data-bs-toggle="dropdown" aria-expanded="false">
+              <img src="assets/images/wishlist.svg" alt="Wishlist" width="30" height="30" />
+            </a>
+            <ul class="dropdown-menu wishlist-dropdown" aria-labelledby="wishlistDropdown">
+              <ng-container *ngIf="wishlist.length > 0; else noWishlist">
+                <li *ngFor="let item of wishlist; trackBy: trackByCourseId" class="dropdown-item py-2">
+                  <div class="d-flex align-items-center">
+                    <img [src]="getCourseImageUrl(item)" alt="Course Image" class="img-thumbnail"
+                      style="width: 50px; height: 50px; object-fit: cover;" />
+                    <div class="d-flex flex-column ms-3" style="flex-grow: 1;">
+                      <a [routerLink]="['/courses', item.courseID]" (click)="closeDropdown()"
+                        class="nav-link text-truncate fw-semibold" style="font-size: 16px;">
+                        {{ item.title }}
+                      </a>
+                      <p class="mb-0 text-muted" style="font-size: 14px;">{{ item.price }} DKK</p>
+                    </div>
                   </div>
-                </div>
-
-                <!-- Add to Cart Button -->
-                <div class="mt-2">
-                  <button class="btn btn-sm btn-outline-success w-100" (click)="addToCart(item)">
-                    Add to Cart
-                  </button>
-                </div>
-              </li>
-
-              <!-- Go to Wishlist Button -->
-              <div class="text-center pt-2">
-                <button class="btn btn-sm btn-success w-100" [routerLink]="['/wishlist']">
-                  Go to Wishlist
-                </button>
-              </div>
-            </div>
-            <ng-template #noItems>
-              <li class="dropdown-item text-muted">
-                No items in your wishlist yet.
-              </li>
-            </ng-template>
-          </ul>
-        </li>
-
-        <!-- Cart Icon -->
-        <li class="nav-item dropdown me-3 cart-container" (mouseover)="showCartDropdown = true"
-          (mouseleave)="showCartDropdown = false">
-          <a class="nav-link dropdown-toggle fw-semibold" id="cartDropdown" role="button" aria-expanded="false">
-            <img src="assets/images/cart.svg" alt="Cart" width="30" height="30" />
-            <!-- Cart Item Count -->
-            <span *ngIf="cartItemCount > 0" class="badge badge-pill bg-danger">
-              {{ cartItemCount }}
-            </span>
-          </a>
+                  <div class="mt-2">
+                    <button class="btn btn-sm btn-outline-success w-100" (click)="addToCart(item)">Add to Cart</button>
+                  </div>
+                </li>
+                <li class="dropdown-item text-center pt-2">
+                  <button class="btn btn-sm btn-success w-100" [routerLink]="['/wishlist']">Go to Wishlist</button>
+                </li>
+              </ng-container>
+              <ng-template #noWishlist>
+                <li class="dropdown-item text-muted text-center">No items in your wishlist yet.</li>
+              </ng-template>
+            </ul>
+          </li>
 
           <!-- Cart Dropdown -->
-          <ul *ngIf="showCartDropdown" class="dropdown-menu cart-dropdown" aria-labelledby="cartDropdown">
-            <div *ngIf="cartItems.length > 0; else noItems">
-              <li *ngFor="let item of cartItems" class="dropdown-item py-2">
-                <!-- Course Image and Details -->
-                <div class="d-flex align-items-center">
-
-                  <!-- Course Image -->
-                  <img [src]="getCourseImageUrl(item)" alt="Course Image" class="img-thumbnail"
-                    style="width: 50px; height: 50px; object-fit: cover;flex-shrink: 0;" />
-
-                  <!-- Course Details -->
-                  <div class="d-flex flex-column ms-3" style="flex-grow: 1;">
-                    <!-- Course Title -->
-                    <a [routerLink]="['/courses', item.courseID]" (click)="closeDropdown()"
-                      class="nav-link text-truncate" style="font-size: 16px; font-weight: bold; margin: 0; padding: 0;">
-                      {{ item.courseTitle }}
-                    </a>
-
-                    <!-- Instructor Name -->
-                    <p class="card-text text-muted" style="font-size: 12px; margin: 0; padding: 0;">
-                      {{ item.instructorName }}
-                    </p>
-
-                    <!-- Course Price -->
-                    <p class="mb-0 text-muted" style="font-size: 16px; font-weight: bold; margin: 0; padding: 0;">
-                      {{ item.price }} DKK
-                    </p>
+          <li class="nav-item dropdown me-3 cart-container" (mouseover)="showCartDropdown = true"
+            (mouseleave)="showCartDropdown = false">
+            <a class="nav-link dropdown-toggle fw-semibold" id="cartDropdown" role="button" aria-expanded="false">
+              <img src="assets/images/cart.svg" alt="Cart" width="30" height="30" />
+              <span *ngIf="cartItemCount > 0" class="badge badge-pill bg-danger">
+                {{ cartItemCount }}
+              </span>
+            </a>
+            <ul *ngIf="showCartDropdown" class="dropdown-menu cart-dropdown" aria-labelledby="cartDropdown">
+              <ng-container *ngIf="cartItems.length > 0; else noCartItems">
+                <li *ngFor="let item of cartItems" class="dropdown-item py-2">
+                  <div class="d-flex align-items-center">
+                    <img [src]="getCourseImageUrl(item)" alt="Course Image" class="img-thumbnail"
+                      style="width: 50px; height: 50px; object-fit: cover; flex-shrink: 0;" />
+                    <div class="d-flex flex-column ms-3" style="flex-grow: 1;">
+                      <a [routerLink]="['/courses', item.courseID]" (click)="closeDropdown()"
+                        class="nav-link text-truncate fw-bold" style="font-size: 16px;">
+                        {{ item.courseTitle }}
+                      </a>
+                      <p class="card-text text-muted" style="font-size: 12px;">{{ item.instructorName }}</p>
+                      <p class="mb-0 text-muted fw-bold" style="font-size: 16px;">{{ item.price }} DKK</p>
+                    </div>
                   </div>
-                </div>
-              </li>
+                </li>
+                <li class="dropdown-item border-top pt-2 d-flex justify-content-between align-items-center">
+                  <span><strong>Total: {{ getTotalPrice() }} DKK </strong></span>
+                </li>
+                <li class="dropdown-item text-center pt-2">
+                  <button class="btn btn-sm btn-success w-100" [routerLink]="'/cart'" (click)="closeDropdown()">Go to Cart</button>
+                </li>
+              </ng-container>
+              <ng-template #noCartItems>
+                <li class="dropdown-item text-muted text-center">No items in your cart yet.</li>
+              </ng-template>
+            </ul>
+          </li>
 
-              <!--Total Price Section  -->
-              <li class="dropdown-item border-top pt-2 d-flex justify-content-between align-items-center">
-                <span><strong>Total: {{ getTotalPrice() }} DKK </strong></span>
-              </li>
-
-              <!-- Go to Cart Button -->
-              <div class="text-center pt-2">
-                <button class="btn btn-sm btn-success w-100" [routerLink]="'/cart'" (click)="closeDropdown()">
-                  Go to Cart
-                </button>
-              </div>
-            </div>
-            <ng-template #noItems>
-              <li class="dropdown-item text-muted">
-                No items in your cart yet.
-              </li>
-            </ng-template>
-          </ul>
-        </li>
-      </ul>
+        </ul>
+      </div>
     </div>
   </div>
-</div>
 </nav>
+
+
 
 <!-- Instructor Dashboard -->
 <nav *ngIf="navbarType === 'instructor'" class="navbar navbar-expand-lg custom-bg py-3 fixed-top">

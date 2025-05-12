@@ -96,7 +96,7 @@ export class CartComponent implements OnInit, OnDestroy {
     }
     this.isLoading = true;
     const courseIds = this.cart.map(item => item.courseID);
-    
+
     this.cartService.createCheckoutSession(courseIds).subscribe({
       next: (response) => {
         if (response.url) {

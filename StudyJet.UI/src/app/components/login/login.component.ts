@@ -80,8 +80,12 @@ export class LoginComponent {
           });
         } else {
           this.authService.handleSuccessfulLogin(response);
-          this.profileImageUrl = this.authService.getProfileImage();
-          this.cookieService.set('profilePictureUrl', this.profileImageUrl, { expires: 7 });
+       if (response.profilePictureUrl) {
+  this.authService.setProfileImage(response.profilePictureUrl);
+} else {
+  console.log('No profile image URL provided in the login response.');
+}
+
           this.loadWishlist();
 
           this.authService.getNavbarTypeFromRoles().subscribe((navbarType) => {
@@ -140,3 +144,6 @@ export class LoginComponent {
     }
   }
 }
+
+
+

@@ -13,8 +13,12 @@ import { NavbarService } from './navbar.service';
 })
 export class AuthService {
   private apiUrl = `${environment.apiBaseUrl}/Auth`;
+
   private isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
   public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
+
+  private profileImageSubject = new BehaviorSubject<string | null>(null);
+  public profileImage$ = this.profileImageSubject.asObservable();
 
   private navbarTypeSubject = new BehaviorSubject<'admin' | 'instructor' | 'student' | 'default'>('default');
   navbarType$ = this.navbarTypeSubject.asObservable();
@@ -27,15 +31,39 @@ export class AuthService {
     private navbarService: NavbarService,
   ) {
     this.checkAuthState();
+
+
+    // ADDED
+    const savedUrl = this.cookieService.get('profileImageUrl');
+    if (savedUrl) {
+      const fullUrl = this.imageService.getProfileImageUrl(savedUrl);
+      this.profileImageSubject.next(fullUrl);
+    }
+
+
   }
+
+  
 
   // Check authstate on app initialization
   private checkAuthState(): void {
     const token = this.cookieService.get('authToken');
     const username = this.cookieService.get('authEmail');
-    
+    const roles = this.cookieService.get('roles');
+    const rawProfile = this.cookieService.get('profileImageUrl');
+
     if (token && username && !this.isTokenExpired(token)) {
       this.isAuthenticatedSubject.next(true);
+
+    if (roles) {
+      this.updateNavbarType(JSON.parse(roles));
+    }
+
+    if (rawProfile) {
+      const fullProfileUrl = this.imageService.getProfileImageUrl(rawProfile);
+      this.setProfileImage(fullProfileUrl); 
+    }
+
     } else {
       this.isAuthenticatedSubject.next(false);
       this.clearAuthCookies();
@@ -53,14 +81,7 @@ export class AuthService {
 
   private clearAuthCookies(): void {
     const cookiesToRemove = [
-      'authToken',
-      'profileImageUrl',
-      'username',
-      'roles',
-      'fullName',
-      'userId',
-      'tempToken',
-      'authEmail',
+      'authToken','profileImageUrl','username', 'roles','fullName','userId','tempToken','authEmail'
     ];
     cookiesToRemove.forEach((cookie) => this.cookieService.delete(cookie, '/'));
   }
@@ -73,8 +94,7 @@ export class AuthService {
     fullName: string,
     userId: string
   ): void {
-    const cookieOptions = { path: '/', secure: true,  sameSite: 'Strict' as const, expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),};
-
+    const cookieOptions = { path: '/', secure: true, sameSite: 'Lax' as const, expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), };
     this.cookieService.set('authToken', token, cookieOptions);
     this.cookieService.set('username', username, cookieOptions);
     this.cookieService.set('roles', JSON.stringify(roles), cookieOptions);
@@ -151,23 +171,39 @@ export class AuthService {
     );
   }
 
-  public handleSuccessfulLogin(response: LoginResponse): void {
-    
-        if (!response.token || !response.userName || !response.roles || !response.userID) {
+
+  handleSuccessfulLogin(response: LoginResponse): void {
+    if (!response.token || !response.userName || !response.roles || !response.userID) {
       throw new Error('Invalid login response - missing required fields');
     }
-    const profilePictureUrl =
-      response.profilePictureUrl || '/images/profiles/profilepic.png';
-    this.updateNavbarType(response.roles);
-
+    const profilePictureUrl = response.profilePictureUrl || '/images/profiles/profilepic.png';
+    const fullProfileUrl = this.imageService.getProfileImageUrl(profilePictureUrl);
+   
     this.cookieService.set('authEmail', response.userName, { secure: true, sameSite: 'Strict', path: '/', });
-    this.cookieService.set('authToken', response.token, {  secure: true,  sameSite: 'Strict',   path: '/', expires: 7  });
-    this.cookieService.set('userID', response.userID, { secure: true,  sameSite: 'Strict', path: '/', });
-    this.setAuthCookies( response.token, response.userName,  response.roles, this.imageService.getProfileImageUrl(profilePictureUrl),response.fullName || '',  response.userID  );
+    this.cookieService.set('authToken', response.token, { secure: true, sameSite: 'Strict', path: '/', expires: 7 });
+    this.cookieService.set('userID', response.userID, { secure: true, sameSite: 'Strict', path: '/', });
+
+    this.setAuthCookies(response.token, response.userName, response.roles, fullProfileUrl, response.fullName || '', response.userID);
+    this.setProfileImage(fullProfileUrl);
+    this.updateNavbarType(response.roles);
     this.isAuthenticatedSubject.next(true);
-    this.setProfileImage(profilePictureUrl);
-    this.cookieService.delete('tempToken'); 
+    this.cookieService.delete('tempToken');
+}
+
+  setProfileImage(url: string): void { 
+    this.cookieService.set('profileImageUrl', url, { secure: true, sameSite: 'Lax', path: '/', }); 
+     this.profileImageSubject.next(url);
   }
+
+  getProfileImage(): string { 
+    return this.imageService.getProfileImageUrl(
+      this.cookieService.get('profileImageUrl') || ''
+    ); 
+  }
+
+
+  
+
 
   getNavbarTypeFromRoles(): Observable<'admin' | 'instructor' | 'student' | 'default'> {
     return this.getRoles().pipe(
@@ -184,7 +220,7 @@ export class AuthService {
     );
   }
 
-    updateNavbarType(roles: string[]): void {
+  updateNavbarType(roles: string[]): void {
     let navbarType: 'admin' | 'instructor' | 'student' | 'default' = 'default';
     if (roles.includes('Admin')) {
       navbarType = 'admin';
@@ -198,7 +234,7 @@ export class AuthService {
     this.navbarTypeSubject.next(navbarType);
   }
 
- 
+
 
   // Logout method
   async logout(): Promise<void> {
@@ -217,11 +253,11 @@ export class AuthService {
   handleError<T>(operation = 'operation'): (error: any) => Observable<T> {
     return (error: any): Observable<T> => {
       console.error(`${operation} failed:`, error);
-  
+
       if (error instanceof HttpErrorResponse) {
         return throwError(() => error);
       }
-  
+
       // general error
       let errorMessage = 'Something went wrong';
       if (error.error instanceof ErrorEvent) {
@@ -234,11 +270,6 @@ export class AuthService {
       return throwError(() => new Error(errorMessage));
     };
   }
-  
-  setProfileImage(url: string): void { this.cookieService.set('profileImageUrl', url, { secure: true, sameSite: 'Lax', path: '/', }); }
-  getProfileImage(): string { return this.imageService.getProfileImageUrl(this.cookieService.get('profileImageUrl'));}
-  setUserName(username: string): void { this.cookieService.set('username', username, { secure: true, sameSite: 'Strict', path: '/',});  }
-  setEmail(email: string): void {this.cookieService.set('authEmail', email, {  secure: true,  sameSite: 'Strict',  path: '/',});  }
 
   
   getEmail(): Observable<string> {
@@ -249,7 +280,7 @@ export class AuthService {
       return throwError(() => new Error('Email not found.'));
     }
   }
-  
+
   getRoles(): Observable<string[]> {
     const roles = this.cookieService.get('roles');
     return roles ? of(JSON.parse(roles)) : of([]);
@@ -316,12 +347,12 @@ export class AuthService {
 
 
   confirm2FA(code: string): Observable<any> {
-    const email = this.cookieService.get('authEmail'); 
+    const email = this.cookieService.get('authEmail');
     if (!email) {
       return throwError(() => new Error('Email is missing or not found in cookies.'));
     }
     return this.http
-      .post(`${this.apiUrl}/confirm-2fa`, { code, email }) 
+      .post(`${this.apiUrl}/confirm-2fa`, { code, email })
       .pipe(
         catchError((error) => {
           return throwError(() => new Error(error.error?.message || 'Error confirming 2FA.'));
@@ -330,57 +361,57 @@ export class AuthService {
   }
 
 
-verify2FALogin(code: string): Observable<LoginResponse> {
-  const tempToken = this.cookieService.get('tempToken');
-  if (!tempToken) {
-    return throwError(() => new Error('Temporary token is missing.'));
+  verify2FALogin(code: string): Observable<LoginResponse> {
+    const tempToken = this.cookieService.get('tempToken');
+    if (!tempToken) {
+      return throwError(() => new Error('Temporary token is missing.'));
+    }
+
+    return this.http
+      .post<LoginResponse>(`${this.apiUrl}/verify-2fa-login`, {
+        code,
+        tempToken,
+      })
+      .pipe(
+        tap((response: LoginResponse) => {
+          if (response.token && response.userName && response.roles) {
+            this.handleSuccessfulLogin(response);
+          }
+        }),
+        catchError((error: any) => {
+          const handledError = this.handleError<LoginResponse>('verify2FALogin')(error);
+          return throwError(() => handledError);
+        })
+      );
   }
 
-  return this.http
-    .post<LoginResponse>(`${this.apiUrl}/verify-2fa-login`, {
-      code,
-      tempToken,
-    })
-    .pipe(
-      tap((response: LoginResponse) => {
-        if (response.token && response.userName && response.roles) {
-          this.handleSuccessfulLogin(response);
-        }
-      }),
-      catchError((error: any) => {
-        const handledError = this.handleError<LoginResponse>('verify2FALogin')(error);
-        return throwError(() => handledError);
-      })
-    );
-}
 
-
-check2FAStatus(): Observable<{ isEnabled: boolean; error?: string }> {
-  return this.http
-    .get<{ isEnabled: boolean }>(`${this.apiUrl}/check-2fa-status`)
-    .pipe(
-      map((response) => ({
-        isEnabled: response.isEnabled,
-      })),
-      catchError((error) => {
-        console.error('Error checking 2FA status:', error);
-        return of({
-          isEnabled: false,
-          error: error.error?.message || 'Failed to check 2FA status',
-        });
-      })
-    );
-}
-
-
-disable2FA(): Observable<Disable2FAResponse> {
-  return this.http.post<Disable2FAResponse>(`${this.apiUrl}/disable-2fa`, {}).pipe(
-    catchError((error) => {
-      console.error('Error disabling 2FA:', error);
-      return throwError(
-        () => new Error(error?.error?.message || 'Failed to disable 2FA.')
+  check2FAStatus(): Observable<{ isEnabled: boolean; error?: string }> {
+    return this.http
+      .get<{ isEnabled: boolean }>(`${this.apiUrl}/check-2fa-status`)
+      .pipe(
+        map((response) => ({
+          isEnabled: response.isEnabled,
+        })),
+        catchError((error) => {
+          console.error('Error checking 2FA status:', error);
+          return of({
+            isEnabled: false,
+            error: error.error?.message || 'Failed to check 2FA status',
+          });
+        })
       );
-    })
-  );
-}
+  }
+
+
+  disable2FA(): Observable<Disable2FAResponse> {
+    return this.http.post<Disable2FAResponse>(`${this.apiUrl}/disable-2fa`, {}).pipe(
+      catchError((error) => {
+        console.error('Error disabling 2FA:', error);
+        return throwError(
+          () => new Error(error?.error?.message || 'Failed to disable 2FA.')
+        );
+      })
+    );
+  }
 }
