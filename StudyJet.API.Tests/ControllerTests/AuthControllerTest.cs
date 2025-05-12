@@ -720,7 +720,7 @@ namespace StudyJet.API.Tests.ControllerTests
         }
 
         [Fact]
-        public async Task Check2FAStatus_ShouldReturnBadRequest_WhenUsernameNotFound()
+        public async Task Check2FAStatus_ShouldReturnBadRequest_WhenUserIdNotFound()
         {
             // Arrange
             _controller.ControllerContext = new ControllerContext()
@@ -739,19 +739,25 @@ namespace StudyJet.API.Tests.ControllerTests
             Assert.Equal(400, badRequestResult.StatusCode);
 
             var jObject = JObject.FromObject(badRequestResult.Value);
-            Assert.Equal("Username not found.", jObject["message"]?.ToString());
+            Assert.Equal("UserId not found.", jObject["message"]?.ToString());
         }
 
         [Fact]
         public async Task Check2FAStatus_ShouldReturnOk_When2FADisabled()
         {
             // Arrange
-            var username = "testuser";
+            var userId = "testuser";
             _controller.ControllerContext = new ControllerContext()
             {
-                HttpContext = new DefaultHttpContext() { User = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim(ClaimTypes.Name, username) })) }
+                HttpContext = new DefaultHttpContext()
+                {
+                    User = new ClaimsPrincipal(new ClaimsIdentity(new[]
+                    {
+                new Claim("userId", userId)  // ✅ Use "userId" instead of ClaimTypes.NameIdentifier
+            }))
+                }
             };
-            _authServiceMock.Setup(s => s.Is2faEnabledAsync(username)).ReturnsAsync(false);
+            _authServiceMock.Setup(s => s.Is2faEnabledAsync(userId)).ReturnsAsync(false);
 
             // Act
             var result = await _controller.Check2FAStatus();
@@ -761,26 +767,35 @@ namespace StudyJet.API.Tests.ControllerTests
             Assert.Equal(200, okResult.StatusCode);
 
             var jObject = JObject.FromObject(okResult.Value);
-
             Assert.False(jObject["isEnabled"]?.ToObject<bool>());
         }
+
+
 
         [Fact]
         public async Task Check2FAStatus_ShouldReturnInternalServerError_WhenExceptionOccurs()
         {
             // Arrange
-            var username = "testuser";
+            var userId = "testuser";
             _controller.ControllerContext = new ControllerContext()
             {
-                HttpContext = new DefaultHttpContext() { User = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim(ClaimTypes.Name, username) })) }
+                HttpContext = new DefaultHttpContext()
+                {
+                    User = new ClaimsPrincipal(new ClaimsIdentity(new[]
+                    {
+                new Claim("userId", userId)  
+            }))
+                }
             };
-            _authServiceMock.Setup(s => s.Is2faEnabledAsync(username)).ThrowsAsync(new Exception("Some error"));
+
+            _authServiceMock.Setup(s => s.Is2faEnabledAsync(userId))
+                            .ThrowsAsync(new Exception("Some error"));
 
             // Act
             var result = await _controller.Check2FAStatus();
 
             // Assert
-            var objectResult = Assert.IsType<ObjectResult>(result); 
+            var objectResult = Assert.IsType<ObjectResult>(result);
             Assert.Equal(500, objectResult.StatusCode);
 
             var jObject = JObject.FromObject(objectResult.Value);
@@ -788,12 +803,18 @@ namespace StudyJet.API.Tests.ControllerTests
         }
 
         [Fact]
-        public async Task Disable2FA_ShouldReturnUnauthorized_WhenUsernameNotFoundInClaims()
+        public async Task Disable2FA_ShouldReturnUnauthorized_WhenUserIdNotFoundInClaims()
         {
             // Arrange
             _controller.ControllerContext = new ControllerContext()
             {
-                HttpContext = new DefaultHttpContext() { User = new ClaimsPrincipal(new ClaimsIdentity()) } // No username in claims
+                HttpContext = new DefaultHttpContext()
+                {
+                    User = new ClaimsPrincipal(new ClaimsIdentity(new[]
+                    {
+                new Claim("userId", "")  // Empty userId as if the username is missing or invalid
+                    }))
+                }
             };
 
             // Act
@@ -804,8 +825,9 @@ namespace StudyJet.API.Tests.ControllerTests
             Assert.Equal(401, unauthorizedResult.StatusCode);
 
             var jObject = JObject.FromObject(unauthorizedResult.Value);
-            Assert.Equal("Username not found in claims.", jObject["message"]?.ToString());
+            Assert.Equal("UserId not found in claims.", jObject["message"]?.ToString()); // Updated to match the actual message
         }
+
 
 
 
