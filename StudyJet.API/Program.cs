@@ -206,11 +206,23 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+
 // Seed the data
 using (var scope = app.Services.CreateScope())
 {
-    var dbInitializer = scope.ServiceProvider.GetRequiredService<DbInitializer>();
-    await dbInitializer.InitializeAsync().ConfigureAwait(false);
+    var env = scope.ServiceProvider.GetRequiredService<IWebHostEnvironment>();
+
+    if (!env.IsEnvironment("Test"))
+    {
+        var dbInitializer = scope.ServiceProvider.GetRequiredService<DbInitializer>();
+        await dbInitializer.InitializeAsync().ConfigureAwait(false);
+    }
 }
 
+
+
 app.Run();
+
+
+//Partial class for extending Program needed for integration test
+public partial class Program { }

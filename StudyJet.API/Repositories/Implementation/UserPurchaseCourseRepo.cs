@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using StudyJet.API.Data;
 using StudyJet.API.Data.Entities;
+using StudyJet.API.Data.Enums;
 using StudyJet.API.DTOs.Course;
 using StudyJet.API.Repositories.Interface;
 
@@ -55,14 +56,13 @@ namespace StudyJet.API.Repositories.Implementation
 
         public async Task<List<CourseResponseDTO>> SelectSuggestedCoursesAsync(string userId, int limit = 3)
         {
-           
             var purchasedCourseIds = await _context.UserPurchaseCourse
                 .Where(upc => upc.UserID == userId)
                 .Select(upc => upc.CourseID)
                 .ToListAsync();
 
             var suggestedCourses = await _context.Courses
-                .Where(c => !purchasedCourseIds.Contains(c.CourseID))
+                .Where(c => !purchasedCourseIds.Contains(c.CourseID) && c.Status == CourseStatus.Approved)
                 .OrderByDescending(c => c.LastUpdatedDate)
                 .Take(limit)
                 .Select(c => new CourseResponseDTO
@@ -80,6 +80,7 @@ namespace StudyJet.API.Repositories.Implementation
             if (!suggestedCourses.Any())
             {
                 suggestedCourses = await _context.Courses
+                    .Where(c => c.Status == CourseStatus.Approved)
                     .OrderByDescending(c => c.LastUpdatedDate)
                     .Take(limit)
                     .Select(c => new CourseResponseDTO

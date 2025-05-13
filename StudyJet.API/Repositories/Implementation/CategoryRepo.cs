@@ -44,14 +44,27 @@ namespace StudyJet.API.Repositories.Implementation
             return await _context.Categories.AnyAsync(c => c.CategoryID == categoryId);
         }
 
+        /* public async Task<List<Category>> SelectAllAsync()
+         {
+             return await _context.Categories
+                 .Where(c => c.Courses.Any(course => course.Status == CourseStatus.Approved))
+                 .Include(c => c.Courses.Where(course => course.Status == CourseStatus.Approved))
+                     .ThenInclude(course => course.Instructor)
+                 .ToListAsync();
+         } */
+
+
         public async Task<List<Category>> SelectAllAsync()
         {
             return await _context.Categories
-                .Where(c => c.Courses.Any(course => course.Status == CourseStatus.Approved))
-                .Include(c => c.Courses.Where(course => course.Status == CourseStatus.Approved))
+                .Include(c => c.Courses.Where(course => course.Status == CourseStatus.Approved)) 
                     .ThenInclude(course => course.Instructor)
                 .ToListAsync();
         }
+
+
+
+
 
         public async Task<Category> SelectByIdAsync(int categoryId)
         {
