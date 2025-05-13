@@ -1,21 +1,21 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { environment } from '../../../environments/environment';
-import { Course } from '../../models';
+import { Category, Course } from '../../models';
 import { AuthService } from '../../services/auth.service';
 import { CourseService } from '../../services/course.service';
 import { ImageService } from '../../services/image.service';
+import { CategoryService } from '../../services/category.service';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-manage-courses',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, FormsModule],
   templateUrl: './manage-courses.component.html',
   styleUrl: './manage-courses.component.css'
 })
 export class ManageCoursesComponent implements OnInit {
-
   courses: Course[] = [];
   pendingCourses: Course[] = [];
   isAdmin = false;
@@ -26,12 +26,14 @@ export class ManageCoursesComponent implements OnInit {
     private courseService: CourseService,
     private authService: AuthService,
     private imageService: ImageService,
+    private categoryService: CategoryService,
   ) { }
 
   ngOnInit(): void {
     this.getCourses();
     this.loadPendingCourses();
     this.checkAdminRole();
+      
   }
 
   // Fetch all courses and map status and image URL
@@ -51,7 +53,6 @@ export class ManageCoursesComponent implements OnInit {
               course.status = 'Rejected';
               break;
           }
-
           // Update image URL if needed 
           course.imageUrl = this.imageService.getCourseImageUrl(course.imageUrl);
           return course;
@@ -127,6 +128,12 @@ export class ManageCoursesComponent implements OnInit {
       complete: () => this.isRejecting = false
     });
   }
+
+
+
+  
+
+
 }
 
 

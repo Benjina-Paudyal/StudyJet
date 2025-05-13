@@ -175,61 +175,12 @@ namespace StudyJet.API.Tests.RepositoryTests
 
 
         [Fact]
-        public async Task SelectAllAsync_ReturnsApprovedCategoriesWithCourses_WhenDataExists()
+        public async Task SelectAllAsync_ReturnsCategoriesWithApprovedCourses_WhenDataExists()
         {
             // Arrange
             var instructor = new User { Id = "instructor1", FullName = "John Doe" };
+
             var approvedCategory = new Category
-            {
-                CategoryID = 1,
-                Name = "Programming",
-                Courses = new List<Course>
-                 {
-                    new Course
-                    {
-                        CourseID = 101,
-                        Title = "C# Basics",
-                        Description = "Learn C# programming",
-                        ImageUrl = "csharp.jpg",
-                        VideoUrl = "intro.mp4",
-                        Price = 99.99m,
-                        InstructorID = "instructor1",
-                        Instructor = instructor,
-                        Status = CourseStatus.Approved,
-                        CreationDate = DateTime.Now,
-                        LastUpdatedDate = DateTime.Now,
-                        CategoryID = 1
-                    }
-                }
-            };
-
-            var emptyCategory = new Category
-            {
-                CategoryID = 2,
-                Name = "Empty",
-                Courses = new List<Course>()
-            };
-
-            _context.Users.Add(instructor);
-            _context.Categories.AddRange(approvedCategory, emptyCategory);
-            await _context.SaveChangesAsync();
-
-            // Act
-            var result = await _categoryRepo.SelectAllAsync();
-
-            // Assert
-            Assert.Single(result); 
-            Assert.Equal("Programming", result[0].Name);
-            Assert.Single(result[0].Courses); 
-            Assert.Equal("John Doe", result[0].Courses.First().Instructor.FullName);
-        }
-
-        [Fact]
-        public async Task SelectAllAsync_ReturnsEmptyList_WhenNoApprovedCoursesExist()
-        {
-            // Arrange
-            var instructor = new User { Id = "instructor1", FullName = "John Doe" };
-            var category = new Category
             {
                 CategoryID = 1,
                 Name = "Programming",
@@ -245,7 +196,7 @@ namespace StudyJet.API.Tests.RepositoryTests
                 Price = 99.99m,
                 InstructorID = "instructor1",
                 Instructor = instructor,
-                Status = CourseStatus.Pending, // Not approved
+                Status = CourseStatus.Approved,
                 CreationDate = DateTime.Now,
                 LastUpdatedDate = DateTime.Now,
                 CategoryID = 1
@@ -253,15 +204,40 @@ namespace StudyJet.API.Tests.RepositoryTests
         }
             };
 
+            var emptyCategory = new Category
+            {
+                CategoryID = 2,
+                Name = "Design",
+                Courses = new List<Course>() 
+            };
+
             _context.Users.Add(instructor);
-            _context.Categories.Add(category);
+            _context.Categories.AddRange(approvedCategory, emptyCategory);
             await _context.SaveChangesAsync();
 
+            var repo = new CategoryRepo(_context);
+
+            // Act
+            var result = await repo.SelectAllAsync();
+
+            // Assert
+            Assert.Equal(2, result.Count);
+            Assert.Equal("Programming", result[0].Name);
+            Assert.Single(result[0].Courses); 
+            Assert.Equal("John Doe", result[0].Courses.First().Instructor.FullName);
+
+            Assert.Equal("Design", result[1].Name);
+            Assert.Empty(result[1].Courses); 
+        }
+
+        [Fact]
+        public async Task SelectAllAsync_ReturnsEmptyList_WhenNoCategoriesExist()
+        {
             // Act
             var result = await _categoryRepo.SelectAllAsync();
 
             // Assert
-            Assert.Empty(result); // Should return empty list when no approved courses
+            Assert.Empty(result); 
         }
 
 

@@ -32,6 +32,7 @@ export *from './cart/cart-item.model';
 
 
 export *from './category/category.model';
+export *from './category/category.request.dto';
 
 
 export *from './email/email-form-data.dto';

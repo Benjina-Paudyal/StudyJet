@@ -1,0 +1,50 @@
+<div class="container mt-5 py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card border-success">
+        <div class="card-header text-center bg-white">
+          <h2 class="text-success fw-semibold">Manage Categories</h2>
+        </div>
+
+        <div class="card-body">
+          <!-- Add New Category Form -->
+          <form (ngSubmit)="addCategory()" #catForm="ngForm" class="mb-4">
+            <div class="input-group">
+              <input
+                type="text"
+                class="form-control border-success"
+                placeholder="New category name"
+                name="newCategory"
+                [(ngModel)]="newCategory"
+                required
+                [ngClass]="{ 'is-invalid': catForm.submitted && !newCategory.trim() }"
+              />
+              <button
+                class="btn btn-success"
+                type="submit"
+                [disabled]="catForm.invalid"
+              >
+                Add
+              </button>
+            </div>
+            <div *ngIf="catForm.submitted && !newCategory.trim()" class="invalid-feedback d-block">
+              Category name is required.
+            </div>
+          </form>
+
+          <!-- Categories List with Scrollbar -->
+          <div class="border rounded" style="max-height: 200px; overflow-y: auto;">
+            <ul class="list-group list-group-flush">
+              <li class="list-group-item" *ngFor="let cat of categories">
+                {{ cat.name }}
+              </li>
+              <li *ngIf="!categories.length" class="list-group-item text-muted">
+                No categories yet.
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

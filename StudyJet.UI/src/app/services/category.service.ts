@@ -9,14 +9,14 @@ import { Category, Course } from '../models';
   providedIn: 'root'
 })
 export class CategoryService {
-  private apiUrl = `${environment.apiBaseUrl}/category`; 
+  private apiUrl = `${environment.apiBaseUrl}/category`;
 
   constructor(
     private http: HttpClient
   ) { }
 
   // Fetch all categories
-  getCategories() : Observable<Category[]> {
+  getCategories(): Observable<Category[]> {
     return this.http.get<Category[]>(this.apiUrl);
   }
 
@@ -30,5 +30,8 @@ export class CategoryService {
     return this.http.get<Category>(`${this.apiUrl}/${categoryId}`);
   }
 
-
+  // Add category
+  addCategory(category: { name: string }): Observable<number> {
+    return this.http.post<number>(this.apiUrl, category);
+  }
 }

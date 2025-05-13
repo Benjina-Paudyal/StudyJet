@@ -238,7 +238,8 @@ namespace StudyJet.API.Tests.RepositoryTests
                 Price = 99.99m,
                 Instructor = new User { FullName = "Instructor 1", UserName = "instructor1" },
                 VideoUrl = "http://example.com/video1.mp4",
-                LastUpdatedDate = DateTime.Now.AddDays(-1)
+                LastUpdatedDate = DateTime.Now.AddDays(-1),
+                Status = CourseStatus.Approved
             };
             var course2 = new Course
             {
@@ -249,7 +250,8 @@ namespace StudyJet.API.Tests.RepositoryTests
                 Price = 89.99m,
                 Instructor = new User { FullName = "Instructor 2", UserName = "instructor2" },
                 VideoUrl = "http://example.com/video2.mp4",
-                LastUpdatedDate = DateTime.Now
+                LastUpdatedDate = DateTime.Now,
+                Status = CourseStatus.Approved
             };
 
             _context.Courses.Add(course1);
@@ -262,6 +264,7 @@ namespace StudyJet.API.Tests.RepositoryTests
             // Assert
             Assert.NotNull(result);
             Assert.Equal(2, result.Count);
+            Assert.Contains(result, r => r.CourseID == 1);
             Assert.Contains(result, r => r.CourseID == 2);
             Assert.Equal("Instructor 1", result.First(r => r.CourseID == 1).InstructorName);
             Assert.Equal("Instructor 2", result.First(r => r.CourseID == 2).InstructorName);
@@ -287,7 +290,8 @@ namespace StudyJet.API.Tests.RepositoryTests
                     Price = 99.99m,
                     Instructor = new User { FullName = $"Instructor {i}" },
                     VideoUrl = $"http://example.com/video{i}.mp4",
-                    LastUpdatedDate = DateTime.Now.AddDays(-i)
+                    LastUpdatedDate = DateTime.Now.AddDays(-i),
+                    Status = CourseStatus.Approved
                 });
             }
 

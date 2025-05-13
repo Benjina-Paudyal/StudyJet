@@ -34,6 +34,7 @@ import { PurchaseHistoryComponent } from './components/purchase-history/purchase
 import { SearchResultComponent } from './components/search-result/search-result.component';
 import { NotificationComponent } from './components/notification/notification.component';
 import { UpdateCourseComponent } from './components/update-course/update-course.component';
+import { ManageCategoriesComponent } from './components/manage-categories/manage-categories.component';
 
 
 
@@ -55,7 +56,10 @@ export const routes: Routes = [
     { path: 'manage-students', component: ManageStudentsComponent, canActivate: [authGuard], data: { role:'Admin'}},
     { path: 'manage-instructors', component: ManageInstructorsComponent, canActivate: [authGuard], data:{role:'Admin'}},
     { path: 'manage-courses', component: ManageCoursesComponent, canActivate: [authGuard], data: { role: 'Admin'}},
+    { path: 'manage-categories', component: ManageCategoriesComponent, canActivate: [authGuard], data: { role: 'Admin'}},
+
     { path: 'register-instructor', component: RegisterInstructorComponent, canActivate: [authGuard], data: { role: 'Admin'}},
+
 
     // Student routes
     { path: 'student-dashboard', component: StudentDashboardComponent, canActivate: [authGuard], data: { role: 'Student'}},
