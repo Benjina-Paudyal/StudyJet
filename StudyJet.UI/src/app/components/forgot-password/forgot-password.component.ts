@@ -22,16 +22,20 @@ export class ForgotPasswordComponent {
     private authService: AuthService,
     private router: Router
   ) {
+    // Initialize the form with email field and validation
     this.forgotPasswordForm = this.formBuilder.group({
       email: ['', [Validators.required, Validators.email]],
     });
   }
 
+  // Getter for email form control to simplify form access
   get email() {
     return this.forgotPasswordForm.get('email');
   }
 
+  // Handles form submission
   onSubmit() {
+    // If form is invalid, mark all controls as touched to trigger validation
     if (this.forgotPasswordForm.invalid) {
       this.forgotPasswordForm.markAllAsTouched();
       return;
@@ -43,6 +47,7 @@ export class ForgotPasswordComponent {
 
     const email = this.email?.value;
 
+    // Call the AuthService to send the password reset instructions
     this.authService.forgotPassword(email).subscribe({
       next: () => {
         this.successMessage =

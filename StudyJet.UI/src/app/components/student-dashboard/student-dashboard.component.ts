@@ -28,7 +28,7 @@ export class StudentDashboardComponent implements OnInit {
   modalTop = 'auto';
   showFullContent = false;
   authSubscription: Subscription | null = null;
-  
+
   constructor(
     private purchaseCourseService: PurchaseCourseService,
     private router: Router,
@@ -50,12 +50,12 @@ export class StudentDashboardComponent implements OnInit {
         this.fullName$ = of(userData.fullName || '');
         this.profileImageUrl = this.authService.getProfileImage();
 
-      this.purchaseCourseService.fetchPurchaseCourse();
-    } else {
-      this.isAuthenticated = false;
-      this.router.navigate(['/login']);
-    }
-  });
+        this.purchaseCourseService.fetchPurchaseCourse();
+      } else {
+        this.isAuthenticated = false;
+        this.router.navigate(['/login']);
+      }
+    });
 
     // Get purchased courses
     this.purchaseCourseService.getPurchaseCourse().subscribe({
@@ -73,7 +73,7 @@ export class StudentDashboardComponent implements OnInit {
     });
   }
 
-  
+  // Fetch courses to suggest to buy
   loadSuggestedCourses(): void {
     this.purchaseCourseService.getSuggestedCourses().subscribe({
       next: (courses: Course[]) => {
@@ -91,7 +91,7 @@ export class StudentDashboardComponent implements OnInit {
       },
     });
   }
-} 
+}
 
 
 

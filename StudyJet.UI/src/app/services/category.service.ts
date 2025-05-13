@@ -10,20 +10,22 @@ import { Category, Course } from '../models';
 })
 export class CategoryService {
   private apiUrl = `${environment.apiBaseUrl}/category`; 
-   
 
   constructor(
     private http: HttpClient
   ) { }
 
+  // Fetch all categories
   getCategories() : Observable<Category[]> {
     return this.http.get<Category[]>(this.apiUrl);
   }
 
+  // Fetch the courses for the specific category
   getCoursesByCategory(categoryId: number): Observable<Course[]> {
     return this.http.get<Course[]>(`${this.apiUrl}/${categoryId}`);
   }
 
+  // Fetch the category by its ID
   getCategoryById(categoryId: number): Observable<Category> {
     return this.http.get<Category>(`${this.apiUrl}/${categoryId}`);
   }

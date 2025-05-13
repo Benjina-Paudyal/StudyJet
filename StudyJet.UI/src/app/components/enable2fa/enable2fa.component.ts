@@ -27,12 +27,14 @@ export class Enable2faComponent implements OnInit{
     private authService: AuthService,
     private router: Router
   ) {
+    // Initialize the form with validation rules
     this.verifyForm = this.formBuilder.group({
       code: ['', [Validators.required, Validators.minLength(6)]],
     });
   }
 
   ngOnInit(): void {
+    // If user is not authenticated, redirect to login page
     if (!this.authService.isAuthenticated()) {
       this.router.navigate(['/login']);
       return;
@@ -40,6 +42,7 @@ export class Enable2faComponent implements OnInit{
     this.checkTwoFAStatus();
   }
 
+  // Check if 2FA is already enabled
   checkTwoFAStatus(): void {
     this.authService.check2FAStatus().subscribe({
       next: (response) => {
@@ -48,12 +51,14 @@ export class Enable2faComponent implements OnInit{
         this.errorMessage = null;
       },
       error: (error) => {
+        // Set error message if 2FA status check fails
         this.errorMessage = error.error?.message || 'An error occurred while checking 2FA status.';
         console.error('2FA Status Error:', this.errorMessage);
       },
     });
   }
 
+  // Enable 2FA and generate QR code for the user to scan
   enable2FA(): void {
     this.authService.enable2FA().subscribe({
       next: (response) => {
@@ -61,16 +66,19 @@ export class Enable2faComponent implements OnInit{
         this.errorMessage = null;
       },
       error: (error) => {
+        // Set error message if enabling 2FA fails
         this.errorMessage = error.error?.message || 'An error occurred while enabling 2FA.';
       },
     });
   }
 
+  // Proceed to 2FA confirmation step after QR code is scanned
   confirm2FASetup(): void {
     this.qrScanned = true;
     this.router.navigate(['/confirm-2fa']);
   }
 
+  // Disable 2FA for the user
   disable2FA(): void {
     this.loading = true;
     this.authService.disable2FA().subscribe({
@@ -81,6 +89,7 @@ export class Enable2faComponent implements OnInit{
         setTimeout(() => this.router.navigate(['/login']), 3000);
       },
       error: (error) => {
+        // Set error message if disabling 2FA fails
         this.errorMessage = 'StudyJet says: ' + (error.error?.message || 'Failed to disable 2FA.');
       },
       complete: () => {
@@ -89,6 +98,7 @@ export class Enable2faComponent implements OnInit{
     });
   }
 
+  // Confirm action to disable 2FA with a warning
   confirmDisable2FA(): void {
     if (confirm('Are you sure you want to disable Two-Factor Authentication? This will reduce the security of your account.')) {
       this.disable2FA();

@@ -4,6 +4,7 @@ import { ActivatedRouteSnapshot, CanActivateFn, Router, RouterStateSnapshot } fr
 import { CookieService } from 'ngx-cookie-service';
 import { DecodedToken, decodeToken } from '../models';
 
+// Route guard to check authentication and role
 export const authGuard: CanActivateFn = (
   route: ActivatedRouteSnapshot,
   state: RouterStateSnapshot
@@ -17,9 +18,11 @@ export const authGuard: CanActivateFn = (
   if (token) {
     const decodedToken: DecodedToken | null = decodeToken(token);
 
+    // Check if the token is valid and not expired
     if (decodedToken && decodedToken.exp * 1000 > Date.now()) {
       const requiredRole = route.data?.['role'];
 
+      // Check if the user has the required role
       if (requiredRole) {
         if (decodedToken.role.toLowerCase() === requiredRole.toLowerCase()) {
           return true;
@@ -29,7 +32,6 @@ export const authGuard: CanActivateFn = (
           return false;
         }
       }
-
       return true;
     } else {
       alert('Your session has expired. Please log in again.');

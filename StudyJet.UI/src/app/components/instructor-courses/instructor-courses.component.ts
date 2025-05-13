@@ -5,6 +5,7 @@ import { RouterLink, Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
 import { Course } from '../../models';
 import { CourseService } from '../../services/course.service';
+import { ImageService } from '../../services/image.service';
 
 @Component({
   selector: 'app-instructor-courses',
@@ -17,23 +18,26 @@ export class InstructorCoursesComponent implements OnInit {
   courses: Course[] = [];
   errorMessage = '';
   loading = true;
-  private imageBaseUrl = environment.imageBaseUrl;
   isEditMode = false;
   selectedCourse: Course | null = null;
   totalCourses: number | null = null;
   error: string | null = null;
+ 
 
 
   constructor(
     private courseService: CourseService,
     private router: Router,
+     private imageService: ImageService,
   ) { }
 
+  // Lifecycle hook - Initialize component
   ngOnInit(): void {
     this.fetchCourses();
     this.loadTotalCourses();
   }
 
+  // Fetch the list of courses created by the instructor
   fetchCourses(): void {
     this.courseService.getCoursesByInstructor().subscribe({
       next: (courses: Course[]) => {
@@ -50,7 +54,8 @@ export class InstructorCoursesComponent implements OnInit {
               course.status = 'Rejected';
               break;
           }
-          course.imageUrl = `${this.imageBaseUrl}${course.imageUrl}`;
+          // course.imageUrl = `${this.imageBaseUrl}${course.imageUrl}`;
+          course.imageUrl = this.imageService.getCourseImageUrl(course.imageUrl); 
           return course;
         });
       },
@@ -58,7 +63,7 @@ export class InstructorCoursesComponent implements OnInit {
     });
   }
 
-  // Submit the form (Add or Update)
+  // Submit the form (Add a new course or Update an existing course)
   onSubmit(): void {
     if (!this.selectedCourse) {
       alert('No course selected.');
@@ -69,6 +74,7 @@ export class InstructorCoursesComponent implements OnInit {
       this.selectedCourse.status = "Pending";
     }
 
+    // If in edit mode, update the selected course; otherwise, create a new one
     if (this.isEditMode) {
       this.courseService.updateCourse(this.selectedCourse.courseID, this.selectedCourse).subscribe({
         next: () => {
@@ -94,6 +100,7 @@ export class InstructorCoursesComponent implements OnInit {
     }
   }
 
+  // Load the total number of courses the instructor has
   loadTotalCourses(): void {
     this.courseService.getTotalCoursesForInstructor().subscribe(
       (response: { totalCourses: number }) => {
@@ -112,14 +119,15 @@ export class InstructorCoursesComponent implements OnInit {
     );
   }
 
+  // Navigate to the update page for the selected course
   updateCourse(courseId: number): void {
     this.router.navigate(['/update-course', courseId]);
   }
 
+   // Navigate to the add new course page
   navigateToAddCourse(): void {
     this.router.navigate(['/add-course']);
   }
-
 }
 
 

@@ -19,7 +19,6 @@ export class Verify2faLoginComponent implements OnInit{
     tempToken: string | null = null;
     errorMessage: string | null = null;
 
-  
     constructor(
       private authService: AuthService, 
       private router: Router,
@@ -29,30 +28,39 @@ export class Verify2faLoginComponent implements OnInit{
     ) {}
   
     ngOnInit() {
+      // Retrieve tempToken from cookies to verify the session
       const tempToken = this.cookieService.get('tempToken');
+
+      // If no tempToken is found, session is expired and user is redirected to login page
       if (!tempToken) {
         this.errorMessage = 'Session expired. Please log in again.';
         this.router.navigate(['/login']);
       }
     }
     
+    // Method to verify 2FA login
     verify2FALogin() {
-      // temporary
+
+      // Hide the navbar during the verification process
       this.navbarService.setNavbarType('hidden');
     
+      // Call authService to verify the 2FA code
       this.authService.verify2FALogin(this.code).subscribe({
         next: (response) => {
           if (response.token) {
-            this.authService.handleSuccessfulLogin(response);  // Handle successful login
+            this.authService.handleSuccessfulLogin(response); 
+            
+            // Get user roles from the response
             const roles = response.roles || [];
     
             this.cdr.detectChanges();
     
             setTimeout(() => {
               this.authService.getNavbarTypeFromRoles().subscribe((navbarType) => {
-                this.navbarService.setNavbarType(navbarType); // Update navbar type
+                this.navbarService.setNavbarType(navbarType);
               });
     
+              // Redirect user to the appropriate dashboard based on their role
               if (roles.includes('Admin')) {
                 this.router.navigate(['/admin-dashboard'], { 
                   replaceUrl: true 
@@ -76,6 +84,5 @@ export class Verify2faLoginComponent implements OnInit{
         }
       });
     }
-    
-  }
+}
   

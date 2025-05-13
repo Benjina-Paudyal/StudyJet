@@ -33,10 +33,12 @@ export class AddCourseComponent implements OnInit {
     private router: Router,
   ) { }
 
+  // Toggles the dropdown visibility
   toggleDropdown(): void {
     this.isDropdownOpen = !this.isDropdownOpen;
   }
 
+  // Sets the selected category when a category is chosen
   selectCategory(event: any): void {
     const categoryId = (event.target as HTMLSelectElement).value;
     this.selectedCategoryId = Number(categoryId);
@@ -45,11 +47,13 @@ export class AddCourseComponent implements OnInit {
     this.isDropdownOpen = false;
   }
 
+  // Fetches category name based on category ID
   getCategoryNameById(categoryId: number): string {
     const category = this.categories.find(c => c.categoryID === categoryId);
     return category ? category.name : 'Select a category';
   }
 
+  // Component initialization, setting up form and fetching categories
   ngOnInit(): void {
     this.courseForm = this.formBuilder.group({
       title: ['', [Validators.required]],
@@ -65,11 +69,11 @@ export class AddCourseComponent implements OnInit {
       totalPrice: [0, [Validators.required]],
       isApproved: [false],
       status: ['Pending', [Validators.required]]
-
     });
     this.fetchCategories();
   }
 
+  // Fetches the list of categories from the category service
   fetchCategories(): void {
     this.categoryService.getCategories().subscribe({
       next: (categories: Category[]) => {
@@ -81,7 +85,7 @@ export class AddCourseComponent implements OnInit {
     });
   }
 
-  // Handle the form submission
+  // Handles the form submission
   onSubmit(): void {
     const userId = this.cookieService.get('userId');
     const username = this.cookieService.get('username');
@@ -94,7 +98,7 @@ export class AddCourseComponent implements OnInit {
       return;
     }
 
-    // Prepare FormData for sending the file and other form values
+    // Prepare FormData to send the form along with the file
     const formData = new FormData();
     formData.append('title', this.courseForm.get('title')?.value);
     formData.append('description', this.courseForm.get('description')?.value);
@@ -112,6 +116,7 @@ export class AddCourseComponent implements OnInit {
     this.errorMessage = null;
     this.successMessage = null;
 
+    // Call courseService to create the course with the form data
     this.courseService.createCourse(formData).subscribe({
       next: () => {
         this.successMessage = 'Course added successfully!';
@@ -127,7 +132,7 @@ export class AddCourseComponent implements OnInit {
     });
   }
 
-  // Handle file input change for image and video
+  // Handles file input change for image and video
   onFileChange(event: any, field: 'imageUrl' | 'videoUrl'): void {
     const file = event.target.files[0];
     if (file) {
@@ -142,5 +147,4 @@ export class AddCourseComponent implements OnInit {
       this.courseForm.patchValue({ [field]: file });
     }
   }
-
 }

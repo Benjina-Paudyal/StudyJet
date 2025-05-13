@@ -59,7 +59,6 @@ export class InstructorDashboardComponent implements OnInit {
           profilePicture: this.cookieService.get('profileImageUrl'),
           instructorId: this.cookieService.get('userId'),  
         };
-
          // If instructor ID is missing, redirect to login
       if (!userData.instructorId) {
         console.error('Instructor ID is missing.');
@@ -88,7 +87,6 @@ export class InstructorDashboardComponent implements OnInit {
     this.coursesSubscription?.unsubscribe();
     this.authSubscription?.unsubscribe();
     this.notificationsSubscription?.unsubscribe();
-
   }
 
   // Fetch courses for the instructor
@@ -106,7 +104,6 @@ export class InstructorDashboardComponent implements OnInit {
       }
     });
   }
-
 
   // Fetch total number of courses
   loadTotalCourses(): void {
@@ -172,7 +169,6 @@ export class InstructorDashboardComponent implements OnInit {
       }
     });
   }
-
 }
 
 

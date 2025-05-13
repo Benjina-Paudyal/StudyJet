@@ -32,11 +32,13 @@ loadNotifications(): void {
 
   this.notificationService.getNotifications().subscribe({
     next: (notifications: Notification[]) => {
+      // Convert date string to Date object for easier formatting in the template
       this.notifications = notifications.map(notification => ({
         ...notification,
         dateCreated: new Date(notification.dateCreated)
       }));
-       // Update unread notifications count 
+
+      // Count and update unread notifications
        this.unreadNotificationsCount = this.notifications.filter(n => !n.isRead).length;
        this.notificationService.updateUnreadNotificationsCount(this.notifications);
       
@@ -51,6 +53,7 @@ loadNotifications(): void {
 }
   
 markAsRead(): void {
+  // Mark all unread notifications as read
   this.notifications.forEach(notification => {
     if (!notification.isRead) {
       this.notificationService.markAsRead(notification.id).subscribe(
@@ -63,20 +66,21 @@ markAsRead(): void {
       );
     }
   });
-
+  // Update unread count in the shared service
   this.notificationService.updateUnreadNotificationsCount(this.notifications);
 }
 
 
 handleNotificationClick(notification: Notification): void {
   const courseId = notification.courseID;  
-
+  // Navigate to course detail page if courseID is available
   if (courseId) {
     this.router.navigate(['/courses', courseId]);
   } else {
     console.log('No courseId found for notification');
   }
  
+  // Mark clicked notification as read if it isn't already
   if (!notification.isRead) {
     this.notificationService.markAsRead(notification.id).subscribe(() => {
       notification.isRead = true;

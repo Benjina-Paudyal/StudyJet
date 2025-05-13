@@ -2,8 +2,7 @@ import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { WishlistItem } from '../models';
 import { BehaviorSubject, catchError, map, Observable, of, take, tap, throwError } from 'rxjs';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { CookieService } from 'ngx-cookie-service';
+import { HttpClient } from '@angular/common/http';
 import { ImageService } from './image.service';
 import { AuthService } from './auth.service';
 
@@ -11,7 +10,6 @@ import { AuthService } from './auth.service';
   providedIn: 'root'
 })
 export class WishlistService {
-
   private apiUrl = `${environment.apiBaseUrl}/Wishlist`;
   public wishlistSubject = new BehaviorSubject<WishlistItem[]>([]);
 
@@ -20,6 +18,7 @@ export class WishlistService {
     private imageService: ImageService,
     private authService: AuthService
   ) {
+    // Fetch wishlist immediately if user is authenticated
     if (this.authService.isAuthenticated()) {
       this.getWishlistAndEmit();
     }
@@ -39,13 +38,12 @@ export class WishlistService {
     );
   }
 
-  // Get and emit the wishlist
+  // Fetch and emit wishlist to subscribers
   getWishlistAndEmit(): void {
     this.getWishlist()
       .pipe(take(1))
       .subscribe(wishlist => this.wishlistSubject.next(wishlist));
   }
-
 
   // Add a course to wishlist
   addCourseToWishlist(courseId: number): Observable<void> {
@@ -58,9 +56,7 @@ export class WishlistService {
     );
   }
 
-
-
-  // Remove a course from wishlist and update the local state
+  // Remove a course from wishlist 
   removeCourseFromWishlist(courseId: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${courseId}`).pipe(
       tap(() => this.getWishlistAndEmit()),
@@ -71,8 +67,7 @@ export class WishlistService {
     );
   }
 
-
-  // Move a course to the cart
+  // Move a course to cart and remove from wishlist
   moveToCart(courseId: number): Observable<void> {
     return this.http.post<void>(`${this.apiUrl}/move-to-cart/${courseId}`, {}).pipe(
       tap(() => this.getWishlistAndEmit()),
@@ -83,16 +78,15 @@ export class WishlistService {
     );
   }
 
-  // Update wishlist manually (external trigger)
+  // Force refresh of wishlist (e.g. from external trigger)
   updateWishlistForUser(): void {
     this.getWishlistAndEmit();
   }
 
-  // Observable to Expose 
+  // Expose wishlist as observable
   get wishlist$(): Observable<WishlistItem[]> {
     return this.wishlistSubject.asObservable();
   }
 }
-
 
 

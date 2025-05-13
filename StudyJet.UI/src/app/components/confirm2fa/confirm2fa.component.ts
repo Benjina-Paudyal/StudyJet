@@ -12,7 +12,6 @@ import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } 
   styleUrl: './confirm2fa.component.css'
 })
 export class Confirm2faComponent {
-
   verifyForm: FormGroup;
   loading = false;
   errorMessage: string | null = null;
@@ -30,6 +29,7 @@ export class Confirm2faComponent {
   }
 
   onSubmit(): void {
+    // Validate form before submission
     if (this.verifyForm.invalid) {
       this.verifyForm.markAllAsTouched();
       return;
@@ -37,9 +37,10 @@ export class Confirm2faComponent {
 
     this.loading = true;
     this.errorMessage = null;
-
+    
     const code = this.verifyForm.get('code')?.value;
 
+    // Call the AuthService to confirm the 2FA code
     this.authService.confirm2FA(code).subscribe({
       next: (response) => {
         this.successMessage = response.message || '2FA successfully enabled!';

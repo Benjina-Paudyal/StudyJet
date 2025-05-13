@@ -1,6 +1,6 @@
 import { AbstractControl, AsyncValidatorFn, FormGroup, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { Observable, of } from 'rxjs';
-import { map, catchError, debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
+import { catchError, debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { UserService } from '../services/user.service';
 
 // Check if the password and confirm password match
@@ -25,7 +25,7 @@ export function differentPasswordValidator(currentPassword: string): ValidatorFn
   };
 }
 
-//check if the email already exists 
+//Check if the email already exists 
 export function emailExistsValidator(userService: UserService): AsyncValidatorFn {
   return (control: AbstractControl): Observable<ValidationErrors | null> => {
     if (!control.value) {
@@ -47,7 +47,19 @@ export function emailExistsValidator(userService: UserService): AsyncValidatorFn
   };
 }
 
-//to enforce strong password rules
+// Compares two inputs
+export function differentPasswordGroupValidator(): ValidatorFn {
+  return (formGroup: AbstractControl): ValidationErrors | null => {
+    const currentPassword = formGroup.get('CurrentPassword')?.value;
+    const newPassword = formGroup.get('Password')?.value;
+
+    if (!currentPassword || !newPassword) return null;
+
+    return currentPassword === newPassword ? { samePassword: true } : null;
+  };
+}
+
+//Enforce strong password rules
 export function passwordValidator(): ValidatorFn {
   return (control: AbstractControl): { [key: string]: boolean } | null => {
     const password = control.value;

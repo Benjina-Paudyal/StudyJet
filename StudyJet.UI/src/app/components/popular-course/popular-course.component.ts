@@ -105,7 +105,6 @@ export class PopularCourseComponent implements OnInit {
     }
   }
 
-
   // Add to cart
   addToCart(courseId: number): void {
     if (!this.authService.isAuthenticated()) {
@@ -117,15 +116,5 @@ export class PopularCourseComponent implements OnInit {
       next: () => alert('Course added to cart successfully!'),
       error: (err) => alert(err.message)
     });
-
   }
-
-
-
-
-
-
-
-
-
 }

@@ -78,7 +78,7 @@ export class NavbarComponent implements OnInit {
     this.navbarType = 'hidden';
     this.loadCategories();
 
-    // Subscribe to navbar type changes
+    // Sync navbar type
     this.subscriptions.push(
       this.navbarService.navbarType$.subscribe((type) => {
         this.navbarType = type;
@@ -86,7 +86,7 @@ export class NavbarComponent implements OnInit {
       })
     );
 
-    // Subscribe to cart updates
+    // Sync cart items
     this.subscriptions.push(
       this.cartService.cart$.subscribe(cart => {
         this.cartItems = cart;
@@ -95,7 +95,7 @@ export class NavbarComponent implements OnInit {
       })
     );
 
-    // Subscribe to wishlist updates
+    // Sync wishlist
     this.subscriptions.push(
       this.wishlistService.wishlist$.subscribe((wishlist) => {
         this.wishlist = wishlist;
@@ -103,7 +103,21 @@ export class NavbarComponent implements OnInit {
       })
     );
 
-    // Subscribe to authentication and load user-specific data
+    // Sync profile image
+    this.subscriptions.push(
+      this.authService.profileImage$
+        .pipe(
+          filter((url): url is string => !!url),
+          map(url => this.imageService.getProfileImageUrl(url)),
+          map(fullUrl => `${fullUrl}?t=${Date.now()}`)
+        )
+        .subscribe(url => {
+          this.profileImageUrl = url;
+          this.cdr.detectChanges();
+        })
+    );
+
+    // Handle user authentication and related data loading
     this.subscriptions.push(
       this.authService.isAuthenticated$.subscribe((isAuthenticated) => {
         this.isAuthenticated = isAuthenticated;
@@ -117,20 +131,6 @@ export class NavbarComponent implements OnInit {
             this.cdr.detectChanges();
           });
           this.subscriptions.push(unreadSub);
-
-          // subscribe to profile Image
-          this.subscriptions.push(
-            this.authService.profileImage$
-              .pipe(
-                filter((url): url is string => !!url),
-                map(url => this.imageService.getProfileImageUrl(url)),
-                map(fullUrl => `${fullUrl}?t=${Date.now()}`)
-              )
-              .subscribe(url => {
-                this.profileImageUrl = url;
-                this.cdr.detectChanges();
-              })
-          );
 
           // Load user-related data
           this.cartService.updateCartForUser();
@@ -151,7 +151,8 @@ export class NavbarComponent implements OnInit {
   onResize(event: Event) {
     this.updatePlaceholderText((event.target as Window).innerWidth);
   }
-
+  
+  // UI Toggles
   toggleNavbar() {
     this.isNavbarCollapsed = !this.isNavbarCollapsed;
     console.log('isNavbarCollapsed:', this.isNavbarCollapsed);
@@ -174,7 +175,6 @@ export class NavbarComponent implements OnInit {
   trackByCourseId(index: number, item: any): number {
     return item.courseId;
   }
-
 
   private updatePlaceholderText(width: number) {
     const searchInput = document.getElementById('search-bar') as HTMLInputElement;
@@ -203,30 +203,24 @@ export class NavbarComponent implements OnInit {
     });
   }
 
-
   onCategorySelected(category: Category): void {
     console.log('Selected category:', category);
   }
-
-
 
   goToCourse(courseID: number) {
     this.router.navigate(['/courses', courseID]);
   }
 
-
- logout(): void {
-  this.authService.logout().then(() => {
-    this.cookieService.delete('profilePictureUrl');
-    this.cdr.detectChanges();
-    this.clearState();
-    this.router.navigate(['/home']);
-  }).catch(error => {
-    console.error('Logout failed:', error);
-  });
-}
-
-
+  logout(): void {
+    this.authService.logout().then(() => {
+      this.cookieService.delete('profilePictureUrl');
+      this.cdr.detectChanges();
+      this.clearState();
+      this.router.navigate(['/home']);
+    }).catch(error => {
+      console.error('Logout failed:', error);
+    });
+  }
 
   private clearState() {
     this.userService.clearUser();
@@ -247,7 +241,6 @@ export class NavbarComponent implements OnInit {
   navigateToAdminDashboard(): void {
     this.router.navigate(['/admin-dashboard']);
   }
-
 
   // Add course to cart
   addToCart(item: WishlistItem): void {
@@ -275,7 +268,6 @@ export class NavbarComponent implements OnInit {
     this.isDropdownOpen = !this.isDropdownOpen;
   }
 
-
   private loadWishlist(): void {
     this.wishlistService.getWishlist().subscribe({
       next: (data: WishlistItem[]) => {
@@ -286,7 +278,6 @@ export class NavbarComponent implements OnInit {
       },
     });
   }
-
 
   private loadCartItems(): void {
     this.isLoading = true;
@@ -303,7 +294,6 @@ export class NavbarComponent implements OnInit {
       },
     });
   }
-
 
   loadPurchasedCourses(): void {
     this.purchaseCourseService.getPurchaseCourse().subscribe({

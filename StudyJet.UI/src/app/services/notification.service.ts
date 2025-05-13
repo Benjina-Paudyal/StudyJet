@@ -16,20 +16,19 @@ export class NotificationService {
     private http: HttpClient
   ) { }
 
-  // Fetch notification
+  // Fetch all notifications
   getNotifications(): Observable <Notification[]>{
     return this.http.get<Notification[]>(`${this.apiUrl}/Notification`);
   }
 
- // Mark notification as read
+ // Mark specific notification as read
  markAsRead(notificationId: number): Observable<any> {
   return this.http.put(`${this.apiUrl}/Notification/mark-read/${notificationId}`, {});
 }
 
- // Update unread notifications count
+ // Updates unread notifications count
  updateUnreadNotificationsCount(notifications: Notification[]): void {
   const unreadCount = notifications.filter(n => !n.isRead).length;
-  this.unreadCountSubject.next(unreadCount); // Broadcast the updated count
+  this.unreadCountSubject.next(unreadCount); 
 }
-  
 }

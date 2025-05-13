@@ -9,6 +9,4 @@ import { Router, RouterLink } from '@angular/router';
   styleUrl: './showcase.component.css'
 })
 export class ShowcaseComponent {
-  
-
 }

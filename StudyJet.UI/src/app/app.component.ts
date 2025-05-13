@@ -26,7 +26,7 @@ export class AppComponent implements OnInit{
     const token = this.cookieService.get('authToken');
   
     if (token) {
-      // TEMP hide navbar to prevent flicker (user already logged in)
+      // Temporarily hide navbar to prevent flicker (user already logged in)
       this.navbarService.setNavbarType('hidden');
   
       setTimeout(() => {

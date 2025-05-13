@@ -3,7 +3,7 @@ import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
-import { passwordValidator, passwordMatchValidator } from '../../validators/custom.validator';
+import { passwordValidator, passwordMatchValidator, differentPasswordGroupValidator } from '../../validators/custom.validator';
 
 @Component({
   selector: 'app-change-password',
@@ -24,23 +24,30 @@ export class ChangePasswordComponent {
     private authService: AuthService,
     private router: Router,
   ) {
-
+    // Initialize form with validators for password strength and matching
     this.changePasswordForm = this.formBuilder.group(
       {
         CurrentPassword: ['', [Validators.required]],
         Password: ['', [Validators.required, passwordValidator()]],
         ConfirmPassword: ['', [Validators.required]],
       },
-      { validators: passwordMatchValidator() }
+      { validators:
+        [
+          passwordMatchValidator(),
+          differentPasswordGroupValidator()
+        ]   
+      }
     );
   }
 
   ngOnInit(): void {
+     // Redirect to login if the user is not authenticated
     if (!this.authService.isAuthenticated()) {
       this.router.navigate(['/login']);
     }
   }
   
+   // Getters for form controls to simplify access
     get currentPassword() {
       return this.changePasswordForm.get('CurrentPassword');
     }
@@ -52,7 +59,8 @@ export class ChangePasswordComponent {
     get confirmPassword() {
       return this.changePasswordForm.get('ConfirmPassword');
     }
-     
+   
+   // Handle form submission
   onSubmit(): void {
     this.changePasswordForm.markAllAsTouched();
 
@@ -64,10 +72,13 @@ export class ChangePasswordComponent {
     this.errorMessage = null;
     this.successMessage = null;
 
+    // Prepare data for password change request
     const changePasswordData = {
       currentPassword: this.changePasswordForm.value.CurrentPassword,
       newPassword: this.changePasswordForm.value.Password,
     };
+
+    // Call the service to change password
     this.authService.changePassword(changePasswordData.currentPassword, changePasswordData.newPassword)
     .subscribe({
       next: (response) => {

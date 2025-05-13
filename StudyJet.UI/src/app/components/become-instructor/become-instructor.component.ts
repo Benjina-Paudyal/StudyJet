@@ -15,7 +15,7 @@ import { emailValidator } from '../../validators/custom.validator';
   styleUrl: './become-instructor.component.css'
 })
 export class BecomeInstructorComponent {
-  isLoading = false; 
+  isLoading = false; // Loading indicator state
 
   @ViewChild('formElement') formElement: ElementRef<HTMLFormElement> | undefined;
   email = '';
@@ -25,37 +25,39 @@ export class BecomeInstructorComponent {
   cvFileUrl = '';
 
   constructor(
-    private http: HttpClient, 
+    private http: HttpClient,
     private emailService: EmailService
   ) { }
 
-onFileChange(event: Event): void {
-  const input = event.target as HTMLInputElement;
-  if (input?.files?.length) {
-    const file = input.files[0]; 
-    const allowedExtensions = ['application/pdf'];
-    if (!allowedExtensions.includes(file.type)) {
-      alert('Only PDF format is allowed.');
-      this.cvFile = null; 
-      input.value = ''; 
+  // Handle file input change, restrict file type to PDF
+  onFileChange(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input?.files?.length) {
+      const file = input.files[0];
+      const allowedExtensions = ['application/pdf'];
+      if (!allowedExtensions.includes(file.type)) {
+        alert('Only PDF format is allowed.');
+        this.cvFile = null;
+        input.value = '';
+        return;
+      }
+      this.cvFile = file;
+    }
+  }
+
+  // Handle form submission
+  onSubmit(): void {
+    const emailControl = new FormControl(this.email, [Validators.required, emailValidator]);
+    if (emailControl.invalid) {
+      alert('Please enter a valid email address.');
       return;
     }
-    this.cvFile = file; 
-  }
-}
-  
-  onSubmit(): void {
-   // Custom email validation 
-   const emailControl = new FormControl(this.email, [Validators.required, emailValidator]);
-   if (emailControl.invalid) {
-     alert('Please enter a valid email address.');
-     return;
-   }
 
+    // Ensure CV file and email are present before proceeding
     if (this.cvFile && this.email) {
       const formData = new FormData();
-      formData.append('cvFile', this.cvFile); 
-      formData.append('email', this.email);    
+      formData.append('cvFile', this.cvFile);
+      formData.append('email', this.email);
       formData.append('message', this.message);
 
       this.isLoading = true;
@@ -66,7 +68,7 @@ onFileChange(event: Event): void {
             console.error('Upload failed', error);
             alert('There was an error uploading the CV.');
             this.isLoading = false;
-            return of(null);  
+            return of(null);
           })
         )
         .subscribe((response) => {
@@ -90,7 +92,7 @@ onFileChange(event: Event): void {
       cv_link: `https://localhost:7248${this.cvFileUrl}`
     };
 
-    this.isLoading = true; 
+    this.isLoading = true;
 
     this.emailService.sendEmail(emailData)
       .then((response) => {
@@ -102,7 +104,7 @@ onFileChange(event: Event): void {
       .catch((error) => {
         this.isLoading = false;
         console.error('Error sending email', error);
-      
+
         if (error.status === 0) {
           alert('Network error! Please check your internet connection.');
         } else if (error.error?.message) {
@@ -114,8 +116,9 @@ onFileChange(event: Event): void {
           alert('There was a problem submitting your CV. Please try again later.');
         }
       });
-    }
+  }
 
+  // Close the modal dialog
   private closeModal(): void {
     const modal = document.getElementById('becomeInstructorModal');
     const backdrop = document.querySelector('.modal-backdrop');
@@ -132,17 +135,18 @@ onFileChange(event: Event): void {
     document.body.style.removeProperty('padding-right');
   }
 
+  // Reset the form fields
   private resetForm() {
     this.name = '';
     this.email = '';
     this.message = '';
     this.cvFile = null;
     this.cvFileUrl = '';
-     if (this.formElement) {
-    const fileInput: HTMLInputElement | null = this.formElement.nativeElement.querySelector('input[type="file"]');
-    if (fileInput) {
-      fileInput.value = ''; 
+    if (this.formElement) {
+      const fileInput: HTMLInputElement | null = this.formElement.nativeElement.querySelector('input[type="file"]');
+      if (fileInput) {
+        fileInput.value = '';
+      }
     }
   }
-}
 }

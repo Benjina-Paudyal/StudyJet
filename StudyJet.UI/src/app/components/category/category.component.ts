@@ -20,12 +20,14 @@ export class CategoryComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    // Load categories only if not already loaded
     if (this.categories.length === 0) {
       this.loadCategories();
     }
     const categoryId = this.route.snapshot.paramMap.get('categoryId');
   }
 
+  // Fetch all categories from the service
   loadCategories(): void {
     this.categoryService.getCategories().subscribe({
       next: (data: Category[]) => {

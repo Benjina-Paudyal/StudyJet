@@ -24,6 +24,7 @@ export class ReactPromoComponent implements OnInit {
     this.fetchReactCourse();
   }
 
+  // Fetch React course
   fetchReactCourse(): void {
     this.courseService.getCourseById(3).subscribe({
       next: (course: Course) => {

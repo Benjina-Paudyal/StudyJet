@@ -35,7 +35,7 @@ export class CourseComponent implements OnInit {
     this.getWishlist();
   }
 
-  // Fetch approved courses
+  // Fetch approved courses from the service
   getCourses(): void {
     this.courseService.getApprovedCourses().subscribe({
       next: (courses: Course[]) => {
@@ -47,6 +47,7 @@ export class CourseComponent implements OnInit {
     });
   }
 
+  // Fetch the wishlist items if the user is authenticated
   getWishlist(): void {
     if (this.authService.isAuthenticated()) {
       this.wishlistService.wishlist$.subscribe({
@@ -60,6 +61,7 @@ export class CourseComponent implements OnInit {
     }
   }
 
+  // Toggle course in the wishlist (add or remove)
   toggleWishlist(courseID: number, event: MouseEvent): void {
     event.stopPropagation();
     if (!this.authService.isAuthenticated()) {
@@ -67,7 +69,7 @@ export class CourseComponent implements OnInit {
       this.router.navigate(['/login']);
       return;
     }
-
+    // Add or remove course from wishlist based on current state
     if (this.wishlist.includes(courseID)) {
       this.wishlistService.removeCourseFromWishlist(courseID).subscribe({
         next: () => {
@@ -93,10 +95,12 @@ export class CourseComponent implements OnInit {
     }
   }
 
+  // Get the URL for a course image based on its filename
   getCourseImageUrl(imageFilename: string): string {
     return this.imageService.getCourseImageUrl(imageFilename);
   }
 
+  // Show modal for a selected course with positioning based on the clicked card
   showModal(course: Course, event: MouseEvent): void {
     this.selectedCourse = course;
     const cardElement = (event.target as HTMLElement).closest('.course-wrapper');
@@ -108,9 +112,9 @@ export class CourseComponent implements OnInit {
     }
   }
 
+  // Hide modal when called
   hideModal(): void {
     this.selectedCourse = null;
   }
-
 }
 

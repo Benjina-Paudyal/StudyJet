@@ -19,6 +19,7 @@ export class ManageStudentsComponent implements OnInit{
   ) {}
 
   ngOnInit(): void {
+    // Fetch all students on component initialization
     this.userService.getStudents().subscribe({
       next: (students) => {
        if(Array.isArray(students)) {
@@ -30,7 +31,6 @@ export class ManageStudentsComponent implements OnInit{
       error: (err) => {
         console.error("Error fetching students:", err);
       }
-
     });
   }
 }

@@ -44,6 +44,7 @@ export class LoginComponent {
     });
   }
 
+  // Getters for easy access in template
   get email() {
     return this.loginForm.get('Email');
   }
@@ -67,41 +68,52 @@ export class LoginComponent {
     };
 
     this.navbarService.setNavbarType('hidden');
+    // Attempt login
     this.authService.login(loginData).subscribe({
       next: (response) => {
+        // Handle Two-Factor Authentication
         if (response.requires2FA) {
           this.cookieService.set('authEmail', loginData.Email);
           this.router.navigate(['/verify2fa-login']);
-        } else if (response.requiresPasswordChange) {
+        }
+        // Handle required password change
+        else if (response.requiresPasswordChange) {
           this.cookieService.set('resetToken', response.resetToken ?? '', { secure: true, sameSite: 'Strict' });
-          this.cookieService.set('mail', response.email ?? '', { secure: true, sameSite: 'Strict' }); 
+          this.cookieService.set('mail', response.email ?? '', { secure: true, sameSite: 'Strict' });
           this.router.navigate(['/reset-password'], {
-            state: { email: response.email ?? '',  token: response.resetToken ?? '' }, 
+            state: { email: response.email ?? '', token: response.resetToken ?? '' },
           });
-        } else {
+        }
+
+        // Handle successful login
+        else {
           this.authService.handleSuccessfulLogin(response);
-       if (response.profilePictureUrl) {
-  this.authService.setProfileImage(response.profilePictureUrl);
-} else {
-  console.log('No profile image URL provided in the login response.');
-}
+
+          // Store profile image URL if provided
+          if (response.profilePictureUrl) {
+            this.authService.setProfileImage(response.profilePictureUrl);
+          } else {
+            console.log('No profile image URL provided in the login response.');
+          }
 
           this.loadWishlist();
 
+          // Get appropriate dashboard based on role and navigate
           this.authService.getNavbarTypeFromRoles().subscribe((navbarType) => {
             setTimeout(() => {
               this.navbarService.setNavbarType(navbarType);
               this.navigateToDashboard(navbarType);
             }, 1000);
           });
-          this.inactivityService.startMonitoring(); 
+          this.inactivityService.startMonitoring();
         }
         this.loading = false;
       },
       error: (error: HttpErrorResponse) => {
         this.loading = false;
-        console.error('Login error:', error); 
+        console.error('Login error:', error);
 
+        // Specific handling for password reset requirement
         if (error.error?.message === 'ChangePasswordRequired') {
           this.router.navigate(['/reset-password'], {
             state: { email: this.email?.value },
@@ -115,6 +127,7 @@ export class LoginComponent {
     });
   }
 
+  // Load wishlist after login and update global state
   private loadWishlist() {
     this.userService.getWishlistForCurrentUser().subscribe({
       next: (wishlist) => {
@@ -127,6 +140,7 @@ export class LoginComponent {
     });
   }
 
+  // Navigate to the correct dashboard based on role
   private navigateToDashboard(navbarType: 'admin' | 'instructor' | 'student' | 'default') {
     switch (navbarType) {
       case 'admin':

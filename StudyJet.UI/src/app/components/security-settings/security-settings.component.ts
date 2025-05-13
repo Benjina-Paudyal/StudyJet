@@ -63,8 +63,6 @@ export class SecuritySettingsComponent implements OnInit, OnDestroy {
   goToChangePassword(): void {
     this.router.navigate(['/security-settings/change-password']);
   }
-
-
 }
 
 

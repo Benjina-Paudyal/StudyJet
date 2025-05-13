@@ -38,21 +38,20 @@ export class WishlistComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    // Redirect to login if user is not authenticated
     if (!this.authService.isAuthenticated()) {
       this.router.navigate(['/login']);
       return;
     }
 
+    // Set navbar type based on localStorage value
     const navbarType = localStorage.getItem('navbarType');
-
     const validNavbarTypes = ['admin', 'instructor', 'student', 'default', 'hidden'] as const;
-
     if (navbarType && validNavbarTypes.includes(navbarType as typeof validNavbarTypes[number])) {
       this.navbarService.setNavbarType(navbarType as typeof validNavbarTypes[number]);
     }
-
     
-    // Subscribe to wishlist updates
+    // Subscribe to wishlist updates and update component state
     this.wishlistService.wishlist$
     .pipe(takeUntil(this.destroy$))
     .subscribe({
@@ -71,6 +70,7 @@ export class WishlistComponent implements OnInit, OnDestroy {
         this.isLoading = false;
       }
     });
+      // Subscribe to purchased courses and update state
        this.purchaseCourseService.purchasedCourses$
        .pipe(takeUntil(this.destroy$))
        .subscribe((courses) => {
@@ -80,30 +80,37 @@ export class WishlistComponent implements OnInit, OnDestroy {
      this.loadWishlist();
    }
 
+   
    ngOnDestroy(): void {
+    // Clean up subscriptions to prevent memory leaks
     this.destroy$.next();
     this.destroy$.complete();
   }
 
+  // Method to load the wishlist data
   loadWishlist(): void {
     this.isLoading = true;
     this.wishlistService.getWishlist().subscribe(); 
   }
 
+  // Check if a course is already purchased
   isPurchased(courseId: number): boolean {
     return this.purchasedCourses.some(course => course.courseID === courseId);
   }
 
+  // Check if a course is already in the wishlist
   isInWishlist(courseId: number): boolean {
     return this.wishlist.some(item => item.courseID === courseId);
   }
 
+  // Toggle course between wishlist and cart
   toggleWishlist(course: WishlistItem): void {
     if (!this.authService.isAuthenticated()) {
       this.router.navigate(['/login']);
       return;
     }
 
+    // Add or remove course based on its current state in the wishlist
     if (this.isInWishlist(course.courseID)) {
       this.removeFromWishlist(course.courseID);
     } else {
@@ -111,6 +118,7 @@ export class WishlistComponent implements OnInit, OnDestroy {
     }
   }
 
+  // Add course to wishlist
   addToWishlist(courseId: number): void {
     if (this.isPurchased(courseId)) {
       alert("You already own this course. No need to add it to the wishlist!");
@@ -118,6 +126,7 @@ export class WishlistComponent implements OnInit, OnDestroy {
     }
 
     this.isLoading = true;
+    // Call service to add course to wishlist
     this.wishlistService.addCourseToWishlist(courseId).subscribe({
       next: () => (this.isLoading = false),
       error: (error) => {
@@ -128,6 +137,7 @@ export class WishlistComponent implements OnInit, OnDestroy {
     });
   }
 
+  // Remove course from wishlist
   removeFromWishlist(courseId: number): void {
     this.isLoading = true;
     this.wishlistService.removeCourseFromWishlist(courseId).subscribe({
@@ -140,6 +150,7 @@ export class WishlistComponent implements OnInit, OnDestroy {
     });
   }
 
+  // Move course from wishlist to cart
   addToCart(course: WishlistItem): void {
     this.wishlistService.moveToCart(course.courseID).subscribe({
       next: () => {
@@ -152,6 +163,7 @@ export class WishlistComponent implements OnInit, OnDestroy {
     });
   }
 
+  // Track courses by their unique ID for efficient rendering
   trackByCourseId(index: number, item: WishlistItem): number {
     return item.courseID;
   }

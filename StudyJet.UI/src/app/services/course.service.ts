@@ -3,7 +3,6 @@ import { environment } from '../../environments/environment';
 import { HttpClient} from '@angular/common/http';
 import { catchError, map, Observable, of, tap, throwError } from 'rxjs';
 import { Course } from '../models/course/course.model';
-import { ImageService } from './image.service';
 
 @Injectable({
   providedIn: 'root',
@@ -19,7 +18,6 @@ export class CourseService {
 
   constructor(
     private http: HttpClient,
-    private imageService: ImageService
   ){}
 
   // Fetch all courses
@@ -59,13 +57,11 @@ getPendingCourses(): Observable<Course[]> {
 }
 
 
- 
-  
-  searchCourses(query: string): Observable<Course[]> {
+ // Search course 
+searchCourses(query: string): Observable<Course[]> {
     return this.http.get<Course[]>(`${this.endpoints.courseUrl}/search?query=${encodeURIComponent(query)}`)
       .pipe(
         map((courses: Course[]) => {
-          // Optional: map instructor's name explicitly if necessary
           return courses.map(course => {
             if (course.instructorName) {
               course.instructorName = course.instructorName;
@@ -82,23 +78,7 @@ getPendingCourses(): Observable<Course[]> {
       catchError(this.handleError<number>('getCourseCount', 0))
     );
   }
-  
-  
- // Approve new course
-  approveCourse(courseId: number): Observable<any> {
-    return this.http.put(`${this.apiUrl}/course/approve/${courseId}`, {});
-  }
-  
-// Approve course update
-approveCourseUpdate(courseId: number): Observable<any> {
-  if (courseId === null || courseId === undefined || isNaN(courseId)) {
-    console.error('Invalid courseId passed:', courseId);
-    return throwError(() => new Error('Invalid course ID provided'));
-  }
-  return this.http.put(`${this.apiUrl}/course/approve-update/${courseId}`, {});
-}
-
-
+ 
 // Get courses by instructor
 getCoursesByInstructor(): Observable<Course[]> {
   return this.http.get<Course[]>(`${this.apiUrl}/course/course-by-instructor`).pipe(
@@ -135,7 +115,21 @@ updateCourse(courseId: number, courseData: any): Observable<any> {
   );
 }
 
-// Reject a course
+// Approve new course
+  approveCourse(courseId: number): Observable<any> {
+    return this.http.put(`${this.apiUrl}/course/approve/${courseId}`, {});
+  }
+  
+// Approve course update
+approveCourseUpdate(courseId: number): Observable<any> {
+  if (courseId === null || courseId === undefined || isNaN(courseId)) {
+    console.error('Invalid courseId passed:', courseId);
+    return throwError(() => new Error('Invalid course ID provided'));
+  }
+  return this.http.put(`${this.apiUrl}/course/approve-update/${courseId}`, {});
+}
+
+// Reject new course
 rejectCourse(courseId: number): Observable<any> {
   return this.http.put<any>(
     `${this.apiUrl}/course/reject/${courseId}`, 
@@ -145,7 +139,7 @@ rejectCourse(courseId: number): Observable<any> {
   );
 }
 
-// Reject a course update
+// Reject course update
 rejectCourseUpdate(courseId: number): Observable<any> {
   return this.http.post<any>(
     `${this.apiUrl}/course/reject-updates/${courseId}`, 
@@ -164,5 +158,4 @@ rejectCourseUpdate(courseId: number): Observable<any> {
       return of(result as T); // Return a default value to keep app running
     };
    }
-   
 }

@@ -21,8 +21,7 @@ export class CategoryCourseComponent implements OnInit {
   courses: Course[] = [];
   wishlist: WishlistItem[] = [];
   isAuthenticated = false;
-  private subscriptions = new Subscription();
-  private destroy$ = new Subject<void>();
+  private subscriptions = new Subscription(); // To manage multiple subscriptions
 
   constructor(
     private route: ActivatedRoute,
@@ -34,6 +33,7 @@ export class CategoryCourseComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    // Subscribe to route param changes to load relevant category and its courses
     this.route.paramMap.subscribe((params) => {
       this.categoryId = Number(params.get('categoryId'));
       if (this.categoryId !== null) {
@@ -42,7 +42,7 @@ export class CategoryCourseComponent implements OnInit {
       }
     });
 
-    // Track auth status
+     // Track user authentication status and fetch wishlist if logged in
     this.subscriptions.add(
       this.authService.isAuthenticated$.subscribe((status) => {
         this.isAuthenticated = status;
@@ -52,7 +52,7 @@ export class CategoryCourseComponent implements OnInit {
       })
     );
 
-    // Track wishlist changes
+     // Keep local wishlist updated in real-time
     this.subscriptions.add(
       this.wishlistService.wishlist$.subscribe((items) => {
         this.wishlist = items;
@@ -61,17 +61,17 @@ export class CategoryCourseComponent implements OnInit {
   }
 
   ngOnDestroy(): void {
+    // Clean up all active subscriptions
     this.subscriptions.unsubscribe();
   }
 
+  // Fetch courses associated with the current category
   loadCourses(categoryId: number): void {
     console.log('Calling loadCourses for categoryID:', categoryId);
     this.categoryService.getCoursesByCategory(categoryId).subscribe({
       next: (response: any) => {
         const courses = response.courses;
-        this.courses = courses.map((course: Course) => {
-          return course;
-        });
+        this.courses = courses.map((course: Course) => course );
       },
       error: (err) => {
         console.error('Error fetching courses:', err);
@@ -79,7 +79,7 @@ export class CategoryCourseComponent implements OnInit {
     });
   }
 
-
+  // Fetch category name for display based on ID
   loadCategoryName(categoryId: number): void {
     this.categoryService.getCategoryById(categoryId).subscribe({
       next: (cat: Category) => this.categoryName = cat.name,
@@ -87,6 +87,7 @@ export class CategoryCourseComponent implements OnInit {
     });
   }
 
+  // Fetch user's wishlist (after confirming authentication)
   loadWishlist(): void {
     this.wishlistService.getWishlist().subscribe({
       next: () => { },
@@ -94,15 +95,17 @@ export class CategoryCourseComponent implements OnInit {
     });
   }
 
+   // Generate course image URL from filename
   getCourseImageUrl(imageFilename: string): string {
     return this.imageService.getCourseImageUrl(imageFilename);
   }
 
+    // Check if course is in wishlist
   isInWishlist(courseId: number): boolean {
     return this.wishlist.some(item => item.courseID === courseId);
   }
 
-
+// Add or remove course from wishlist (based on its current state)
   toggleWishlist(courseId: number, event: MouseEvent): void {
     event.stopPropagation(); // Prevent card click
 
@@ -125,6 +128,7 @@ export class CategoryCourseComponent implements OnInit {
     }
   }
 
+   // Navigate to the course detail page
   navigateToDetail(courseId: number): void {
     this.router.navigate(['/courses', courseId]);
   }

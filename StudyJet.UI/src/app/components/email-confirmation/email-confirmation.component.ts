@@ -19,6 +19,7 @@ export class EmailConfirmationComponent implements OnInit{
   ) {}
 
   ngOnInit(): void {
+    // Subscribe to query parameters from the URL
     this.route.queryParams.subscribe(params => {
       if (params['confirmed'] === 'true') {
         this.confirmationSuccess = true;

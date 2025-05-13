@@ -3,11 +3,9 @@ import { Component, OnInit } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { Observable, of, Subscription } from 'rxjs';
 import { CourseService } from '../../services/course.service';
-import { NavbarService } from '../../services/navbar.service';
 import { NotificationService } from '../../services/notification.service';
 import { UserService } from '../../services/user.service';
 import { CookieService } from 'ngx-cookie-service';
-import { ImageService } from '../../services/image.service';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
@@ -48,10 +46,12 @@ export class AdminDashboardComponent implements OnInit{
   ) { }
 
   ngOnInit(): void {
+     // Subscribe to authentication status
     this.authSubscription = this.authService.isAuthenticated$.subscribe((isAuth) => {
       this.isAuthenticated = isAuth;
 
       if (isAuth) {
+        // If authenticated, load user data from cookies
         const userData = {
           username: this.cookieService.get('username'),
           fullName: this.cookieService.get('fullName'),
@@ -62,18 +62,21 @@ export class AdminDashboardComponent implements OnInit{
         this.fetchCounts();
         this.fetchNotifications();
       } else {
+        // If not authenticated, redirect to login page
         this.router.navigate(['/login']);
       }
     });
   }
 
   ngOnDestroy(): void {
+    // Unsubscribe from all subscriptions on component destruction
     this.authSubscription?.unsubscribe();
     this.coursesSubscription?.unsubscribe();
     this.usersSubscription?.unsubscribe();
     this.notificationsSubscription?.unsubscribe();
   }
   
+  // Fetch counts of students, instructors, and courses
   fetchCounts(): void {
     this.userService.getStudentCount().subscribe({
       next: (count) => {
@@ -107,6 +110,7 @@ export class AdminDashboardComponent implements OnInit{
     });
   }
 
+   // Fetch notifications and calculate unread count
   fetchNotifications(): void {
     this.notificationsSubscription = this.notificationService.getNotifications().subscribe(
       (notifications) => {

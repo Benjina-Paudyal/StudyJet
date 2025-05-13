@@ -20,10 +20,9 @@ export class UserService {
 
   constructor(
     private http: HttpClient,
-    private cookieService: CookieService,
   ) {}
 
-  // Check if email exists
+ // Check if the provided email already exists in the system
   checkEmailExists(email: string): Observable<boolean> {
     const url = `${this.apiUrl}/User/email-exists?email=${encodeURIComponent(
       email
@@ -34,7 +33,7 @@ export class UserService {
     );
   }
 
-  // Check if username exists
+  // Check if the provided username already exists in the system
   checkUsernameExists(username: string): Observable<boolean> {
     const url = `${
       this.apiUrl
@@ -45,10 +44,12 @@ export class UserService {
     );
   }
 
+   // Set the current user in the BehaviorSubject
   setUser(user: any) {
     this.userSubject.next(user);
   }
 
+  // Clear the current user data
   clearUser(): void {
     this.userSubject.next(null);
   }
@@ -61,7 +62,7 @@ export class UserService {
       .pipe(catchError(this.handleError<any[]>('getWishlistForCurrentUser')));
   }
 
-  // Set the wishlist (called after fetching)
+  // Set the wishlist (after fetching)
    setWishlist(wishlist: any[]): void {
     this.wishlistSubject.next(wishlist);
   }
@@ -112,18 +113,16 @@ export class UserService {
     );
   }
 
-  
+   // Fetch courses with students for instructor
   getCoursesWithStudentsForInstructor(): Observable<CourseWithStudents[]> {
     return this.http.get<CourseWithStudents[]>(`${this.apiUrl}/Course/instructor/courses/students`);
   }
   
-
-  // Error Handling
+  // Generic Error Handling
   private handleError<T>(operation = 'operation', result?: T) {
     return (error: any): Observable<T> => {
       console.error(`${operation} failed: ${error.message}`);
       return of(result as T);
     };
   }
-
 }

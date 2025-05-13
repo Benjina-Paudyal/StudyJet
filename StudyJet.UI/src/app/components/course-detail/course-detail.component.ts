@@ -48,6 +48,7 @@ export class CourseDetailComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit(): void {
+    // Get course ID from route params and load the course details
     this.courseId = +this.route.snapshot.paramMap.get('id')!;
     if (this.courseId) {
       this.loadCourseDetails();
@@ -55,6 +56,7 @@ export class CourseDetailComponent implements OnInit, OnDestroy {
       console.error('No course ID provided in the route.');
     }
 
+    // Check if the user is authenticated and load additional data
     this.isAuthenticated = this.authService.isAuthenticated();
     if (this.isAuthenticated) {
       this.loadWishlist();
@@ -65,6 +67,7 @@ export class CourseDetailComponent implements OnInit, OnDestroy {
       });
     }
 
+    // Subscribe to wishlist updates
     this.wishlistService.wishlist$.subscribe((updatedWishlist: WishlistItem[]) => {
       this.wishlist = updatedWishlist.map(item => item.courseID);
       this.cdr.detectChanges();
@@ -72,11 +75,12 @@ export class CourseDetailComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    // Clean up observables to prevent memory leaks
     this.destroy$.next();
     this.destroy$.complete();
   }
 
-
+  // Get a safe video URL for embedding in the component
   getSafeVideoUrl(url?: string): SafeResourceUrl | null {
     if (url) {
       const videoId = this.extractYouTubeVideoId(url);
@@ -88,13 +92,14 @@ export class CourseDetailComponent implements OnInit, OnDestroy {
     return null;
   }
 
+  // Extract the YouTube video ID from a given URL
   extractYouTubeVideoId(url: string): string {
     const regExp = /(?:https?:\/\/)?(?:www\.)?youtube\.com\/(?:v\/|embed\/|watch\?v=|watch\?.+&v=|user\/\w+\/\w+\/|playlist\?list=)([a-zA-Z0-9_-]{11})/;
     const match = url.match(regExp);
     return match ? match[1] : '';
   }
 
-
+// Add a course to the shopping cart
   addToCart(course: any): void {
     if (!this.isAuthenticated) {
       alert('Please log in first to add courses to the cart.');
@@ -105,7 +110,6 @@ export class CourseDetailComponent implements OnInit, OnDestroy {
       alert('You have already purchased this course.');
       return;
     }
-
     this.cartService.addCourseToCart(course.courseID).subscribe({
       next: () => {
         alert('Course added to cart successfully!');
@@ -117,6 +121,7 @@ export class CourseDetailComponent implements OnInit, OnDestroy {
     });
   }
 
+  // Load the courses the user has purchased
   loadPurchasedCourses(): void {
     this.purchaseCourseService.purchasedCourses$.subscribe((courses) => {
       this.purchasedCourses = courses;
@@ -124,10 +129,12 @@ export class CourseDetailComponent implements OnInit, OnDestroy {
     });
   }
 
+  // Check if the user has already purchased a specific course
   isPurchased(courseId: number): boolean {
     return this.purchaseCourseService.isCoursePurchased(courseId); 
   }
 
+  // Load the user's wishlist
   loadWishlist(): void {
     this.wishlistService.getWishlist().subscribe({
       next: (wishlist) => {
@@ -137,6 +144,7 @@ export class CourseDetailComponent implements OnInit, OnDestroy {
     });
   }
 
+  // Toggle a course in the wishlist (add/remove)
   toggleWishlist(courseId: number, event: MouseEvent): void {
     if (!this.isAuthenticated) {
       this.router.navigate(['/login']);
@@ -164,9 +172,9 @@ export class CourseDetailComponent implements OnInit, OnDestroy {
         error: (err) => console.error('Error adding course to wishlist:', err)
       });
     }
-
   }
 
+  // Load the course details from the backend
   loadCourseDetails(): void {
     this.courseService.getCourseById(this.courseId).subscribe({
       next: (course: Course) => {
@@ -195,6 +203,7 @@ export class CourseDetailComponent implements OnInit, OnDestroy {
     });
   }
 
+  // Approve a course (or its update)
   approveCourse(): void {
     if (!this.course || this.isApproving) return;
     const message = this.course.isUpdate
@@ -221,6 +230,7 @@ export class CourseDetailComponent implements OnInit, OnDestroy {
   }
 
 
+   // Reject a course (or its update)
   rejectCourse(): void {
     if (!this.course || this.isRejecting) return;
     const message = this.course.isUpdate
@@ -245,6 +255,7 @@ export class CourseDetailComponent implements OnInit, OnDestroy {
     });
   }
 
+  // Display course status as a string
   getStatusDisplay(status: number | string): string {
     const statusMap: Record<number | string, string> = {
       0: '⏳ Pending',
@@ -257,18 +268,10 @@ export class CourseDetailComponent implements OnInit, OnDestroy {
     return statusMap[status] || 'Unknown';
   }
 
-
-
-  // Method to check if the course is in the wishlist
+  // Check if a course is in the wishlist
   isInWishlist(courseId: number): boolean {
     return this.wishlist.includes(courseId);
   }
-
-
-
-
-
-
 }
 
 

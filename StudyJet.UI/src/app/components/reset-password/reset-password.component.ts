@@ -29,6 +29,7 @@ export class ResetPasswordComponent implements OnInit {
     private route: ActivatedRoute,
     private cookieService: CookieService
   ) {
+    // Build the form with validation rules
     this.resetPasswordForm = this.formBuilder.group(
       {
         password: [
@@ -49,25 +50,26 @@ export class ResetPasswordComponent implements OnInit {
     );
   }
 
-
   ngOnInit(): void {
-
-    // First check for state (from navigation)
+    // Try getting email from router navigation state
     const navigation = this.router.getCurrentNavigation();
     if (navigation?.extras.state) {
       this.email = navigation.extras.state['email'];
       console.log('Email from router state:', this.email);
     }
-    // Then check for token and email from cookies or URL
+
+    // Fallback to token/email from cookies or query params
     this.token = this.cookieService.get('resetToken') || this.route.snapshot.queryParams['token'];
     this.email = this.cookieService.get('mail') || this.route.snapshot.queryParams['email'];
 
+    // Show error if essential data is missing
     if (!this.token || !this.email) {
       this.errorMessage = 'Invalid reset details. Please try again.';
     }
     this.updatePasswordValidator();
   }
 
+  // Getter for form control access
   get password() {
     return this.resetPasswordForm.get('password');
   }
@@ -76,13 +78,17 @@ export class ResetPasswordComponent implements OnInit {
     return this.resetPasswordForm.get('confirmPassword');
   }
 
+  // Manually update password field validators
   updatePasswordValidator(): void {
     this.resetPasswordForm.get('Password')?.setValidators([Validators.required, passwordValidator()]);
     this.resetPasswordForm.get('Password')?.updateValueAndValidity();
   }
 
+  // Handle form submission
   onSubmit(): void {
     this.resetPasswordForm.markAllAsTouched();
+
+    // Abort if form is invalid or missing token/email
     if (this.resetPasswordForm.invalid || !this.token || !this.email) {
       this.errorMessage = 'Invalid reset details. Please try again.';
       return;
@@ -98,6 +104,7 @@ export class ResetPasswordComponent implements OnInit {
       newPassword: this.password?.value,
     };
 
+    // Attempt password reset
     this.authService.resetPassword(resetPasswordData.email, resetPasswordData.token, resetPasswordData.newPassword).subscribe({
       next: () => {
         this.successMessage = 'Password successfully updated! Redirecting to login...';

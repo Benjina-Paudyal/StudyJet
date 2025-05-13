@@ -173,11 +173,8 @@ export class RegisterComponent implements OnInit {
       }
       if (control.hasError('emailExists')) return 'This email is already registered.';  
     }
-  
     return null;
   }
-  
-
 }
 
   

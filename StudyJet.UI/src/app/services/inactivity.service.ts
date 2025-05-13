@@ -8,7 +8,7 @@ import { Router } from '@angular/router';
 export class InactivityService {
   private timeout: any;
   private warningTimeout: any;
-  private readonly INACTIVITY_TIMEOUT: number = 60 * 20 * 1000;
+  private readonly INACTIVITY_TIMEOUT: number = 60 * 20 * 1000; // 20 minutes of inactivity
 
   constructor(
     private authService: AuthService,
@@ -23,16 +23,16 @@ export class InactivityService {
   // Start tracking inactivity
   startMonitoring(): void {
       this.resetInactivityTimeout();  
-      window.addEventListener('mousemove', this.resetInactivityTimeout.bind(this));
-      window.addEventListener('keydown', this.resetInactivityTimeout.bind(this));
+      window.addEventListener('mousemove', this.resetInactivityTimeout);
+      window.addEventListener('keydown', this.resetInactivityTimeout);
     }
 
   // Stop tracking  
   stopMonitoring(): void {
     clearTimeout(this.timeout);  
     clearTimeout(this.warningTimeout); 
-    window.removeEventListener('mousemove', this.resetInactivityTimeout.bind(this));
-    window.removeEventListener('keydown', this.resetInactivityTimeout.bind(this));
+    window.removeEventListener('mousemove', this.resetInactivityTimeout);
+    window.removeEventListener('keydown', this.resetInactivityTimeout);
   }
 
    // Reset both warning and logout timers
@@ -48,5 +48,4 @@ export class InactivityService {
       this.router.navigate(['/home']);
     });
   }
-
 }

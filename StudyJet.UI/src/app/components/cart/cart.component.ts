@@ -21,7 +21,7 @@ export class CartComponent implements OnInit, OnDestroy {
   wishlist = [];
   errorMessage = '';
   isLoading = false;
-  private destroy$ = new Subject<void>(); // to clean up subscription
+  private destroy$ = new Subject<void>(); 
 
   constructor(
     private cartService: CartService,
@@ -33,30 +33,37 @@ export class CartComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit(): void {
+    // Redirect unauthenticated users to login
     if (!this.authService.isAuthenticated()) {
       this.router.navigate(['/login']);
       return;
     }
 
+    // Set the appropriate navbar type based on cookie value
     const navbarType = this.cookieService.get('navbarType');
     const validNavbarTypes = ['admin', 'instructor', 'student', 'default', 'hidden'] as const;
     if (validNavbarTypes.includes(navbarType as typeof validNavbarTypes[number])) {
       this.navbarService.setNavbarType(navbarType as typeof validNavbarTypes[number]);
     }
+    
+    // Subscribe to cart changes
     this.cartService.cart$
       .pipe(takeUntil(this.destroy$))
       .subscribe(cartItems => {
         this.cart = cartItems;
         this.cdr.detectChanges();
       });
-    this.cartService.updateCartForUser(); // intial fetch and update
+    // Trigger initial cart fetch/update
+    this.cartService.updateCartForUser(); 
   }
 
   ngOnDestroy(): void {
+    // Clean up subscriptions
     this.destroy$.next();
     this.destroy$.complete();
   }
 
+   // Remove course from cart
   removeFromCart(courseID: number, title: string): void {
     this.isLoading = true;
     this.cartService.removeCourseFromCart(courseID).subscribe({
@@ -72,6 +79,7 @@ export class CartComponent implements OnInit, OnDestroy {
     });
   }
 
+   // Move course from cart to wishlist
   moveToWishlist(courseID: number, title: string): void {
     this.isLoading = true;
     this.cartService.moveToWishlist(courseID).subscribe({
@@ -89,6 +97,7 @@ export class CartComponent implements OnInit, OnDestroy {
     });
   }
 
+  // Handle checkout flow (Stripe Sandbox Test )
   checkout(): void {
     if (this.cart.length === 0) {
       this.errorMessage = "Your cart is empty!";
@@ -100,7 +109,7 @@ export class CartComponent implements OnInit, OnDestroy {
     this.cartService.createCheckoutSession(courseIds).subscribe({
       next: (response) => {
         if (response.url) {
-          window.location.href = response.url; // Redirect to Stripe checkout
+          window.location.href = response.url; 
         } else {
           this.errorMessage = "Failed to initiate checkout.";
         }
@@ -114,10 +123,12 @@ export class CartComponent implements OnInit, OnDestroy {
     });
   }
 
+   // Calculate total price of cart items
   getTotalPrice(): number {
     return this.cart.reduce((total, item) => total + item.price, 0);
   }
 
+  // Optimize ngFor rendering with course ID
   trackByCartId(index: number, item: any): number {
     return item.courseID;
   }

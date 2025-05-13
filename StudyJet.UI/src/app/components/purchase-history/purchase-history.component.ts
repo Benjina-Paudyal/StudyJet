@@ -44,7 +44,6 @@ export class PurchaseHistoryComponent {
   navigateToDetail(courseID: number): void {
     this.router.navigate(['/courses', courseID]);
   }
-
    // track the items
    trackByCourseId(index: number, course: Course): number {
     return course.courseID;

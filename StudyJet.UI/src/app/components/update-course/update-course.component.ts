@@ -28,9 +28,11 @@ export class UpdateCourseComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    // Extract course ID from the route parameters
     this.courseId = +this.route.snapshot.paramMap.get('id')!;
     this.loadCourseData();
   
+    // Initialize the form group with default values
     this.updateCourseForm = this.fb.group({
       title: [''],
       description: [''],
@@ -40,8 +42,11 @@ export class UpdateCourseComponent implements OnInit {
     });
   }
 
+  // Method to load course data from backend and populate the form
   loadCourseData() {
     this.courseService.getCourseById(this.courseId).subscribe(course => {
+
+      // Populate form with the course data
       this.updateCourseForm.patchValue({
         title: course.title,
         description: course.description,
@@ -49,11 +54,11 @@ export class UpdateCourseComponent implements OnInit {
         videoUrl: course.videoUrl
       });
       
+      // Set image preview if a course image exists
       if (course.imageUrl) {
         this.imagePreview = this.imageService.getCourseImageUrl(course.imageUrl);
       }
     });
-      
   }
 
   onFileChange(event: any) {
@@ -62,7 +67,7 @@ export class UpdateCourseComponent implements OnInit {
     if (file) {
       this.selectedFile = file;
   
-      // Preview Image
+      // Create a FileReader to show the selected image as a preview
       const reader = new FileReader();
       reader.onload = () => {
         this.imagePreview = reader.result as string; 
@@ -71,17 +76,22 @@ export class UpdateCourseComponent implements OnInit {
     }
   }
 
+  // Method to handle the form submission for updating the course
   updateCourse() {
     const formData = new FormData();
+
+    // Append form values to form data
     formData.append('title', this.updateCourseForm.get('title')?.value || '');
     formData.append('description', this.updateCourseForm.get('description')?.value || '');
     formData.append('price', this.updateCourseForm.get('price')?.value || '');
     formData.append('videoUrl', this.updateCourseForm.get('videoUrl')?.value || '');
     
+    // Append selected image file if available
     if (this.selectedFile) {
       formData.append('imageFile', this.selectedFile);
     }
   
+    // Call the service to update the course with the form data
     this.courseService.updateCourse(this.courseId, formData).subscribe({
       next: () => {
         alert('Course updated successfully');
@@ -93,7 +103,7 @@ export class UpdateCourseComponent implements OnInit {
       }
     });
   }
-  }
+}
 
 
 

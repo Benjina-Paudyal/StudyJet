@@ -126,6 +126,5 @@ export class RegisterInstructorComponent implements OnInit {
       this.errorMessage = 'An unexpected error occurred. Please try again later.';
     }
   }
-
 }
 

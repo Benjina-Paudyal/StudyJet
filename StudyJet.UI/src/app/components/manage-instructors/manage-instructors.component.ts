@@ -3,7 +3,6 @@ import { UserService } from '../../services/user.service';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { User } from '../../models';
-import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-manage-instructors',
@@ -25,6 +24,7 @@ export class ManageInstructorsComponent implements OnInit{
   ) {}
 
   ngOnInit(): void {
+    // Fetch all instructors on component initialization
     this.userService.getInstructors().subscribe({
       next: (instructors) => {
         if (Array.isArray(instructors)) {
@@ -32,14 +32,17 @@ export class ManageInstructorsComponent implements OnInit{
         } else {
           console.error("API returned a non-array response", instructors);
         }
+        this.loading = false;
       },
       error: (err) => {
         console.error("Error fetching instructors:", err);
+        this.errorMessage = 'Failed to load instructors.';
+        this.loading = false;
       }
     });
   }
 
-
+ // Navigate to instructor registration form
   navigateToRegisterInstructor() {
     this.router.navigate(['/register-instructor']); 
   }
