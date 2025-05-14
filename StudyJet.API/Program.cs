@@ -15,20 +15,22 @@ var builder = WebApplication.CreateBuilder(args);
 // Ensure environment variables are replaced in configuration before use
 var config = builder.Configuration;
 
-// Get environment variables first
+// Get environment variables
 var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD");
 var defaultPassword = Environment.GetEnvironmentVariable("DEFAULT_PASSWORD");
+var instructorPassword = Environment.GetEnvironmentVariable("INSTRUCTOR_PASSWORD");
 var jwtKey = Environment.GetEnvironmentVariable("JWT_KEY");
 var smtpPassword = Environment.GetEnvironmentVariable("SMTP_PASSWORD");
 var stripeSecretKey = Environment.GetEnvironmentVariable("STRIPE_SECRET_KEY");
 var stripePublishableKey = Environment.GetEnvironmentVariable("STRIPE_PUBLISHABLE_KEY");
-
 
 // Ensure critical environment variables are set
 if (string.IsNullOrEmpty(dbPassword))
     throw new InvalidOperationException("DB_PASSWORD environment variable is not set.");
 if (string.IsNullOrEmpty(defaultPassword))
     throw new InvalidOperationException("DEFAULT_PASSWORD environment variable is not set.");
+if (string.IsNullOrEmpty(instructorPassword))
+    throw new InvalidOperationException("INSTRUCTOR_PASSWORD environment variable is not set.");
 if (string.IsNullOrEmpty(smtpPassword))
     throw new Exception("SMTP_PASSWORD environment variable not found.");
 if (string.IsNullOrEmpty(stripeSecretKey))
@@ -36,10 +38,8 @@ if (string.IsNullOrEmpty(stripeSecretKey))
 if (string.IsNullOrEmpty(stripePublishableKey))
     throw new Exception("STRIPE_PUBLISHABLE_KEY environment variable not found.");
 
-
 // Initialize Stripe SDK
 Stripe.StripeConfiguration.ApiKey = stripeSecretKey;
-
 
 // Replace the placeholder manually in connection string
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection").Replace("${DB_PASSWORD}", dbPassword);
@@ -52,7 +52,6 @@ builder.Configuration["Stripe:PublishableKey"] = stripePublishableKey;
 
 // Adding DbContext with connection string
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connectionString));
-
 
 // Add services to the container.
 builder.Services.AddControllers()
@@ -94,7 +93,6 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.SignIn.RequireConfirmedEmail = true;
 
 });
-
 
 // Configuring Identity token lifespan
 builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
@@ -159,8 +157,6 @@ builder.Services.AddScoped<IWishlistRepo, WishlistRepo>();
 builder.Services.AddScoped<IUserPurchaseCourseRepo, UserPurchaseCourseRepo>();
 
 
-
-
 // Registering Services
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
@@ -173,8 +169,6 @@ builder.Services.AddScoped<IWishlistService, WishlistService>();
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<IUserPurchaseCourseService, UserPurchaseCourseService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
-
-
 
 
 
@@ -218,8 +212,6 @@ using (var scope = app.Services.CreateScope())
         await dbInitializer.InitializeAsync().ConfigureAwait(false);
     }
 }
-
-
 
 app.Run();
 

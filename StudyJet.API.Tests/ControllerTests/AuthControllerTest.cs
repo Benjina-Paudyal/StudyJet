@@ -716,7 +716,7 @@ namespace StudyJet.API.Tests.ControllerTests
             Assert.Equal(user.FullName, response.FullName);
             Assert.Equal(user.Email, response.Email);
             Assert.Equal(user.Id, response.UserID);
-            Assert.Equal("default-pic-url", response.ProfilePictureUrl); // since user.ProfilePictureUrl is null
+            Assert.Equal("default-pic-url", response.ProfilePictureUrl); 
         }
 
         [Fact]

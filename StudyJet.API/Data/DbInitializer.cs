@@ -135,7 +135,6 @@ namespace StudyJet.API.Data
             // Skip seeding if courses already exist
             if (_context.Courses.Any()) return;
 
-
             try
             {
                 // Fetch and validate categories
