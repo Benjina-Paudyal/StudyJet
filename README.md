@@ -21,6 +21,33 @@
 - **Payments**: Stripe (Sandbox)  
 - **Emails**: SMTP (backend), EmailJS (frontend)
 
-##  License
 
-This project is for educational purposes. Feel free to explore and adapt it for learning or demo purposes.
+## Environment Variables
+
+This project follows **secure development practices** by keeping sensitive information (like database passwords, API keys, and SMTP credentials) outside of the source code using environment variables.
+
+Environment variables are referenced in `appsettings.json` like:
+
+```json
+"ConnectionStrings": {
+  "DefaultConnection": "Server=...;Database=...;Password=${DB_PASSWORD};"
+}
+```
+
+#Required Environment Variables:
+
+DB_PASSWORD - Database connection password
+
+JWT_KEY - Secret key for JWT token generation
+
+DEFAULT_PASSWORD - Default user password
+
+INSTRUCTOR_PASSWORD - Default instructor password
+
+SMTP_PASSWORD - Email service password
+
+STRIPE_SECRET_KEY - Stripe API secret key
+
+STRIPE_PUBLISHABLE_KEY - Stripe client-side key
+
+Set these variables in your system environment before running the project.
