@@ -58,17 +58,4 @@ StudyJet.API.Tests/obj/
 *.lcov
 coverage/
 
-##########################################
-# Sensitive files
-##########################################
-# Ignore environment variable files
-.env
-secrets.json
-
-
-appsettings.json
-appsettings.Development.json
-angular.json
-StudyJet.API/Data/Migrations/
-
 
