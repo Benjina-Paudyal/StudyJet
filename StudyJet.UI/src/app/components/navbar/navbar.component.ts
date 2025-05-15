@@ -76,7 +76,7 @@ export class NavbarComponent implements OnInit {
   ngOnInit() {
     this.inactivityService.startMonitoring();
     this.navbarType = 'hidden';
-    this.loadCategories();
+    // this.loadCategories();
 
     // Sync navbar type
     this.subscriptions.push(
@@ -98,7 +98,7 @@ export class NavbarComponent implements OnInit {
     // Sync wishlist
     this.subscriptions.push(
       this.wishlistService.wishlist$.subscribe((wishlist) => {
-        this.wishlist = wishlist;
+        this.wishlist = wishlist || [];
         this.cdr.detectChanges();
       })
     );
@@ -122,6 +122,7 @@ export class NavbarComponent implements OnInit {
       this.authService.isAuthenticated$.subscribe((isAuthenticated) => {
         this.isAuthenticated = isAuthenticated;
         if (isAuthenticated) {
+          this.loadCategories();
           this.notificationService.getNotifications().subscribe(notifications => {
             this.notificationService.updateUnreadNotificationsCount(notifications);
           });
@@ -137,6 +138,7 @@ export class NavbarComponent implements OnInit {
           this.loadWishlist();
           this.loadPurchasedCourses();
           this.updatePlaceholderText(window.innerWidth);
+          this.cdr.detectChanges();
         }
       })
     );
@@ -192,9 +194,12 @@ export class NavbarComponent implements OnInit {
   }
 
   loadCategories(): void {
+      console.log('Loading categories1...');
     this.categoryService.getCategories().subscribe({
       next: (data: Category[]) => {
+              console.log('Categories loaded:', data);
         this.categories = data;
+        this.cdr.detectChanges();
         console.log('Categories loaded:', this.categories);
       },
       error: (err) => {
