@@ -6,6 +6,7 @@ import { Router } from '@angular/router';
   providedIn: 'root'
 })
 export class InactivityService {
+   private boundResetInactivityTimeout!: () => void;
   private timeout: any;
   private warningTimeout: any;
   private readonly INACTIVITY_TIMEOUT: number = 60 * 20 * 1000; // 20 minutes of inactivity
@@ -21,19 +22,23 @@ export class InactivityService {
   }
   
   // Start tracking inactivity
-  startMonitoring(): void {
-      this.resetInactivityTimeout();  
-      window.addEventListener('mousemove', this.resetInactivityTimeout);
-      window.addEventListener('keydown', this.resetInactivityTimeout);
-    }
+startMonitoring(): void {
+  this.boundResetInactivityTimeout = this.resetInactivityTimeout.bind(this); // ✅ bind once
+  this.resetInactivityTimeout();  
+  window.addEventListener('mousemove', this.boundResetInactivityTimeout);
+  window.addEventListener('keydown', this.boundResetInactivityTimeout);
+}
 
-  // Stop tracking  
-  stopMonitoring(): void {
-    clearTimeout(this.timeout);  
-    clearTimeout(this.warningTimeout); 
-    window.removeEventListener('mousemove', this.resetInactivityTimeout);
-    window.removeEventListener('keydown', this.resetInactivityTimeout);
+// Stop tracking
+stopMonitoring(): void {
+  clearTimeout(this.timeout);  
+  clearTimeout(this.warningTimeout); 
+  if (this.boundResetInactivityTimeout) {
+    window.removeEventListener('mousemove', this.boundResetInactivityTimeout);
+    window.removeEventListener('keydown', this.boundResetInactivityTimeout);
   }
+}
+
 
    // Reset both warning and logout timers
    private resetInactivityTimeout(): void {

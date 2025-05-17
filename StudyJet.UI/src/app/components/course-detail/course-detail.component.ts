@@ -131,7 +131,6 @@ export class CourseDetailComponent implements OnInit, OnDestroy {
   loadPurchasedCourses(): void {
     this.purchaseCourseService.purchasedCourses$.subscribe((courses) => {
       this.purchasedCourses = courses;
-      console.log('Purchased COurses', this.purchasedCourses);
     });
   }
 

@@ -151,17 +151,14 @@ export class WishlistComponent implements OnInit, OnDestroy {
   }
 
   // Move course from wishlist to cart
-  addToCart(course: WishlistItem): void {
-    this.wishlistService.moveToCart(course.courseID).subscribe({
-      next: () => {
-        console.log(`${course.courseID} has been moved to the cart.`);
-      },
-      error: (error) => {
-        console.error('Error moving course to cart:', error);
-        this.errorMessage = 'Failed to add course to cart. Please try again later.';
-      }
-    });
-  }
+ addToCart(course: WishlistItem): void {
+  this.wishlistService.moveToCart(course.courseID).subscribe({
+    error: (error) => {
+      console.error('Error moving course to cart:', error);
+      this.errorMessage = 'Failed to add course to cart. Please try again later.';
+    }
+  });
+}
 
   // Track courses by their unique ID for efficient rendering
   trackByCourseId(index: number, item: WishlistItem): number {

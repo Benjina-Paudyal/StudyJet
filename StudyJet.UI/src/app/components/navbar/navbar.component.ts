@@ -156,7 +156,6 @@ export class NavbarComponent implements OnInit {
   // UI Toggles
   toggleNavbar() {
     this.isNavbarCollapsed = !this.isNavbarCollapsed;
-    console.log('isNavbarCollapsed:', this.isNavbarCollapsed);
     this.updatePlaceholderText(window.innerWidth);
   }
 
@@ -193,13 +192,10 @@ export class NavbarComponent implements OnInit {
   }
 
   loadCategories(): void {
-    console.log('Loading categories1...');
     this.categoryService.getCategories().subscribe({
       next: (data: Category[]) => {
-        console.log('Categories loaded:', data);
         this.categories = data;
         this.cdr.detectChanges();
-        console.log('Categories loaded:', this.categories);
       },
       error: (err) => {
         console.error('Error fetching categories', err);
@@ -208,7 +204,6 @@ export class NavbarComponent implements OnInit {
   }
 
   onCategorySelected(category: Category): void {
-    console.log('Selected category:', category);
   }
 
   goToCourse(courseID: number) {
@@ -306,8 +301,6 @@ export class NavbarComponent implements OnInit {
           ...course,
           imageUrl: this.imageService.getCourseImageUrl(course.imageUrl || 'default-image.jpg')
         }));
-
-        console.log('Purchased Courses:', this.purchasedCourses);
       },
       error: (err) => {
         console.error('Error fetching purchased courses:', err);

@@ -55,7 +55,6 @@ export class ResetPasswordComponent implements OnInit {
     const navigation = this.router.getCurrentNavigation();
     if (navigation?.extras.state) {
       this.email = navigation.extras.state['email'];
-      console.log('Email from router state:', this.email);
     }
 
     // Fallback to token/email from cookies or query params
@@ -112,7 +111,6 @@ export class ResetPasswordComponent implements OnInit {
         setTimeout(() => this.router.navigate(['/login']), 3000);
       },
       error: (error) => {
-        console.log('resetPassword failed: ', error);
         if (error.error && error.error.message) {
           this.errorMessage = error.error.message;
         } else {

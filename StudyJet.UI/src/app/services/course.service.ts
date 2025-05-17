@@ -80,12 +80,13 @@ searchCourses(query: string): Observable<Course[]> {
   }
  
 // Get courses by instructor
+// Get courses by instructor
 getCoursesByInstructor(): Observable<Course[]> {
   return this.http.get<Course[]>(`${this.apiUrl}/course/course-by-instructor`).pipe(
-    tap((response: Course[]) => console.log('API Response:', response)),
     catchError(this.handleError<Course[]>('getCoursesByInstructor', []))
   );
 }
+
 
 // Get the total number of courses for the instructor
 getTotalCoursesForInstructor(): Observable<{ totalCourses: number }> {

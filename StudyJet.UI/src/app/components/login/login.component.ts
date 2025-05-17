@@ -92,9 +92,7 @@ export class LoginComponent {
           // Store profile image URL if provided
           if (response.profilePictureUrl) {
             this.authService.setProfileImage(response.profilePictureUrl);
-          } else {
-            console.log('No profile image URL provided in the login response.');
-          }
+          } 
 
           this.loadWishlist();
 

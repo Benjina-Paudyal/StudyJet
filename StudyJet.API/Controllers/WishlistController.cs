@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using StudyJet.API.DTOs.Wishlist;
 using StudyJet.API.Services.Interface;
 using StudyJet.API.Utilities;
 using System.Security.Claims;
@@ -20,7 +21,37 @@ namespace StudyJet.API.Controllers
             _cartService = cartService;
         }
 
+
         // Get the authenticated user's wishlist items
+        //[HttpGet]
+        //public async Task<IActionResult> GetWishlist()
+        //{
+        //    try
+        //    {
+        //        var userId = User.FindFirst(CustomClaimTypes.UserId)?.Value;
+        //        var role = User.FindFirst(ClaimTypes.Role)?.Value;
+
+        //        if (string.IsNullOrEmpty(userId))
+        //        {
+        //            return Unauthorized(new { message = "User is not authenticated." });
+        //        }
+
+        //        var wishlist = await _wishlistService.GetWishlistAsync(userId);
+
+        //        if (wishlist == null || !wishlist.Any())
+        //        {
+        //            return NotFound(new { message = "No items found in the wishlist." });
+        //        }
+
+        //        return Ok(wishlist);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return StatusCode(500, new { message = $"Internal server error: {ex.Message}" });
+        //    }
+        //}
+
+
         [HttpGet]
         public async Task<IActionResult> GetWishlist()
         {
@@ -36,18 +67,18 @@ namespace StudyJet.API.Controllers
 
                 var wishlist = await _wishlistService.GetWishlistAsync(userId);
 
-                if (wishlist == null || !wishlist.Any())
-                {
-                    return NotFound(new { message = "No items found in the wishlist." });
-                }
+                // Instead of returning 404 if empty, just return OK with empty list
+                return Ok(wishlist ?? Enumerable.Empty<WishlistCourseDTO>());
 
-                return Ok(wishlist);
             }
             catch (Exception ex)
             {
                 return StatusCode(500, new { message = $"Internal server error: {ex.Message}" });
             }
         }
+
+
+
 
         // Add a course to the authenticated user's wishlist
         [HttpPost("{courseId}")]
@@ -84,6 +115,7 @@ namespace StudyJet.API.Controllers
             }
         }
 
+
         // Check if a course is in the authenticated user's wishlist
         [HttpGet("is-in-wishlist/{courseId}")]
         public async Task<IActionResult> IsCourseInWishlist(int courseId)
@@ -107,6 +139,7 @@ namespace StudyJet.API.Controllers
                 return StatusCode(500, new { success = false, message = $"Internal server error: {ex.Message}" });
             }
         }
+
 
         // Remove a course from the authenticated user's wishlist
         [HttpDelete("{courseId}")]

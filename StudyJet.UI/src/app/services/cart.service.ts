@@ -5,6 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import { WishlistService } from './wishlist.service';
 import { CartItem } from '../models';
 import { ImageService } from './image.service';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
@@ -17,6 +18,7 @@ export class CartService {
   constructor(
     private http: HttpClient,
     private wishlistService: WishlistService,
+    private authService: AuthService,
     private imageService: ImageService,
   ) {
     this.getCartAndEmit(); // Initialize the cart data when the service is instantiated
@@ -24,6 +26,11 @@ export class CartService {
 
   // Get the cart items and map image URLs to the course images
   getCartItems(): Observable<CartItem[]> {
+     if (!this.authService.isAuthenticated()) {
+    // Not logged in, don't call backend
+    return of([]);
+  }
+
     return this.http.get<CartItem[]>(`${this.cartUrl}`).pipe(
       map(cart => cart.map(item => ({
         ...item,
@@ -39,7 +46,6 @@ export class CartService {
 
   // Check if the course is already in the cart
   isCourseInCart(courseId: number): Observable<boolean> {
-    console.log('Checking if course is in cart:', courseId);
     return this.http.get<boolean>(`${this.cartUrl}/is-in-cart/${courseId}`).pipe(
       catchError(err => {
         console.error('Error checking if course is in cart:', err);
@@ -109,7 +115,6 @@ export class CartService {
         if (isInWishlist) {
           return of(void 0);
         } else {
-          console.log('Sending POST request to move course to wishlist');
           return this.http.post<void>(`${this.cartUrl}/move-to-wishlist/${courseId}`, {});
         }
       }),

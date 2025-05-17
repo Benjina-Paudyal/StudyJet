@@ -27,7 +27,6 @@ export class ManageCategoriesComponent {
 private loadCategories(): void {
   this.categoryService.getCategories().subscribe({
     next: cats => {
-      console.log('API Response:', cats); 
       this.categories = cats;
     },
     error: err => console.error('Error loading categories', err)

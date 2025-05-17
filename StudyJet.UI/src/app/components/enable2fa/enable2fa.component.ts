@@ -46,7 +46,6 @@ export class Enable2faComponent implements OnInit{
   checkTwoFAStatus(): void {
     this.authService.check2FAStatus().subscribe({
       next: (response) => {
-        console.log('2FA Status Response:', response); 
         this.is2FAEnabled = response.isEnabled;
         this.errorMessage = null;
       },

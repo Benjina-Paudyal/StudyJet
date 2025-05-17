@@ -42,11 +42,10 @@ namespace StudyJet.API.Controllers
                 return Unauthorized(new { message = "User not found" });
 
             var courses = await _userPurchaseCourseService.GetPurchasedCoursesAsync(userId);
-            if (!courses.Any())
-                return Ok(new { message = "No purchased courses found.", courses = new List<string>() });
-
+            
             return Ok(courses);
         }
+
 
         // Get course suggestions for the logged-in user
         [HttpGet("suggested-courses")]

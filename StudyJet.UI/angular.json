@@ -83,8 +83,8 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
             "ssl": true,
-            "sslKey": "C:/Users/bhask/Certificates/localhost_no_password.key",
-            "sslCert": "C:/Users/bhask/Certificates/localhost.crt"
+            "sslKey": "C:/Users/benjm/Certificates/localhost_no_password.key",
+            "sslCert": "C:/Users/benjm/Certificates/localhost.crt"
           },
           "configurations": {
             "production": {

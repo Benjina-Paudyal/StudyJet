@@ -28,23 +28,32 @@ export class PurchaseCourseService {
       console.error("No token found, user might not be logged in.");
       return;
     }
-    this.http.get<Course[]>(this.purchasedCourseUrl).subscribe({
-      next: (courses) => {
-        if (!courses || courses.length === 0) {
-          console.warn("No purchased courses found!");
-          this.purchasedCoursesSubject.next([]);
-          return;
-        }
-        const updatedCourses = courses.map(course => ({
-          ...course,
-          imageUrl: this.imageService.getCourseImageUrl(course.imageUrl) 
-        }));
-        this.purchasedCoursesSubject.next(updatedCourses);
-      },
-      error: (err) => {
-        console.error('Error fetching purchased courses:', err);
-      }
-    });
+    
+this.http.get<Course[]>(this.purchasedCourseUrl).subscribe({
+  next: (courses) => {
+    if (!Array.isArray(courses)) {
+      console.error('Unexpected response format, expected array but got:', courses);
+      this.purchasedCoursesSubject.next([]);
+      return;
+    }
+    
+    if (courses.length === 0) {
+      // console.warn("No purchased courses found!");
+      this.purchasedCoursesSubject.next([]);
+      return;
+    }
+    
+    const updatedCourses = courses.map(course => ({
+      ...course,
+      imageUrl: this.imageService.getCourseImageUrl(course.imageUrl) 
+    }));
+    this.purchasedCoursesSubject.next(updatedCourses);
+  },
+  error: (err) => {
+    console.error('Error fetching purchased courses:', err);
+  }
+});
+
   }
 
    // Observable to listen for purchased courses

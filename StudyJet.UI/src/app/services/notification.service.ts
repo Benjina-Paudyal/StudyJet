@@ -27,8 +27,8 @@ export class NotificationService {
 }
 
  // Updates unread notifications count
- updateUnreadNotificationsCount(notifications: Notification[]): void {
-  const unreadCount = notifications.filter(n => !n.isRead).length;
+updateUnreadNotificationsCount(notifications: Notification[] | null | undefined): void {
+  const unreadCount = (notifications ?? []).filter(n => !n.isRead).length;
   this.unreadCountSubject.next(unreadCount); 
 }
 }

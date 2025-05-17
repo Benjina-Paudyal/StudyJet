@@ -279,7 +279,7 @@ namespace StudyJet.API.Data
 
                            Title = "2D Game",
                            Description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-                           ImageUrl = "/images/courses/Default.png",
+                           ImageUrl = "/images/courses/2DGame.png",
                            Price = 499.99m,
                            InstructorID = instructors[3].Id,
                            CategoryID =  gameDevCategory,
@@ -296,7 +296,7 @@ namespace StudyJet.API.Data
 
                            Title = "3D Game",
                            Description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-                           ImageUrl = "/images/courses/Default.png",
+                           ImageUrl = "/images/courses/3DGame.png",
                            Price = 399.99m,
                            InstructorID = instructors[3].Id,
                            CategoryID =  gameDevCategory,
@@ -313,7 +313,7 @@ namespace StudyJet.API.Data
 
                            Title = "Android",
                            Description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-                           ImageUrl = "/images/courses/Default.png",
+                           ImageUrl = "/images/courses/Android.png",
                            Price = 699.99m,
                            InstructorID = instructors[4].Id,
                            CategoryID = mobileDevCategory,
@@ -330,7 +330,7 @@ namespace StudyJet.API.Data
 
                             Title = "iOS",
                             Description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-                            ImageUrl = "/images/courses/Default.png",
+                            ImageUrl = "/images/courses/iOS.png",
                             Price = 699.99m,
                             InstructorID = instructors[4].Id,
                             CategoryID = mobileDevCategory,

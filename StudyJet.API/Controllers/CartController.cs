@@ -70,7 +70,7 @@ namespace StudyJet.API.Controllers
 
             if (!cartItems.Any())
             {
-                return NotFound(new { message = "No items found in the cart." });
+                return Ok(new List<CartItemDTO>());
             }
 
             var cartItemsDTO = cartItems.Select(cartItem => new CartItemDTO

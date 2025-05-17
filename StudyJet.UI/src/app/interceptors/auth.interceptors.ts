@@ -6,9 +6,6 @@ import { CookieService } from 'ngx-cookie-service';
 export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<any>, next: HttpHandlerFn): Observable<HttpEvent<any>> => {
   const cookieService = inject(CookieService); 
   const token = cookieService.get('authToken'); 
-
-  console.log('Intercepting request:', req.url, 'Token exists?', !!token); // 👈 Add logging
-
  
   if (token) {
     const authReq = req.clone({

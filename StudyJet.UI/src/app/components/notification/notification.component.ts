@@ -76,9 +76,7 @@ handleNotificationClick(notification: Notification): void {
   // Navigate to course detail page if courseID is available
   if (courseId) {
     this.router.navigate(['/courses', courseId]);
-  } else {
-    console.log('No courseId found for notification');
-  }
+  } 
  
   // Mark clicked notification as read if it isn't already
   if (!notification.isRead) {
@@ -89,8 +87,6 @@ handleNotificationClick(notification: Notification): void {
     });
   }
 }
-
-
 
 }
 

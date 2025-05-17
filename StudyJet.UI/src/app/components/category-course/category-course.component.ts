@@ -67,7 +67,6 @@ export class CategoryCourseComponent implements OnInit {
 
   // Fetch courses associated with the current category
   loadCourses(categoryId: number): void {
-    console.log('Calling loadCourses for categoryID:', categoryId);
     this.categoryService.getCoursesByCategory(categoryId).subscribe({
       next: (response: any) => {
         const courses = response.courses;
@@ -102,7 +101,7 @@ export class CategoryCourseComponent implements OnInit {
 
     // Check if course is in wishlist
   isInWishlist(courseId: number): boolean {
-    return this.wishlist.some(item => item.courseID === courseId);
+    return this.wishlist?.some(item => item.courseID === courseId) ?? false;
   }
 
 // Add or remove course from wishlist (based on its current state)

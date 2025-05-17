@@ -136,7 +136,6 @@ export class RegisterComponent implements OnInit {
 
   // Handle registration errors based on the error response from backend
   private handleRegistrationError(error: any) {
-    console.log(error);
     if (error.status === 400 && error.error) {
       if (error.error.usernameExists) {
         this.errorMessage = 'This username is already taken.';
@@ -168,7 +167,6 @@ export class RegisterComponent implements OnInit {
   
       // Async validation errors
       if (control.hasError('usernameExists')){
-        console.log('Email already exists error is triggered'); 
        return 'This username is already taken.';
       }
       if (control.hasError('emailExists')) return 'This email is already registered.';  

@@ -35,7 +35,6 @@ export function emailExistsValidator(userService: UserService): AsyncValidatorFn
       debounceTime(300), 
       distinctUntilChanged(), 
       switchMap(emailExists => {
-        console.log('Email exists: ', emailExists);
         if (emailExists) {
           return of({ emailExists: true }); 
         } else {
