@@ -25,6 +25,8 @@ namespace StudyJet.API.Controllers
             _userService = userService;
         }
 
+
+        // Get all notifications for the logged-in user(admin & instructor)
         [HttpGet]
         public async Task<IActionResult> GetNotifications()
         {
@@ -49,6 +51,7 @@ namespace StudyJet.API.Controllers
         }
 
 
+        // Send a notification to an instructor about a course approval status update
         [HttpPost("notify-instructor-on-course-status")]
         public async Task<IActionResult> NotifyInstructorOnCourseStatus([FromBody] CourseApprovalRequestDTO request)
         {
@@ -84,7 +87,7 @@ namespace StudyJet.API.Controllers
         }
 
 
-
+        // Mark a notification as read by the admin or instructor
         [HttpPut("mark-read/{notificationId}")]
         public async Task<IActionResult> MarkNotificationAsRead(int notificationId)
         {

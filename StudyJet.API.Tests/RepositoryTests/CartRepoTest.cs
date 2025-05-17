@@ -2,13 +2,6 @@
 using StudyJet.API.Data;
 using StudyJet.API.Data.Entities;
 using StudyJet.API.Repositories.Implementation;
-using StudyJet.API.Repositories.Interface;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace StudyJet.API.Tests.RepositoryTests
 {

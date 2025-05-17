@@ -76,7 +76,7 @@ export class NavbarComponent implements OnInit {
   ngOnInit() {
     this.inactivityService.startMonitoring();
     this.navbarType = 'hidden';
-    // this.loadCategories();
+    this.loadCategories();
 
     // Sync navbar type
     this.subscriptions.push(
@@ -122,7 +122,6 @@ export class NavbarComponent implements OnInit {
       this.authService.isAuthenticated$.subscribe((isAuthenticated) => {
         this.isAuthenticated = isAuthenticated;
         if (isAuthenticated) {
-          this.loadCategories();
           this.notificationService.getNotifications().subscribe(notifications => {
             this.notificationService.updateUnreadNotificationsCount(notifications);
           });
@@ -153,7 +152,7 @@ export class NavbarComponent implements OnInit {
   onResize(event: Event) {
     this.updatePlaceholderText((event.target as Window).innerWidth);
   }
-  
+
   // UI Toggles
   toggleNavbar() {
     this.isNavbarCollapsed = !this.isNavbarCollapsed;
@@ -194,10 +193,10 @@ export class NavbarComponent implements OnInit {
   }
 
   loadCategories(): void {
-      console.log('Loading categories1...');
+    console.log('Loading categories1...');
     this.categoryService.getCategories().subscribe({
       next: (data: Category[]) => {
-              console.log('Categories loaded:', data);
+        console.log('Categories loaded:', data);
         this.categories = data;
         this.cdr.detectChanges();
         console.log('Categories loaded:', this.categories);

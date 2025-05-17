@@ -16,7 +16,7 @@ namespace StudyJet.API.Controllers
             _categoryService = categoryService;
         }
 
-
+        // Retrieves all categories
         [HttpGet]
         public async Task<ActionResult<List<CategoryResponseDTO>>> GetAllCategories()
         {
@@ -32,6 +32,7 @@ namespace StudyJet.API.Controllers
         }
 
 
+        // Retrieves a single category by its ID
         [HttpGet("{id}")]
         public async Task<ActionResult<CategoryResponseDTO>> GetCategoryById(int id)
         {
@@ -43,6 +44,7 @@ namespace StudyJet.API.Controllers
         }
 
 
+        // Adds a new category (Admin only)
         [HttpPost]
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<int>> AddCategory(CategoryRequestDTO categoryDto)
@@ -57,7 +59,7 @@ namespace StudyJet.API.Controllers
         }
 
 
-
+        // Update of categories is currently disabled
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult> UpdateCategory(int id, CategoryRequestDTO categoryDto)
@@ -66,6 +68,7 @@ namespace StudyJet.API.Controllers
         }
 
 
+        // Deletion of categories is currently disabled
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult> DeleteCategory(int id)
@@ -74,6 +77,7 @@ namespace StudyJet.API.Controllers
         }
 
 
+        // Checks if a category exists by ID
         [HttpGet("exists/{id}")]
         public async Task<ActionResult<bool>> CategoryExists(int id)
         {

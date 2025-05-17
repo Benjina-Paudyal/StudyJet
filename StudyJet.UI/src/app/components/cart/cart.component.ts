@@ -132,4 +132,5 @@ export class CartComponent implements OnInit, OnDestroy {
   trackByCartId(index: number, item: any): number {
     return item.courseID;
   }
+
 }

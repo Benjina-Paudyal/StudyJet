@@ -24,6 +24,7 @@ namespace StudyJet.API.Controllers
             _courseService = courseService;
         }
 
+        // Adds a course to the authenticated user's cart, removing it from wishlist if present
         [HttpPost("{courseId}/add")]
         public async Task<IActionResult> AddToCart(int courseId)
         {
@@ -54,6 +55,7 @@ namespace StudyJet.API.Controllers
         }
 
 
+        // Retrieves all cart items for the authenticated user
         [HttpGet]
         public async Task<IActionResult> GetCartItems()
         {
@@ -86,6 +88,7 @@ namespace StudyJet.API.Controllers
         }
 
 
+        // Removes a specified course from the authenticated user's cart
         [HttpDelete("{courseId}/remove")]
         public async Task<IActionResult> RemoveFromCart(int courseId)
         {
@@ -107,6 +110,7 @@ namespace StudyJet.API.Controllers
         }
 
 
+        // Gets details of a specific course by courseId
         [HttpGet("course/{courseId}")]
         public async Task<IActionResult> GetCourseDetails(int courseId)
         {
@@ -128,6 +132,7 @@ namespace StudyJet.API.Controllers
         }
 
 
+        // Moves a course from the cart to the wishlist for the authenticated user
         [HttpPost("move-to-wishlist/{courseId}")]
         public async Task<IActionResult> MoveToWishlist(int courseId)
         {

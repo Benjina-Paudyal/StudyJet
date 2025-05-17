@@ -25,7 +25,7 @@ export class EmailConfirmationComponent implements OnInit{
         this.confirmationSuccess = true;
         this.confirmationMessage = "Email confirmed! Redirecting to login…";
         setTimeout(() => {
-          this.router.navigate(['/home']);
+          this.router.navigate(['/login']);
         }, 5000);
       } else {
         this.confirmationMessage = params['error'] || "Email confirmation failed. Please try again.";

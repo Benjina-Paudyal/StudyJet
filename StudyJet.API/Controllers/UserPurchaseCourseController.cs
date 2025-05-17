@@ -32,7 +32,7 @@ namespace StudyJet.API.Controllers
             _configuration = configuration;
         }
 
-
+        // Get courses purchased by the logged-in user
         [HttpGet("my-courses")]
         public async Task<IActionResult> GetPurchasedCourse()
         {
@@ -48,7 +48,7 @@ namespace StudyJet.API.Controllers
             return Ok(courses);
         }
 
-
+        // Get course suggestions for the logged-in user
         [HttpGet("suggested-courses")]
         public async Task<IActionResult> GetSuggestedCourses()
         {
@@ -64,8 +64,7 @@ namespace StudyJet.API.Controllers
             return Ok(suggestedCourses);
         }
 
-
-
+        // Create Stripe checkout session for purchasing courses
         [HttpPost("create-checkout-session")]
         public async Task<IActionResult> CreateCheckoutSession([FromBody] PurchaseRequestDTO request)
         {
@@ -85,9 +84,9 @@ namespace StudyJet.API.Controllers
 
             return Ok(new { url = sessionUrl });
         }
-        
 
 
+        // Handle Stripe webhook events for completed payments
         [AllowAnonymous]
         [HttpPost("stripe-webhook")]
         public async Task<IActionResult> StripeWebhook()
@@ -174,14 +173,6 @@ namespace StudyJet.API.Controllers
 
             return Ok();
         }
-
-
-
-
-
-
-
-
 
     }
 }

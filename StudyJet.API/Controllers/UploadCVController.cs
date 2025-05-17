@@ -14,14 +14,17 @@ namespace StudyJet.API.Controllers
             _fileStorageService = fileStorageService;
         }
 
+
         [HttpPost("upload-cv")]
         public async Task<IActionResult> UploadCV(IFormFile cvFile)
         {
+            // Validate if file is provided
             if (cvFile == null || cvFile.Length == 0)
             {
                 return BadRequest(new { message = "No file uploaded." });
             }
 
+            // Allowed file extensions
             var allowedExtensions = new[] { ".pdf" };
             var extension = Path.GetExtension(cvFile.FileName).ToLowerInvariant();
 

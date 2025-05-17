@@ -33,6 +33,7 @@ namespace StudyJet.API.Controllers
 
         }
 
+        // Registers a new user, handling profile picture and validation
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromForm] UserRegistrationSwaggerDTO registrationDto)
         {
@@ -56,7 +57,7 @@ namespace StudyJet.API.Controllers
                 return BadRequest(new { emailExists = true });
             }
 
-            // Converting Swagger DTO to internal DTO 
+            // Map Swagger DTO to internal DTO and set profile picture URL
             var userRegistrationDto = new UserRegistrationDTO
             {
                 UserName = registrationDto.UserName,
@@ -68,7 +69,6 @@ namespace StudyJet.API.Controllers
             };
             var defaultProfilePicUrl = _configuration["DefaultProfilePicPaths:ProfilePicture"];
 
-            // Handling profile picture
             if (registrationDto.ProfilePicture != null)
             {
                 string profilePicUrl = await _fileService.SaveProfilePictureAsync(registrationDto.ProfilePicture);
@@ -94,6 +94,8 @@ namespace StudyJet.API.Controllers
             return BadRequest(errorResponse);
         }
 
+
+        // Registers a new instructor - Admin only
         [Authorize(Roles = "Admin")]
         [HttpPost("register-instructor")]
         public async Task<IActionResult> RegisterInstructor([FromForm] InstructorRegistrationDTO instructorRegistrationDTO)
@@ -108,7 +110,7 @@ namespace StudyJet.API.Controllers
         }
 
 
-
+        // Authenticates user and returns JWT token or 2FA/Password change prompts
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] UserLoginDTO loginDto)
         {
@@ -132,7 +134,7 @@ namespace StudyJet.API.Controllers
                     return Unauthorized(new ErrorResponseDTO { Errors = new List<string> { "Invalid email or password." } });
                 }
 
-                //  if user is instructor
+                // Require password change for instructors flagged as such
                 if (user.NeedToChangePassword)
                 {
                     var resetToken = await _authService.GeneratePasswordResetTokenAsync(user.Email);
@@ -148,7 +150,7 @@ namespace StudyJet.API.Controllers
                         ResetToken = resetToken
                     });
                 }
-
+                // Handle two-factor authentication step
                 if (user.TwoFactorEnabled)
                 {
                     var tempToken = _authService.GenerateTempTokenAsync(user);
@@ -164,6 +166,7 @@ namespace StudyJet.API.Controllers
                     });
                 }
 
+                // Generate JWT token for authenticated user
                 var token = await _authService.GenerateJwtTokenAsync(user);
                 var roles = await _userService.GetUserRolesAsync(user);
                 List<string> rolesList = roles.ToList();
@@ -194,7 +197,7 @@ namespace StudyJet.API.Controllers
         }
 
 
-
+        // Confirms user's email using token and redirects to frontend
         [HttpGet("confirm-email")]
         public async Task<IActionResult> ConfirmationEmail(string token, string email)
         {
@@ -225,13 +228,12 @@ namespace StudyJet.API.Controllers
             }
             var resetToken = await _authService.GeneratePasswordResetTokenAsync(email);
 
-            // Redirection to frontend 
+            // Redirect to frontend confirmation page with tokens
             return Redirect($"https://localhost:4200/confirmation?confirmed=true&email={Uri.EscapeDataString(email)}&token={Uri.EscapeDataString(resetToken)}");
         }
 
 
-
-
+        // Initiates 2FA setup and returns QR code image
         [HttpPost("initiate-2fa")]
         [Authorize]
         public async Task<IActionResult> Initiate2FA()
@@ -246,6 +248,7 @@ namespace StudyJet.API.Controllers
             return File(result.QrCodeImage, "image/png");
         }
 
+        // Confirms 2FA setup with user-provided code
         [HttpPost("confirm-2fa")]
         [Authorize]
         public async Task<IActionResult> Confirm2FA([FromBody] Verify2faDTO model)
@@ -260,6 +263,8 @@ namespace StudyJet.API.Controllers
             return Ok(new { message = "2FA enabled successfully." });
         }
 
+
+        // Verifies 2FA login code and issues JWT token on success
         [HttpPost("verify-2fa-login")]
         [AllowAnonymous]
         public async Task<IActionResult> VerifyTwoFactorLogin([FromBody] Verify2faLoginDTO model)
@@ -306,6 +311,8 @@ namespace StudyJet.API.Controllers
             }
         }
 
+
+        // Checks if 2FA is enabled for the authenticated user
         [HttpGet("check-2fa-status")]
         public async Task<IActionResult> Check2FAStatus()
         {
@@ -329,6 +336,8 @@ namespace StudyJet.API.Controllers
             }
         }
 
+
+        // Disables 2FA for the authenticated user
         [HttpPost("disable-2fa")]
         public async Task<IActionResult> Disable2FA()
         {
@@ -356,9 +365,7 @@ namespace StudyJet.API.Controllers
         }
 
 
-
-
-
+        // Handles forgot password requests and sends reset link if email exists
         [HttpPost("forgot-password")]
         public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDTO forgotPasswordDto)
         {
@@ -376,6 +383,7 @@ namespace StudyJet.API.Controllers
         }
 
 
+        // Verifies user password for login or authentication purposes
         [HttpPost("verify-password")]
         public async Task<IActionResult> VerifyPassword([FromBody] VerifyPasswordRequestDTO request)
         {
@@ -396,6 +404,7 @@ namespace StudyJet.API.Controllers
         }
 
 
+        // Allows authenticated users to change their password
         [Authorize]
         [HttpPost("change-password")]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDTO model)
@@ -421,6 +430,7 @@ namespace StudyJet.API.Controllers
         }
 
 
+        // Resets password using a valid token 
         [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDTO resetPasswordDto)
         {
@@ -446,6 +456,7 @@ namespace StudyJet.API.Controllers
                 return BadRequest(new { Message = errorMessage });
             }
 
+            // For instructors, update password reset flag
             if (isInstructor && user.NeedToChangePassword)
             {
                 user.NeedToChangePassword = false;
@@ -459,46 +470,7 @@ namespace StudyJet.API.Controllers
             return Ok(new { Message = "Password has been successfully reset." });
         }
 
-
-
-
-
-       
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        
 
 
 

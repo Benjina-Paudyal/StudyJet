@@ -168,26 +168,3 @@ export class WishlistComponent implements OnInit, OnDestroy {
     return item.courseID;
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

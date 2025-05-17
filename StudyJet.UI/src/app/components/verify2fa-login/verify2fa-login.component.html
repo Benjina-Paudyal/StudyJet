@@ -4,7 +4,7 @@
         <h2 class="mb-4 text-success fw-bold" style="white-space: nowrap;">Two-Factor Authentication</h2>
         <p class="mb-3 fw-normal">Please enter the verification code from your authenticator app.</p>
         <input type="text" [(ngModel)]="code" class="form-control mb-3" placeholder="Enter 2FA Code" />
-        <button (click)="verify2FALogin()" class="btn btn-success btn-lg btn-block">Verify1</button>
+        <button (click)="verify2FALogin()" class="btn btn-success btn-lg btn-block">Verify</button>
         <p *ngIf="errorMessage" class="text-danger mt-3">{{ errorMessage }}</p>
     </div>
   </div>

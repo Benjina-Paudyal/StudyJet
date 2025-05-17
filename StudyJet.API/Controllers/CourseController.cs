@@ -28,6 +28,7 @@ namespace StudyJet.API.Controllers
 
         }
 
+        // Get all courses (Admin only)
         [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<ActionResult<List<CourseResponseDTO>>> GetAll()
@@ -36,7 +37,7 @@ namespace StudyJet.API.Controllers
             return Ok(courses);
         }
 
-
+        // Get course details by ID
         [HttpGet("{id}")]
         public async Task<ActionResult<CourseResponseDTO>> GetById(int id)
         {
@@ -49,6 +50,7 @@ namespace StudyJet.API.Controllers
         }
 
 
+        // Get popular courses
         [HttpGet("popular")]
         public async Task<ActionResult<List<CourseResponseDTO>>> GetPopularCourses()
         {
@@ -56,7 +58,8 @@ namespace StudyJet.API.Controllers
             return Ok(courses);
         }
 
-      
+
+        // Search courses by query string
         [HttpGet("search")]
         public async Task<IActionResult> Search(string query)
         {
@@ -74,7 +77,7 @@ namespace StudyJet.API.Controllers
             return Ok(results);
         }
 
-
+        // Get total number of courses (Admin only)
         [Authorize(Roles = "Admin")]
         [HttpGet("GetTotalCourses")]
         public async Task<IActionResult> GetTotalCourses()
@@ -83,6 +86,8 @@ namespace StudyJet.API.Controllers
             return Ok(totalCourses);
         }
 
+
+        // Get courses pending approval (Admin only)
         [Authorize(Roles = "Admin")]
         [HttpGet("pending")]
         public async Task<ActionResult<IEnumerable<Course>>> GetPendingCourses()
@@ -91,7 +96,7 @@ namespace StudyJet.API.Controllers
             return Ok(pendingCourses);
         }
 
-       
+        // Get approved courses
         [HttpGet("approved")]
         public async Task<ActionResult<IEnumerable<Course>>> GetApprovedCourses()
         {
@@ -100,6 +105,7 @@ namespace StudyJet.API.Controllers
         }
 
 
+        // Get all courses created by the logged-in instructor
         [Authorize(Roles = "Instructor")]
         [HttpGet("course-by-instructor")]
         public async Task<IActionResult> GetCoursesByInstructor()
@@ -125,6 +131,7 @@ namespace StudyJet.API.Controllers
         }
 
 
+        // Get the total number of courses by the logged-in instructor
         [Authorize(Roles = "Instructor")]
         [HttpGet("total-courses-by-instructor")]
         public async Task<IActionResult> GetTotalCoursesForInstructor()
@@ -148,6 +155,7 @@ namespace StudyJet.API.Controllers
         }
 
 
+        // Get list of students enrolled in a specific course (Admin only)
         [Authorize(Roles = "Admin")]
         [HttpGet("{courseId}/students")]
         public async Task<IActionResult> GetEnrolledStudents(int courseId)
@@ -175,6 +183,7 @@ namespace StudyJet.API.Controllers
         }
 
 
+        // Get all courses along with their enrolled students for the logged-in instructor
         [Authorize(Roles = "Instructor")]
         [HttpGet("instructor/courses/students")]
         public async Task<IActionResult> GetCoursesWithStudents()
@@ -197,6 +206,7 @@ namespace StudyJet.API.Controllers
         }
 
 
+        // Create a new course with image upload by the instructor
         [Authorize(Roles = "Instructor")]
         [HttpPost("create")]
         public async Task<ActionResult<int>> Create([FromForm] CreateCourseRequestDTO dto)
@@ -225,6 +235,7 @@ namespace StudyJet.API.Controllers
         }
 
 
+        // Approve a course (Admin only)
         [Authorize(Roles = "Admin")]
         [HttpPut("approve/{courseId}")]
         public async Task<IActionResult> ApproveCourse(int courseId)
@@ -240,6 +251,7 @@ namespace StudyJet.API.Controllers
         }
 
 
+        // Reject a course (Admin only)
         [Authorize(Roles = "Admin")]
         [HttpPut("reject/{courseId}")]
         public async Task<IActionResult> RejectCourse(int courseId)
@@ -254,6 +266,7 @@ namespace StudyJet.API.Controllers
         }
 
 
+        // Get course details for update (instructor must own the course)
         [Authorize(Roles = "Instructor")]
         [HttpGet("{courseId}/update")]
         public async Task<IActionResult> GetCourseForUpdate(int courseId)
@@ -282,7 +295,7 @@ namespace StudyJet.API.Controllers
             return Ok(courseUpdate);
         }
 
-
+        // Submit course update request (instructor must own the course)
         [Authorize(Roles = "Instructor")]
         [HttpPost("{courseId}/submitUpdate")]
         public async Task<IActionResult> SubmitUpdateAsync(int courseId, [FromForm] UpdateCourseRequestDTO updateDto)
@@ -319,7 +332,7 @@ namespace StudyJet.API.Controllers
             return Ok(new { message = "Course update submitted successfully." });
         }
 
-
+        // Approve pending course update (Admin only)
         [Authorize(Roles = "Admin")]
         [HttpPut("approve-update/{courseId}")]
         public async Task<IActionResult> ApprovePendingUpdate(int courseId)
@@ -341,7 +354,7 @@ namespace StudyJet.API.Controllers
             }
         }
 
-
+        // Reject pending course updates (Admin only)
         [Authorize(Roles = "Admin")]
         [HttpPost("reject-updates/{courseId}")]
         public async Task<IActionResult> RejectPendingUpdates(int courseId)

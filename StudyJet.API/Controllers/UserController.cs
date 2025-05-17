@@ -16,6 +16,7 @@ namespace StudyJet.API.Controllers
             
         }
 
+        // Checks if a given username already exists in the system
         [HttpGet("username-exists")]
         public async Task<IActionResult> CheckUsername([FromQuery] string username)
         {
@@ -29,6 +30,7 @@ namespace StudyJet.API.Controllers
         }
 
 
+        // Checks if a given email already exists in the system
         [HttpGet("email-exists")]
         public async Task<IActionResult> CheckEmailExists([FromQuery] string email)
         {
@@ -43,6 +45,7 @@ namespace StudyJet.API.Controllers
         }
 
 
+        // Retrieves all users with a specific role (Admin-only access)
         [Authorize(Roles = "Admin")]
         [HttpGet("GetUsersByRole/{role}")]
         public async Task<IActionResult> GetUsersByRole(string role)
@@ -63,6 +66,7 @@ namespace StudyJet.API.Controllers
         }
 
 
+        // Returns total count of users with Student role (Admin-only)
         [Authorize(Roles = "Admin")]
         [HttpGet("count-students")]
         public async Task<IActionResult> CountStudents()
@@ -72,6 +76,7 @@ namespace StudyJet.API.Controllers
         }
 
 
+        // Returns total count of users with Instructor role (Admin-only)
         [Authorize(Roles = "Admin")]
         [HttpGet("count-instructors")]
         public async Task<IActionResult> CountInstructors()

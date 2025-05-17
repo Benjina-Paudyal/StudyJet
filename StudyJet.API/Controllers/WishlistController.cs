@@ -20,6 +20,7 @@ namespace StudyJet.API.Controllers
             _cartService = cartService;
         }
 
+        // Get the authenticated user's wishlist items
         [HttpGet]
         public async Task<IActionResult> GetWishlist()
         {
@@ -48,7 +49,7 @@ namespace StudyJet.API.Controllers
             }
         }
 
-
+        // Add a course to the authenticated user's wishlist
         [HttpPost("{courseId}")]
         public async Task<IActionResult> AddToWishlist(int courseId)
         {
@@ -83,7 +84,7 @@ namespace StudyJet.API.Controllers
             }
         }
 
-      
+        // Check if a course is in the authenticated user's wishlist
         [HttpGet("is-in-wishlist/{courseId}")]
         public async Task<IActionResult> IsCourseInWishlist(int courseId)
         {
@@ -107,7 +108,7 @@ namespace StudyJet.API.Controllers
             }
         }
 
-
+        // Remove a course from the authenticated user's wishlist
         [HttpDelete("{courseId}")]
         public async Task<IActionResult> RemoveFromWishlist(int courseId)
         {
@@ -135,9 +136,6 @@ namespace StudyJet.API.Controllers
                 return StatusCode(500, new { success = false, message = $"Internal server error: {ex.Message}" });
             }
         }
-
-
-
 
     }
 }
