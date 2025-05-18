@@ -31,7 +31,8 @@ loadNotifications(): void {
   this.error = null;
 
   this.notificationService.getNotifications().subscribe({
-    next: (notifications: Notification[]) => {
+    next: (notifications: Notification[] | null) => {
+      if (notifications && Array.isArray(notifications)) {
       // Convert date string to Date object for easier formatting in the template
       this.notifications = notifications.map(notification => ({
         ...notification,
@@ -41,6 +42,10 @@ loadNotifications(): void {
       // Count and update unread notifications
        this.unreadNotificationsCount = this.notifications.filter(n => !n.isRead).length;
        this.notificationService.updateUnreadNotificationsCount(this.notifications);
+    } else {
+      this.notifications = [];
+      this.unreadNotificationsCount = 0;
+    }
       
       this.loading = false;
     },

@@ -43,3 +43,7 @@
 .card:hover {
   background-color: #eef5f1;
 }
+
+.notification.container {
+  min-height: 300px;
+}

@@ -4,6 +4,8 @@ import { FormsModule, ReactiveFormsModule, FormGroup, FormBuilder } from '@angul
 import { ActivatedRoute, Router } from '@angular/router';
 import { CourseService } from '../../services/course.service';
 import { ImageService } from '../../services/image.service';
+import { decodeToken, DecodedToken } from '../../models';
+import { CookieService } from 'ngx-cookie-service';
 
 @Component({
   selector: 'app-update-course',
@@ -24,27 +26,43 @@ export class UpdateCourseComponent implements OnInit {
     private courseService: CourseService,
     private route: ActivatedRoute,
     private router: Router,
-    private imageService: ImageService
-  ) {}
+    private imageService: ImageService,
+    private cookieService: CookieService
+  ) { }
 
   ngOnInit(): void {
     // Extract course ID from the route parameters
     this.courseId = +this.route.snapshot.paramMap.get('id')!;
-    this.loadCourseData();
-  
+    // this.loadCourseData();
+
     // Initialize the form group with default values
     this.updateCourseForm = this.fb.group({
       title: [''],
       description: [''],
       price: [''],
       videoUrl: [''],
-      imageFile: [null] 
+      imageFile: [null]
     });
+    this.loadCourseData();
+  }
+
+  getLoggedInUserId(): string | null {
+    const token = this.cookieService.get('authToken');
+    if (!token) return null;
+    const decoded: DecodedToken | null = decodeToken(token);
+    return decoded ? decoded.userId : null;
   }
 
   // Method to load course data from backend and populate the form
   loadCourseData() {
     this.courseService.getCourseById(this.courseId).subscribe(course => {
+      const loggedInUserId = this.getLoggedInUserId();
+
+       if (!loggedInUserId || course.instructorID !== loggedInUserId) {
+        alert('You are not authorized to update this course.');
+        this.router.navigate(['/unauthorized']);
+        return;
+      }
 
       // Populate form with the course data
       this.updateCourseForm.patchValue({
@@ -53,7 +71,7 @@ export class UpdateCourseComponent implements OnInit {
         price: course.price,
         videoUrl: course.videoUrl
       });
-      
+
       // Set image preview if a course image exists
       if (course.imageUrl) {
         this.imagePreview = this.imageService.getCourseImageUrl(course.imageUrl);
@@ -63,16 +81,15 @@ export class UpdateCourseComponent implements OnInit {
 
   onFileChange(event: any) {
     const file = event.target.files.length > 0 ? event.target.files[0] : null;
-  
     if (file) {
       this.selectedFile = file;
-  
+
       // Create a FileReader to show the selected image as a preview
       const reader = new FileReader();
       reader.onload = () => {
-        this.imagePreview = reader.result as string; 
+        this.imagePreview = reader.result as string;
       };
-      reader.readAsDataURL(file); 
+      reader.readAsDataURL(file);
     }
   }
 
@@ -85,12 +102,12 @@ export class UpdateCourseComponent implements OnInit {
     formData.append('description', this.updateCourseForm.get('description')?.value || '');
     formData.append('price', this.updateCourseForm.get('price')?.value || '');
     formData.append('videoUrl', this.updateCourseForm.get('videoUrl')?.value || '');
-    
+
     // Append selected image file if available
     if (this.selectedFile) {
       formData.append('imageFile', this.selectedFile);
     }
-  
+
     // Call the service to update the course with the form data
     this.courseService.updateCourse(this.courseId, formData).subscribe({
       next: () => {

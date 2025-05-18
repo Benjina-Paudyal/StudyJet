@@ -23,35 +23,6 @@ namespace StudyJet.API.Controllers
 
 
         // Get the authenticated user's wishlist items
-        //[HttpGet]
-        //public async Task<IActionResult> GetWishlist()
-        //{
-        //    try
-        //    {
-        //        var userId = User.FindFirst(CustomClaimTypes.UserId)?.Value;
-        //        var role = User.FindFirst(ClaimTypes.Role)?.Value;
-
-        //        if (string.IsNullOrEmpty(userId))
-        //        {
-        //            return Unauthorized(new { message = "User is not authenticated." });
-        //        }
-
-        //        var wishlist = await _wishlistService.GetWishlistAsync(userId);
-
-        //        if (wishlist == null || !wishlist.Any())
-        //        {
-        //            return NotFound(new { message = "No items found in the wishlist." });
-        //        }
-
-        //        return Ok(wishlist);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return StatusCode(500, new { message = $"Internal server error: {ex.Message}" });
-        //    }
-        //}
-
-
         [HttpGet]
         public async Task<IActionResult> GetWishlist()
         {
@@ -76,8 +47,6 @@ namespace StudyJet.API.Controllers
                 return StatusCode(500, new { message = $"Internal server error: {ex.Message}" });
             }
         }
-
-
 
 
         // Add a course to the authenticated user's wishlist
