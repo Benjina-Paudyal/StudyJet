@@ -48,9 +48,6 @@ namespace StudyJet.API.Services.Implementation
             {
                 var latestUpdate = courseUpdates.FirstOrDefault(cu => cu.CourseID == course.CourseID);
 
-                // Show rejected courses only if they have a pending update
-                if (latestUpdate != null || course.Status != CourseStatus.Rejected)
-                {
                     combinedCourses.Add(new CourseResponseDTO
                     {
                         CourseID = latestUpdate?.CourseID ?? course.CourseID,
@@ -69,7 +66,7 @@ namespace StudyJet.API.Services.Implementation
                         IsUpdate = latestUpdate != null
                     });
                 }
-            }
+            
 
             return combinedCourses
                 .OrderByDescending(c => c.Status == CourseStatus.Pending)  
