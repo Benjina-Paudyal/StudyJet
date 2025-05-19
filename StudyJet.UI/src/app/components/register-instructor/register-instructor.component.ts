@@ -79,6 +79,9 @@ export class RegisterInstructorComponent implements OnInit {
     this.errorMessage = null;
     this.successMessage = null;
 
+     // Disable async validators to prevent flicker
+    this.toggleAsyncValidators(false);
+
     const formData = new FormData();
     formData.append('FullName', this.fullName?.value);
     formData.append('UserName', this.userName?.value);
@@ -105,6 +108,9 @@ export class RegisterInstructorComponent implements OnInit {
       error: (error) => {
         this.loading = false;
         this.errorMessage = error.error?.message || "Registration failed. Please try again.";
+
+      // Re-enable async validators on error to restore validation behavior
+      this.toggleAsyncValidators(true);
       },
     });
   }
@@ -126,5 +132,21 @@ export class RegisterInstructorComponent implements OnInit {
       this.errorMessage = 'An unexpected error occurred. Please try again later.';
     }
   }
+
+
+
+
+  private toggleAsyncValidators(enable: boolean) {
+  if (enable) {
+    this.userName?.setAsyncValidators(usernameExistsValidator(this.userService));
+    this.email?.setAsyncValidators(emailExistsValidator(this.userService));
+  } else {
+    this.userName?.clearAsyncValidators();
+    this.email?.clearAsyncValidators();
+  }
+  this.userName?.updateValueAndValidity({ emitEvent: false });
+  this.email?.updateValueAndValidity({ emitEvent: false });
+}
+
 }
 
