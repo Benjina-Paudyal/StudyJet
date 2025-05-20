@@ -6,6 +6,7 @@ import { CategoryService } from '../../services/category.service';
 import { Router } from '@angular/router';
 import { Category } from '../../models';
 import { CookieService } from 'ngx-cookie-service';
+import { youtubeUrlValidator } from '../../validators/custom.validator';
 
 @Component({
   selector: 'app-add-course',
@@ -64,7 +65,7 @@ export class AddCourseComponent implements OnInit {
       categoryID: [null, [Validators.required]],
       creationDate: [new Date(), [Validators.required]],
       lastUpdatedDate: [new Date(), [Validators.required]],
-      videoUrl: [null, [Validators.required]],
+      videoUrl: ['', [Validators.required, youtubeUrlValidator()]],
       isPopular: [false],
       totalPrice: [0, [Validators.required]],
       isApproved: [false],
@@ -133,18 +134,14 @@ export class AddCourseComponent implements OnInit {
   }
 
   // Handles file input change for image and video
-  onFileChange(event: any, field: 'imageUrl' | 'videoUrl'): void {
+  onFileChange(event: any, field: 'imageUrl'): void {
     const file = event.target.files[0];
     if (file) {
-      if (field === 'imageUrl' && !file.type.startsWith('image/')) {
+      if (!file.type.startsWith('image/')) {
         this.errorMessage = 'Please upload a valid image.';
         return;
       }
-      if (field === 'videoUrl' && !file.type.startsWith('video/')) {
-        this.errorMessage = 'Please upload a valid video.';
-        return;
-      }
-      this.courseForm.patchValue({ [field]: file });
+      this.courseForm.patchValue({ imageUrl: file });
     }
   }
 }

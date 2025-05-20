@@ -99,3 +99,14 @@ export function usernameExistsValidator(userService: UserService): AsyncValidato
     );
   };
 }
+
+
+export function youtubeUrlValidator(): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+    const url = control.value;
+    const youtubeRegex = /^(https?\:\/\/)?(www\.youtube\.com|youtu\.be)\/.+$/;
+
+    if (!url) return null; 
+    return youtubeRegex.test(url) ? null : { invalidYoutubeUrl: true };
+  };
+}

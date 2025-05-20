@@ -21,6 +21,7 @@ namespace StudyJet.API.Services.Implementation
             _notificationService = notificationService;
             _fileStorageService = fileStorageService;
         }
+
         public async Task<List<CourseResponseDTO>> GetAllAsync()
         {
             var courseStatuses = new List<CourseStatus>

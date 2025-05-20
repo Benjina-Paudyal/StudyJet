@@ -101,7 +101,7 @@ export class RegisterInstructorComponent implements OnInit {
 
         setTimeout(() => {
           this.successMessage = null; 
-          this.router.navigate(['/admin-dashboard']);  
+          this.router.navigate(['/manage-instructors']);  
         }, 5000);  
       },
 
