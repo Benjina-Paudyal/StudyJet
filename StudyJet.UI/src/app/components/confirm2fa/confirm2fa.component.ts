@@ -44,7 +44,7 @@ export class Confirm2faComponent {
     this.authService.confirm2FA(code).subscribe({
       next: (response) => {
         this.successMessage = response.message || '2FA successfully enabled!';
-        setTimeout(() => this.router.navigate(['/login']), 3000);
+        setTimeout(() => this.router.navigate(['/student-dashboard']), 3000);
       },
       error: (err) => {
         this.errorMessage = err?.error?.message || 'Verification failed.';

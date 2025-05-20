@@ -1,3 +1,4 @@
+
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -85,7 +86,7 @@ export class Enable2faComponent implements OnInit{
         this.is2FAEnabled = false;
         this.successMessage = 'StudyJet: 2FA has been disabled successfully.';
         this.errorMessage = null;
-        setTimeout(() => this.router.navigate(['/login']), 3000);
+        setTimeout(() => this.router.navigate(['/student-dashboard']), 3000);
       },
       error: (error) => {
         // Set error message if disabling 2FA fails

@@ -76,6 +76,7 @@ export class UpdateCourseComponent implements OnInit {
       if (course.imageUrl) {
         this.imagePreview = this.imageService.getCourseImageUrl(course.imageUrl);
       }
+    
     });
   }
 
