@@ -199,7 +199,7 @@ namespace StudyJet.API.Controllers
 
             if (coursesWithStudents == null || !coursesWithStudents.Any())
             {
-                return NotFound(new { message = "No courses with enrolled students found." });
+                return Ok(new List<object>());
             }
 
             return Ok(coursesWithStudents);

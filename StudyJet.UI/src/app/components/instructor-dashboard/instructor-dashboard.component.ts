@@ -125,17 +125,26 @@ export class InstructorDashboardComponent implements OnInit {
   }
 
   // Fetch the total count of enrolled students
-  loadEnrolledStudentsCount(): void {
-    this.userService.getEnrolledUsersCountForInstructor().subscribe({
-      next: (count) => {
-        this.enrolledStudentsCount = count;
-      },
-      error: (error) => {
+ loadEnrolledStudentsCount(): void {
+  this.userService.getEnrolledUsersCountForInstructor().subscribe({
+    next: (count) => {
+      this.enrolledStudentsCount = count;
+      this.error = null;
+    },
+    error: (error) => {
+      if (error.status === 404) {
+        // Backend is saying no courses with enrolled students
+        console.warn('No courses with enrolled students found.');
+        this.enrolledStudentsCount = 0;
+        this.error = null;
+      } else {
         console.error('Error fetching enrolled students count:', error);
         this.error = 'Failed to fetch enrolled students count.';
       }
-    });
-  }
+    }
+  });
+}
+
 
   // Fetch the total count of unread notifications
   loadNotificationCount(): void {
@@ -170,5 +179,8 @@ export class InstructorDashboardComponent implements OnInit {
     });
   }
 }
+
+
+
 
 

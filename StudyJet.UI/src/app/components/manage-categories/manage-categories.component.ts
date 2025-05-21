@@ -3,6 +3,9 @@ import { Category } from '../../models';
 import { CategoryService } from '../../services/category.service';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { ViewChild } from '@angular/core';
+import { NgForm } from '@angular/forms';
+
 
 @Component({
   selector: 'app-manage-categories',
@@ -12,6 +15,7 @@ import { CommonModule } from '@angular/common';
   styleUrl: './manage-categories.component.css'
 })
 export class ManageCategoriesComponent {
+   @ViewChild('catForm') catForm!: NgForm;
   categories: Category[] = [];
   newCategory = '';
 
@@ -45,6 +49,8 @@ private loadCategories(): void {
       next: (categoryId) => {
         alert('Category added successfully with ID: ' + categoryId);
         this.newCategory = '';
+        this.loadCategories(); 
+        this.catForm.resetForm();
       },
       error: (err) => {
         alert('Error adding category: ' + (err.error?.message || 'Unknown error'));

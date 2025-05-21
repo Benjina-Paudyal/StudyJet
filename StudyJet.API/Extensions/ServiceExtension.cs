@@ -37,7 +37,9 @@ namespace StudyJet.API.Extensions
                     OnMessageReceived = context =>
                     {
                         // Extract JWT from the "AuthToken" cookie instead of the Authorization header
-                        context.Token = context.Request.Cookies["AuthToken"];
+                        context.Token = context.Request.Cookies["AuthToken"] ?? context.Request.Cookies["authToken"];
+
+                        //context.Token = context.Request.Cookies["AuthToken"];
                         return Task.CompletedTask;
                     },
                     OnTokenValidated = context =>
